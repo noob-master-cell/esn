@@ -9,7 +9,7 @@ import { CreateEventInput } from './dto/create-event.input';
 import { UpdateEventInput } from './dto/update-event.input';
 import { EventsFilterInput } from './dto/events-filter.input';
 import { EventStatus } from './entities/event.entity';
-import { UserRole } from '../users/entities/user.entity';
+import { UserRole } from '@prisma/client'; // ← FIXED: Import from Prisma instead
 
 @Injectable()
 export class EventsService {

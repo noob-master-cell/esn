@@ -16,14 +16,17 @@ const httpLink = createHttpLink({
 const authLink = setContext(async (_, { headers }) => {
   let token = "";
 
-  // Get Clerk session token (not JWT) if available
-  if (typeof window !== "undefined" && window.Clerk?.session) {
-    try {
-      // Get the session token specifically for backend verification
+  try {
+    // Try to get token from Clerk
+    if (typeof window !== "undefined" && window.Clerk?.session) {
       token = await window.Clerk.session.getToken();
-    } catch (error) {
-      // Intentionally suppress errors to not clutter the console
+      console.log(
+        "🔑 Token obtained from Clerk:",
+        token ? "✅ Success" : "❌ Failed"
+      );
     }
+  } catch (error) {
+    console.error("❌ Error getting Clerk token:", error);
   }
 
   return {
@@ -38,11 +41,15 @@ const authLink = setContext(async (_, { headers }) => {
 const errorLink = onError(
   ({ graphQLErrors, networkError, operation, forward }) => {
     if (graphQLErrors) {
-      // Handle GraphQL errors, but do not log to console to remove debugging
+      graphQLErrors.forEach(({ message, locations, path }) => {
+        console.error(
+          `🔥 GraphQL error: Message: ${message}, Location: ${locations}, Path: ${path}`
+        );
+      });
     }
 
     if (networkError) {
-      // Handle network errors, but do not log to console to remove debugging
+      console.error(`🌐 Network error: ${networkError}`);
     }
   }
 );

@@ -5,7 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { UserRole } from '../../users/entities/user.entity';
+import { UserRole } from '@prisma/client'; // ← FIXED: Import from Prisma instead
 
 @Injectable()
 export class OrganizerGuard implements CanActivate {

@@ -2,45 +2,172 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type User {
+  id: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+  avatar: String
+  phone: String
+  esnCardNumber: String
+  esnCardVerified: Boolean!
+  esnCardExpiry: DateTime
+  university: String
+  chapter: String
+  nationality: String
+  emailVerified: Boolean!
+  isActive: Boolean!
+  role: UserRole!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
 
-type Query {
-  healthCheck: String!
-  hello: String!
-  me: User!
-  user(id: String!): User
-  users: [User!]!
-}
-
-type User {
-  auth0Id: String
-  auth0Name: String
-  auth0Picture: String
-  avatar: String
-  chapter: String
-  createdAt: DateTime!
-  email: String!
-  emailVerified: Boolean!
-  esnCardExpiry: DateTime
-  esnCardNumber: String
-  esnCardVerified: Boolean!
-  firstName: String!
-  id: ID!
-  isActive: Boolean!
-  lastName: String!
-  nationality: String
-  phone: String
-  role: UserRole!
-  university: String
-  updatedAt: DateTime!
-}
-
 enum UserRole {
-  ADMIN
-  ORGANIZER
-  SUPER_ADMIN
   USER
+  ORGANIZER
+  ADMIN
+  SUPER_ADMIN
+}
+
+type Event {
+  id: ID!
+  title: String!
+  description: String!
+  shortDescription: String
+  category: EventCategory!
+  type: EventType!
+  status: EventStatus!
+  startDate: DateTime!
+  endDate: DateTime!
+  registrationDeadline: DateTime
+  location: String!
+  address: String
+  maxParticipants: Int!
+  price: Float
+  memberPrice: Float
+  imageUrl: String
+  tags: [String!]
+  requirements: String
+  additionalInfo: String
+  isPublic: Boolean!
+  allowWaitlist: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  organizer: User!
+  organizerId: String!
+  registrationCount: Int!
+  waitlistCount: Int!
+  isRegistered: Boolean
+  canRegister: Boolean
+}
+
+"""Event category options"""
+enum EventCategory {
+  PARTY
+  CULTURE
+  SPORTS
+  TRIP
+  SOCIAL
+  EDUCATION
+  OTHER
+}
+
+"""Event type options"""
+enum EventType {
+  FREE
+  PAID
+  MEMBERS_ONLY
+}
+
+"""Event status options"""
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+}
+
+type Query {
+  me: User!
+  hello: String!
+  healthCheck: String!
+  users: [User!]!
+  user(id: String!): User
+  events(filter: EventsFilterInput, includePrivate: Boolean = false): [Event!]!
+  myEvents: [Event!]!
+  event(id: ID!): Event!
+  eventsCount(filter: EventsFilterInput): Int!
+}
+
+input EventsFilterInput {
+  search: String
+  category: EventCategory
+  type: EventType
+  status: EventStatus
+  startDate: DateTime
+  endDate: DateTime
+  location: String
+  tags: [String!]
+  availableOnly: Boolean = false
+  skip: Int = 0
+  take: Int = 20
+  orderBy: String = "startDate"
+  orderDirection: String = "asc"
+}
+
+type Mutation {
+  createEvent(createEventInput: CreateEventInput!): Event!
+  updateEvent(updateEventInput: UpdateEventInput!): Event!
+  removeEvent(id: ID!): Boolean!
+  publishEvent(id: ID!): Event!
+}
+
+input CreateEventInput {
+  title: String!
+  description: String!
+  shortDescription: String
+  category: EventCategory!
+  type: EventType!
+  startDate: DateTime!
+  endDate: DateTime!
+  registrationDeadline: DateTime
+  location: String!
+  address: String
+  maxParticipants: Int!
+  price: Float
+  memberPrice: Float
+  imageUrl: String
+  tags: [String!]
+  requirements: String
+  additionalInfo: String
+  isPublic: Boolean! = true
+  allowWaitlist: Boolean! = true
+}
+
+input UpdateEventInput {
+  title: String
+  description: String
+  shortDescription: String
+  category: EventCategory
+  type: EventType
+  startDate: DateTime
+  endDate: DateTime
+  registrationDeadline: DateTime
+  location: String
+  address: String
+  maxParticipants: Int
+  price: Float
+  memberPrice: Float
+  imageUrl: String
+  tags: [String!]
+  requirements: String
+  additionalInfo: String
+  isPublic: Boolean = true
+  allowWaitlist: Boolean = true
+  id: ID!
 }
