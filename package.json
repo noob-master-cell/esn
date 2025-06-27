@@ -1,0 +1,17 @@
+{
+  "name": "esn",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter backend start:dev\" \"pnpm --filter frontend dev\"",
+    "build": "pnpm --filter backend build && pnpm --filter frontend build",
+    "install:all": "pnpm install && pnpm --filter backend install && pnpm --filter frontend install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
