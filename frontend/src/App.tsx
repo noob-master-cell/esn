@@ -11,7 +11,6 @@ import {
 import { Alert } from "./components/ui/Alert";
 import { Button } from "./components/ui/Button";
 import { ClerkGraphQLTest } from "./components/ClerkGraphQLTest";
-import { ClerkDebugTest } from "./components/ClerkDebugTest";
 
 function App() {
   const { user } = useUser();
@@ -64,7 +63,6 @@ function App() {
             </div>
           </div>
         </header>
-        <ClerkDebugTest />
         {/* Main content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <SignedIn>

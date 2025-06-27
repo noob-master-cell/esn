@@ -21,12 +21,8 @@ const authLink = setContext(async (_, { headers }) => {
     try {
       // Get the session token specifically for backend verification
       token = await window.Clerk.session.getToken();
-      console.log(
-        "🔑 Apollo: Got session token from Clerk:",
-        token ? "Token present" : "No token"
-      );
     } catch (error) {
-      console.warn("❌ Apollo: Could not get Clerk session token:", error);
+      // Intentionally suppress errors to not clutter the console
     }
   }
 
@@ -42,15 +38,11 @@ const authLink = setContext(async (_, { headers }) => {
 const errorLink = onError(
   ({ graphQLErrors, networkError, operation, forward }) => {
     if (graphQLErrors) {
-      graphQLErrors.forEach(({ message, locations, path }) => {
-        console.error(
-          `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-        );
-      });
+      // Handle GraphQL errors, but do not log to console to remove debugging
     }
 
     if (networkError) {
-      console.error(`[Network error]: ${networkError}`);
+      // Handle network errors, but do not log to console to remove debugging
     }
   }
 );

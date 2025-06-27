@@ -57,14 +57,4 @@ export class User {
 
   @Field()
   updatedAt: Date;
-
-  // Auth0 specific fields (not stored in database)
-  @Field({ nullable: true })
-  auth0Id?: string;
-
-  @Field({ nullable: true })
-  auth0Name?: string;
-
-  @Field({ nullable: true })
-  auth0Picture?: string;
 }

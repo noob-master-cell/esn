@@ -94,60 +94,77 @@ model NotificationSettings {
 // ================================
 
 model Event {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Basic Info
   title       String
   description String
   shortDescription String?
-  slug        String  @unique
-
+  
   // Event Details
+  category    EventCategory
+  type        EventType
+  status      EventStatus @default(DRAFT)
+  
+  // Dates
   startDate   DateTime
   endDate     DateTime
-  timezone    String   @default("UTC")
+  registrationDeadline DateTime?
+  
+  // Location
   location    String
   address     String?
-  coordinates String?  // JSON: {lat, lng}
-
-  // Capacity & Pricing
-  capacity        Int
-  registeredCount Int      @default(0)
-  waitlistCount   Int      @default(0)
-  price           Decimal  @default(0)
-  esnCardPrice    Decimal? // Discounted price for ESN card holders
-  currency        String   @default("EUR")
-
-  // Media
-  coverImage   String?
-  images       String[] // Array of image URLs
-  tags         String[] // Array of tags
-
+  
+  // Capacity
+  maxParticipants Int
+  
+  // Pricing
+  price       Float?
+  memberPrice Float?
+  
+  // Media & Info
+  imageUrl    String?
+  tags        String[]
+  requirements String?
+  additionalInfo String?
+  
   // Settings
-  isPublic           Boolean  @default(true)
-  allowWaitlist      Boolean  @default(true)
-  requireEsnCard     Boolean  @default(false)
-  registrationOpen   DateTime @default(now())
-  registrationClose  DateTime?
-  cancellationPolicy String?
-
-  // Organization
-  organizerId String
-  organizer   User   @relation("EventCreator", fields: [organizerId], references: [id])
-  chapter     String
-  category    EventCategory
-
-  // Status
-  status EventStatus @default(DRAFT)
-
+  isPublic     Boolean @default(true)
+  allowWaitlist Boolean @default(true)
+  
   // Relations
+  organizer    User     @relation("EventCreator", fields: [organizerId], references: [id])
+  organizerId  String
+  
   registrations Registration[]
-  payments      Payment[]
-  reviews       Review[]
+  reviews      Review[]
 
   @@map("events")
+}
+
+enum EventCategory {
+  PARTY
+  CULTURE
+  SPORTS
+  TRIP
+  SOCIAL
+  EDUCATION
+  OTHER
+}
+
+enum EventType {
+  FREE
+  PAID
+  MEMBERS_ONLY
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
 }
 
 // ================================

@@ -68,10 +68,6 @@ export class UsersService {
       role: prismaUser.role,
       createdAt: prismaUser.createdAt,
       updatedAt: prismaUser.updatedAt,
-      // Auth0 fields if available
-      auth0Id: prismaUser.auth0Id,
-      auth0Name: prismaUser.auth0Name,
-      auth0Picture: prismaUser.auth0Picture,
     };
   }
 }
