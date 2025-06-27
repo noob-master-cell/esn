@@ -1,3 +1,4 @@
+// backend/src/app.module.ts
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -9,6 +10,7 @@ import { ClerkModule } from './clerk/clerk.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
+import { RegistrationsModule } from './registrations/registrations.module'; // Add this import
 
 @Module({
   imports: [
@@ -26,7 +28,8 @@ import { EventsModule } from './events/events.module';
     ClerkModule,
     AuthModule,
     UsersModule,
-    EventsModule, // Add this
+    EventsModule,
+    RegistrationsModule, // Add this line
   ],
 })
 export class AppModule {}

@@ -54,6 +54,7 @@ model User {
 
   @@map("users")
 }
+
 model UserPreferences {
   id     String @id @default(cuid())
   userId String @unique
@@ -140,31 +141,9 @@ model Event {
   
   registrations Registration[]
   reviews      Review[]
+  payments     Payment[] // Added missing payments relation
 
   @@map("events")
-}
-
-enum EventCategory {
-  PARTY
-  CULTURE
-  SPORTS
-  TRIP
-  SOCIAL
-  EDUCATION
-  OTHER
-}
-
-enum EventType {
-  FREE
-  PAID
-  MEMBERS_ONLY
-}
-
-enum EventStatus {
-  DRAFT
-  PUBLISHED
-  CANCELLED
-  COMPLETED
 }
 
 // ================================
@@ -308,6 +287,12 @@ enum EventCategory {
   WORKSHOP
   CONFERENCE
   OTHER
+}
+
+enum EventType {
+  FREE
+  PAID
+  MEMBERS_ONLY
 }
 
 enum RegistrationStatus {

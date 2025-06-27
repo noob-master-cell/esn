@@ -92,6 +92,57 @@ enum EventStatus {
   COMPLETED
 }
 
+type Registration {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+  event: Event!
+  eventId: String!
+  status: RegistrationStatus!
+  registrationType: RegistrationType!
+  position: Int
+  paymentRequired: Boolean!
+  paymentStatus: PaymentStatus!
+  amountDue: Float!
+  currency: String!
+  specialRequests: String
+  emergencyContact: String
+  dietary: String
+  registeredAt: DateTime!
+  confirmedAt: DateTime
+  cancelledAt: DateTime
+}
+
+"""Registration status options"""
+enum RegistrationStatus {
+  PENDING
+  CONFIRMED
+  WAITLISTED
+  CANCELLED
+  ATTENDED
+  NO_SHOW
+}
+
+"""Registration type options"""
+enum RegistrationType {
+  REGULAR
+  WAITLIST
+  VIP
+  ORGANIZER
+}
+
+"""Payment status options"""
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
 type Query {
   me: User!
   hello: String!
@@ -102,6 +153,13 @@ type Query {
   myEvents: [Event!]!
   event(id: ID!): Event!
   eventsCount(filter: EventsFilterInput): Int!
+  registrations(filter: RegistrationFilterInput): [Registration!]!
+  myRegistrations: [Registration!]!
+  eventRegistrations(eventId: ID!, filter: RegistrationFilterInput): [Registration!]!
+  registration(id: ID!): Registration!
+  registrationsCount(filter: RegistrationFilterInput): Int!
+  eventCapacityInfo(eventId: ID!): Int!
+  waitlistRegistrations(eventId: ID!): [Registration!]!
 }
 
 input EventsFilterInput {
@@ -120,11 +178,30 @@ input EventsFilterInput {
   orderDirection: String = "asc"
 }
 
+input RegistrationFilterInput {
+  status: RegistrationStatus
+  registrationType: RegistrationType
+  paymentStatus: PaymentStatus
+  eventId: String
+  userId: String
+  registeredAfter: DateTime
+  registeredBefore: DateTime
+  skip: Int = 0
+  take: Int = 20
+  orderBy: String = "registeredAt"
+  orderDirection: String = "desc"
+}
+
 type Mutation {
   createEvent(createEventInput: CreateEventInput!): Event!
   updateEvent(updateEventInput: UpdateEventInput!): Event!
   removeEvent(id: ID!): Boolean!
   publishEvent(id: ID!): Event!
+  registerForEvent(createRegistrationInput: CreateRegistrationInput!): Registration!
+  updateRegistration(updateRegistrationInput: UpdateRegistrationInput!): Registration!
+  cancelRegistration(id: ID!): Registration!
+  markAttendance(registrationId: ID!, attended: Boolean!): Boolean!
+  promoteFromWaitlist(registrationId: ID!): Registration!
 }
 
 input CreateEventInput {
@@ -170,4 +247,22 @@ input UpdateEventInput {
   isPublic: Boolean = true
   allowWaitlist: Boolean = true
   id: ID!
+}
+
+input CreateRegistrationInput {
+  eventId: ID!
+  specialRequests: String
+  dietary: String
+  emergencyContact: String
+  emergencyEmail: String
+}
+
+input UpdateRegistrationInput {
+  eventId: ID
+  specialRequests: String
+  dietary: String
+  emergencyContact: String
+  emergencyEmail: String
+  id: ID!
+  status: RegistrationStatus
 }
