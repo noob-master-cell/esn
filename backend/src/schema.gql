@@ -156,6 +156,7 @@ type Query {
   healthCheck: String!
   users: [User!]!
   user(id: String!): User
+  myProfile: User!
   events(filter: EventsFilterInput, includePrivate: Boolean = false): [Event!]!
   myEvents: [Event!]!
   event(id: ID!): Event!
@@ -200,6 +201,7 @@ input RegistrationFilterInput {
 }
 
 type Mutation {
+  updateUserProfile(updateUserInput: UpdateUserInput!): User!
   createEvent(createEventInput: CreateEventInput!): Event!
   updateEvent(updateEventInput: UpdateEventInput!): Event!
   removeEvent(id: ID!): Boolean!
@@ -209,6 +211,16 @@ type Mutation {
   cancelRegistration(id: ID!): Registration!
   markAttendance(registrationId: ID!, attended: Boolean!): Boolean!
   promoteFromWaitlist(registrationId: ID!): Registration!
+}
+
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  phone: String
+  university: String
+  nationality: String
+  avatar: String
+  chapter: String
 }
 
 input CreateEventInput {

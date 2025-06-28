@@ -13,7 +13,7 @@ import { ClerkGraphQLTest } from "./components/ClerkGraphQLTest";
 import HomePage from "./pages/HomePage";
 import EventsPage from "./pages/EventsPage";
 import EventDetailsPage from "./pages/EventDetailsPage";
-import DashboardPage from "./pages/DashboardPage"; // Import the new page
+import ProfilePage from "./pages/ProfilePage";
 import SignInPage from "./pages/auth/SignInPage";
 import SignUpPage from "./pages/auth/SignUpPage";
 import { Footer } from "./components/layout/Footer";
@@ -80,12 +80,12 @@ function App() {
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/:id" element={<EventDetailsPage />} />
 
-              {/* Dashboard Route - Protected */}
+              {/* Profile Route - Protected */}
               <Route
-                path="/dashboard"
+                path="/profile"
                 element={
                   <SignedIn>
-                    <DashboardPage />
+                    <ProfilePage />
                   </SignedIn>
                 }
               />

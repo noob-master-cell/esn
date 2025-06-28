@@ -42,7 +42,15 @@ export class UsersService {
   async updateProfile(userId: string, updateData: any): Promise<User> {
     const prismaUser = await this.prisma.user.update({
       where: { id: userId },
-      data: updateData,
+      data: {
+        firstName: updateData.firstName,
+        lastName: updateData.lastName,
+        phone: updateData.phone,
+        university: updateData.university,
+        nationality: updateData.nationality,
+        avatar: updateData.avatar,
+        chapter: updateData.chapter,
+      },
     });
 
     return this.transformPrismaUser(prismaUser);

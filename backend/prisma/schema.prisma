@@ -1,3 +1,4 @@
+// backend/prisma/schema.prisma
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -19,8 +20,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Clerk Integration - This should be here
-  clerkId   String   @unique  // ← Make sure this line exists
+  // Clerk Integration
+  clerkId   String   @unique
 
   // Basic Info
   email     String  @unique
@@ -135,13 +136,13 @@ model Event {
   isPublic     Boolean @default(true)
   allowWaitlist Boolean @default(true)
   
-  // Relations
+  // Relations - Only ADMIN can create events
   organizer    User     @relation("EventCreator", fields: [organizerId], references: [id])
   organizerId  String
   
   registrations Registration[]
   reviews      Review[]
-  payments     Payment[] // Added missing payments relation
+  payments     Payment[]
 
   @@map("events")
 }
@@ -255,14 +256,12 @@ model Review {
 }
 
 // ================================
-// ENUMS
+// ENUMS - SIMPLIFIED
 // ================================
 
 enum UserRole {
   USER
-  ORGANIZER
   ADMIN
-  SUPER_ADMIN
 }
 
 enum EventStatus {

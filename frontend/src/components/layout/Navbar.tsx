@@ -305,16 +305,3 @@ export const Navbar: React.FC = () => {
     </>
   );
 };
-// ...existing code...
-<MobileNavButton
-  to="/"
-  icon={<img src={esnLogo} alt="Home" className="w-8 h-8" />}
->
-  Home
-</MobileNavButton>;
-// ...existing code...
-{
-  /* Add bottom padding to prevent content from being hidden behind bottom nav on mobile */
-}
-<div className="pb-24 lg:pb-0" />;
-// ...existing code...
