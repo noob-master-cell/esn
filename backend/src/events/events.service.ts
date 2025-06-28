@@ -1,3 +1,4 @@
+// backend/src/events/events.service.ts
 import {
   Injectable,
   NotFoundException,
@@ -8,8 +9,8 @@ import { PrismaService } from './../../prisma/prisma.service';
 import { CreateEventInput } from './dto/create-event.input';
 import { UpdateEventInput } from './dto/update-event.input';
 import { EventsFilterInput } from './dto/events-filter.input';
-import { EventStatus } from './entities/event.entity';
-import { UserRole } from '@prisma/client'; // ← FIXED: Import from Prisma instead
+// Import EventStatus from Prisma instead of GraphQL entity
+import { EventStatus, UserRole } from '@prisma/client';
 
 @Injectable()
 export class EventsService {
@@ -32,11 +33,12 @@ export class EventsService {
       );
     }
 
+    // Use organizer relation
     const event = await this.prisma.event.create({
       data: {
         ...createEventInput,
-        organizerId,
-        status: EventStatus.DRAFT,
+        organizer: { connect: { id: organizerId } },
+        status: EventStatus.DRAFT, // Use Prisma enum
       },
       include: {
         organizer: true,
@@ -89,7 +91,7 @@ export class EventsService {
 
     // Only show published events to regular users
     if (!userId) {
-      where.status = EventStatus.PUBLISHED;
+      where.status = EventStatus.PUBLISHED; // Use Prisma enum
       where.isPublic = true;
     }
 
@@ -165,9 +167,12 @@ export class EventsService {
       }
     }
 
+    // Exclude id from update data
+    const { id: inputId, ...updateData } = updateEventInput;
+
     const updatedEvent = await this.prisma.event.update({
       where: { id },
-      data: updateEventInput,
+      data: updateData,
       include: {
         organizer: true,
         registrations: {
@@ -231,7 +236,7 @@ export class EventsService {
 
     const publishedEvent = await this.prisma.event.update({
       where: { id },
-      data: { status: EventStatus.PUBLISHED },
+      data: { status: EventStatus.PUBLISHED }, // Use Prisma enum
       include: {
         organizer: true,
         registrations: {

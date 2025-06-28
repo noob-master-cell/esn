@@ -1,3 +1,4 @@
+// backend/src/events/dto/events-filter.input.ts
 import { InputType, Field, Int } from '@nestjs/graphql';
 import {
   IsOptional,
@@ -8,11 +9,8 @@ import {
   Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import {
-  EventCategory,
-  EventType,
-  EventStatus,
-} from '../entities/event.entity';
+// Import enums directly from Prisma instead of entity file
+import { EventCategory, EventType, EventStatus } from '@prisma/client';
 
 @InputType()
 export class EventsFilterInput {

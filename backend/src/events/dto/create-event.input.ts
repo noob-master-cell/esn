@@ -1,3 +1,4 @@
+// backend/src/events/dto/create-event.input.ts
 import { InputType, Field, Int, Float } from '@nestjs/graphql';
 import {
   IsString,
@@ -10,7 +11,8 @@ import {
   Max,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { EventCategory, EventType } from '../entities/event.entity';
+// Import enums directly from Prisma instead of entity file
+import { EventCategory, EventType } from '@prisma/client';
 
 @InputType()
 export class CreateEventInput {

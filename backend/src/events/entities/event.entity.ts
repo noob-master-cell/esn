@@ -1,3 +1,4 @@
+// backend/src/events/entities/event.entity.ts
 import {
   ObjectType,
   Field,
@@ -7,30 +8,10 @@ import {
   registerEnumType,
 } from '@nestjs/graphql';
 import { User } from '../../users/entities/user.entity';
+// Import enums from Prisma instead of defining our own
+import { EventStatus, EventCategory, EventType } from '@prisma/client';
 
-export enum EventStatus {
-  DRAFT = 'DRAFT',
-  PUBLISHED = 'PUBLISHED',
-  CANCELLED = 'CANCELLED',
-  COMPLETED = 'COMPLETED',
-}
-
-export enum EventCategory {
-  PARTY = 'PARTY',
-  CULTURE = 'CULTURE',
-  SPORTS = 'SPORTS',
-  TRIP = 'TRIP',
-  SOCIAL = 'SOCIAL',
-  EDUCATION = 'EDUCATION',
-  OTHER = 'OTHER',
-}
-
-export enum EventType {
-  FREE = 'FREE',
-  PAID = 'PAID',
-  MEMBERS_ONLY = 'MEMBERS_ONLY',
-}
-
+// Register Prisma enums for GraphQL
 registerEnumType(EventStatus, {
   name: 'EventStatus',
   description: 'Event status options',

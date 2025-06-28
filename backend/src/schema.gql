@@ -68,12 +68,16 @@ type Event {
 
 """Event category options"""
 enum EventCategory {
-  PARTY
-  CULTURE
-  SPORTS
-  TRIP
   SOCIAL
-  EDUCATION
+  CULTURAL
+  EDUCATIONAL
+  SPORTS
+  TRAVEL
+  VOLUNTEER
+  NETWORKING
+  PARTY
+  WORKSHOP
+  CONFERENCE
   OTHER
 }
 
@@ -88,8 +92,11 @@ enum EventType {
 enum EventStatus {
   DRAFT
   PUBLISHED
-  CANCELLED
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  ONGOING
   COMPLETED
+  CANCELLED
 }
 
 type Registration {
