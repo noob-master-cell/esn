@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { SignIn, SignUp } from "@clerk/clerk-react";
 import esnLogo from "../../assets/favicon/mstile-70x70.png";
 

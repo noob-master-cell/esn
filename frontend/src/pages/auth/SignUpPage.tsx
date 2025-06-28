@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { ClerkAuthWrapper } from "../../components/auth/ClerkAuthWrapper";
 
 const SignUpPage: React.FC = () => {

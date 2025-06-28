@@ -1,1 +1,89 @@
 @import "tailwindcss";
+/* Add this to your frontend/src/styles/App.css */
+
+/* Prevent horizontal overflow */
+html,
+body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Ensure containers don't exceed viewport */
+.container,
+.max-w-7xl {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Mobile-specific fixes */
+@media (max-width: 768px) {
+
+    /* Ensure no horizontal overflow */
+    body {
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Fix any grid issues */
+    .grid {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Ensure cards fit properly */
+    .card {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Prevent text from causing overflow */
+    * {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+}
+
+/* Animation for event cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ensure images don't cause overflow */
+img {
+    max-width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+/* Better text truncation */
+.line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+}
+
+.line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+}
+
+/* Ensure truncate works properly */
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

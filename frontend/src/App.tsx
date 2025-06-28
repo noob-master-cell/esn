@@ -12,10 +12,12 @@ import { Alert } from "./components/ui/Alert";
 import { ClerkGraphQLTest } from "./components/ClerkGraphQLTest";
 import HomePage from "./pages/HomePage";
 import EventsPage from "./pages/EventsPage";
+import EventDetailsPage from "./pages/EventDetailsPage";
+import DashboardPage from "./pages/DashboardPage"; // Import the new page
 import SignInPage from "./pages/auth/SignInPage";
 import SignUpPage from "./pages/auth/SignUpPage";
 import { Footer } from "./components/layout/Footer";
-import { Navbar } from "./components/layout/Navbar"; // Import the new Navbar
+import { Navbar } from "./components/layout/Navbar";
 import "./App.css";
 import "./styles/App.css";
 
@@ -74,8 +76,21 @@ function App() {
               <Route path="/sign-in/*" element={<SignInPage />} />
               <Route path="/sign-up/*" element={<SignUpPage />} />
 
-              {/* Other Routes */}
+              {/* Events Routes */}
               <Route path="/events" element={<EventsPage />} />
+              <Route path="/events/:id" element={<EventDetailsPage />} />
+
+              {/* Dashboard Route - Protected */}
+              <Route
+                path="/dashboard"
+                element={
+                  <SignedIn>
+                    <DashboardPage />
+                  </SignedIn>
+                }
+              />
+
+              {/* Debug Route */}
               <Route path="/debug" element={<DebugPage />} />
             </Routes>
           </main>

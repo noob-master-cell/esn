@@ -1,4 +1,5 @@
-import React from "react";
+// frontend/src/pages/auth/SignInPage.tsx
+import * as React from "react";
 import { ClerkAuthWrapper } from "../../components/auth/ClerkAuthWrapper";
 
 const SignInPage: React.FC = () => {

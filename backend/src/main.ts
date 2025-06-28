@@ -1,3 +1,4 @@
+// backend/src/main.ts
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -5,9 +6,16 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Enable CORS
+  // Enable CORS with your specific IP
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'http://0.0.0.0:5173',
+      'http://192.168.0.200:5173', // Your specific IP
+      // Allow all for development
+      '*',
+    ],
     credentials: true,
   });
 
@@ -21,9 +29,12 @@ async function bootstrap() {
   );
 
   const port = process.env.PORT || 4000;
-  await app.listen(port);
 
-  console.log(`🚀 Server running on http://localhost:${port}`);
-  console.log(`📊 GraphQL Playground: http://localhost:${port}/graphql`);
+  // Bind to all network interfaces
+  await app.listen(port, '0.0.0.0');
+
+  console.log(`🚀 Server running on http://0.0.0.0:${port}`);
+  console.log(`📊 GraphQL Playground: http://192.168.0.200:${port}/graphql`);
+  console.log(`📱 Mobile access: http://192.168.0.200:${port}/graphql`);
 }
 bootstrap();

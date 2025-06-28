@@ -5,7 +5,8 @@ import { ApolloProvider } from "@apollo/client";
 import { apolloClient } from "./lib/apollo";
 import { ThemeProvider } from "@material-tailwind/react"; // <-- Import ThemeProvider
 import App from "./App";
-import "./index.css"; // <-- Import the main CSS file
+import "./index.css";
+import "./styles/Clerk.css";
 
 // Import your publishable key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
