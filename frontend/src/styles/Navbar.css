@@ -1,0 +1,14 @@
+/* frontend/src/styles/Navbar.css */
+.navbar-header {
+    padding: 1rem;
+    /* Adjust padding for spacing around the navbar */
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    transition: top 0.3s ease-in-out;
+}
+
+.mobile-menu {
+    transition: all 0.3s ease-in-out;
+    transform-origin: top;
+}

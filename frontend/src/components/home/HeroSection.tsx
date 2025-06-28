@@ -41,7 +41,7 @@ export const HeroSection: React.FC = () => {
         <HeroSlideshow />
         <div className="lg:col-span-3 flex flex-col justify-center p-4">
           <h1 className="text-4xl md:text-5xl font-bold text-black mb-8 text-center lg:text-left">
-            Your Home Away From Home
+            Welcome to ESN Kaiserslautern
           </h1>
           <div className="space-y-4">
             <a
@@ -74,18 +74,6 @@ export const HeroSection: React.FC = () => {
                 <p className="text-sm text-gray-600">
                   Share your culture and discover others.
                 </p>
-              </div>
-            </a>
-            <a
-              href="#"
-              className="card bg-blue-500 p-4 rounded-2xl shadow-sm text-white hover:bg-blue-600 transition-all"
-            >
-              <p className="font-semibold">Join the ESN Community</p>
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-sm opacity-90">
-                  Become a member today!
-                </span>
-                <span className="card-arrow text-lg">&rarr;</span>
               </div>
             </a>
           </div>
