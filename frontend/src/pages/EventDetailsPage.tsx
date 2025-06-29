@@ -6,7 +6,56 @@ import { useAuth } from "@clerk/clerk-react";
 import { GET_EVENT } from "../lib/graphql/events";
 import { Button } from "../components/ui/Button";
 import { Alert } from "../components/ui/Alert";
-import { EventRegistrationModal } from "../components/events/EventRegistrationModal";
+
+// ----------- SVG Icon Components ----------- //
+
+const CalendarIcon = () => (
+  <svg className="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+  </svg>
+);
+
+const ClockIcon = () => (
+  <svg className="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+  </svg>
+);
+
+const LocationPinIcon = () => (
+  <svg className="w-5 h-5 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg className="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path>
+  </svg>
+);
+
+// ----------- Sub-components for the page ----------- //
+
+// A reusable component to display event info with an icon
+const InfoBlock = ({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) => (
+  <div className="flex items-center text-lg text-gray-700">{icon}{children}</div>
+);
+
+// Component for displaying a single comment
+const Comment = ({ author, text, time }: { author: string; text: string; time: string }) => (
+  <div className="flex items-start space-x-4">
+    <div className="flex-shrink-0">
+      <UserIcon />
+    </div>
+    <div className="flex-1">
+      <div className="bg-gray-100 rounded-lg px-4 py-2">
+        <p className="font-semibold text-gray-800">{author}</p>
+        <p className="text-gray-600">{text}</p>
+      </div>
+      <p className="text-xs text-gray-500 mt-1">{time}</p>
+    </div>
+  </div>
+);
 
 interface EventDetailsPageProps {}
 
@@ -14,10 +63,9 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isSignedIn } = useAuth();
-  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
-  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [newComment, setNewComment] = useState("");
 
-  const { data, loading, error, refetch } = useQuery(GET_EVENT, {
+  const { data, loading, error } = useQuery(GET_EVENT, {
     variables: { id },
     skip: !id,
   });
@@ -40,71 +88,37 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = () => {
     };
   };
 
-  // Get event type icon
-  const getEventTypeIcon = (category: string) => {
-    const icons = {
-      PARTY: "🎉",
-      CULTURAL: "🎭",
-      SPORTS: "⚽",
-      TRAVEL: "✈️",
-      SOCIAL: "👥",
-      EDUCATIONAL: "📚",
-      VOLUNTEER: "🤝",
-      NETWORKING: "🌐",
-      WORKSHOP: "🔧",
-      CONFERENCE: "🎤",
-      OTHER: "📅",
-    };
-    return icons[category as keyof typeof icons] || icons.OTHER;
-  };
-
-  // Get status badge color
-  const getStatusBadge = (status: string) => {
-    const badges = {
-      PUBLISHED: "bg-green-100 text-green-800",
-      DRAFT: "bg-gray-100 text-gray-800",
-      CANCELLED: "bg-red-100 text-red-800",
-      COMPLETED: "bg-blue-100 text-blue-800",
-    };
-    return badges[status as keyof typeof badges] || badges.PUBLISHED;
-  };
-
-  // Handle registration success
-  const handleRegistrationSuccess = () => {
-    setRegistrationSuccess(true);
-    refetch(); // Refetch event data to update registration status
-    setTimeout(() => setRegistrationSuccess(false), 5000); // Hide success message after 5 seconds
-  };
-
-  // Handle registration button click
+  // Handle registration button click - Navigate to registration page
   const handleRegisterClick = () => {
     if (!isSignedIn) {
-      // Redirect to sign in
       navigate("/sign-in");
       return;
     }
-    setIsRegistrationModalOpen(true);
+    navigate(`/events/${id}/register`);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Loading skeleton - same as before */}
-        <div className="max-w-4xl mx-auto px-6 py-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-            <div className="h-64 bg-gray-200 rounded-2xl mb-8"></div>
-            <div className="grid lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-6">
-                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
-                <div className="space-y-3">
-                  <div className="h-4 bg-gray-200 rounded"></div>
-                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                  <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+      <div className="bg-gray-50 min-h-screen font-sans">
+        <div className="container mx-auto p-4 md:p-8">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden animate-pulse">
+            <div className="h-64 md:h-96 bg-gray-200"></div>
+            <div className="p-6 md:p-10">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+                <div className="lg:col-span-2 space-y-4">
+                  <div className="h-12 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+                  <div className="space-y-2 mt-8">
+                    <div className="h-4 bg-gray-200 rounded"></div>
+                    <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                    <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-4">
-                <div className="h-64 bg-gray-200 rounded-2xl"></div>
+                <div className="lg:col-span-1">
+                  <div className="h-80 bg-gray-200 rounded-xl"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -115,7 +129,7 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="bg-gray-50 min-h-screen font-sans flex items-center justify-center">
         <div className="max-w-md w-full">
           <Alert
             type="error"
@@ -134,7 +148,7 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = () => {
 
   if (!data?.event) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="bg-gray-50 min-h-screen font-sans flex items-center justify-center">
         <div className="max-w-md w-full text-center">
           <div className="bg-white p-8 rounded-2xl shadow-sm">
             <div className="text-6xl mb-4">😕</div>
@@ -161,22 +175,17 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = () => {
     event.imageUrl ||
     `https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=400&fit=crop`;
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Success Message */}
-      {registrationSuccess && (
-        <div className="fixed top-4 right-4 z-50 max-w-sm">
-          <Alert
-            type="success"
-            title="Registration Successful!"
-            message="You have been successfully registered for this event."
-            onClose={() => setRegistrationSuccess(false)}
-          />
-        </div>
-      )}
+  // Mock comments data - replace with real data when comments feature is implemented
+  const mockComments = [
+    { id: 1, author: "Maria S.", text: "Can't wait for this! Is lunch included?", time: "2 hours ago" },
+    { id: 2, author: "Admin (ESN)", text: "Hi Maria! Lunch is not included, but we'll stop at a place with plenty of options to buy food.", time: "1 hour ago" },
+    { id: 3, author: "Carlos G.", text: "Is it possible to join from a different city?", time: "30 minutes ago" },
+  ];
 
+  return (
+    <div className="bg-gray-50 min-h-screen font-sans">
       {/* Back Button */}
-      <div className="max-w-4xl mx-auto px-6 pt-8">
+      <div className="container mx-auto p-4 pt-8">
         <button
           onClick={() => navigate("/events")}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-6"
@@ -198,316 +207,188 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = () => {
         </button>
       </div>
 
-      {/* Hero Section */}
-      <div className="max-w-4xl mx-auto px-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          <div className="relative h-64 md:h-80">
-            <img
-              src={eventImage}
-              alt={event.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+      <div className="container mx-auto p-4 md:p-8">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          
+          {/* Header Image */}
+          <div 
+            className="h-64 md:h-96 bg-cover bg-center" 
+            style={{ backgroundImage: `url('${eventImage}')` }}
+          ></div>
 
-            {/* Event category badge */}
-            <div className="absolute top-4 left-4">
-              <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
-                <span className="text-lg">
-                  {getEventTypeIcon(event.category)}
-                </span>
-                {event.category}
-              </span>
-            </div>
-
-            {/* Status badge */}
-            <div className="absolute top-4 right-4">
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(
-                  event.status
-                )}`}
-              >
-                {event.status}
-              </span>
-            </div>
-
-            {/* Title overlay */}
-            <div className="absolute bottom-4 left-4 right-4">
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                {event.title}
-              </h1>
-              <p className="text-white/90 text-lg">
-                Organized by {event.organizer.firstName}{" "}
-                {event.organizer.lastName}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-6 pb-16">
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Event Details */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Description */}
-            <div className="bg-white rounded-2xl shadow-sm p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                About This Event
-              </h2>
-              <div className="prose prose-gray max-w-none">
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {event.description}
-                </p>
-                {event.shortDescription && (
-                  <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                    <p className="text-blue-800 font-medium">
-                      {event.shortDescription}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Requirements & Additional Info */}
-            {(event.requirements || event.additionalInfo) && (
-              <div className="bg-white rounded-2xl shadow-sm p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  Important Information
-                </h3>
-
-                {event.requirements && (
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">
-                      Requirements
-                    </h4>
-                    <p className="text-gray-700">{event.requirements}</p>
-                  </div>
-                )}
-
-                {event.additionalInfo && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">
-                      Additional Information
-                    </h4>
-                    <p className="text-gray-700">{event.additionalInfo}</p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Tags */}
-            {event.tags && event.tags.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-sm p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {event.tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
+          <div className="p-6 md:p-10">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+              
+              {/* Left Column: Details */}
+              <div className="lg:col-span-2">
+                <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">
+                  {event.title}
+                </h1>
+                <div className="space-y-4 mt-6">
+                  <InfoBlock icon={<CalendarIcon />}>
+                    {startDateTime.date}
+                  </InfoBlock>
+                  <InfoBlock icon={<ClockIcon />}>
+                    {startDateTime.time} - {endDateTime.time}
+                  </InfoBlock>
+                  <InfoBlock icon={<LocationPinIcon />}>
+                    {event.location}
+                    {event.address && (
+                      <span className="block text-sm text-gray-500 ml-8">
+                        {event.address}
+                      </span>
+                    )}
+                  </InfoBlock>
                 </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right Column - Event Info Card */}
-          <div className="space-y-6">
-            {/* Registration Card */}
-            <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-8">
-              <div className="space-y-6">
-                {/* Price */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Price
-                  </h3>
-                  {event.type === "FREE" ? (
-                    <div className="text-2xl font-bold text-green-600">
-                      Free
+                
+                {/* Event Description */}
+                <div className="mt-8 prose max-w-none text-gray-600">
+                  <p className="text-lg leading-relaxed whitespace-pre-wrap">
+                    {event.description}
+                  </p>
+                  
+                  {/* Additional Info */}
+                  {event.requirements && (
+                    <div className="mt-6">
+                      <h3 className="text-xl font-bold text-gray-800 mb-2">Requirements</h3>
+                      <p className="text-gray-600">{event.requirements}</p>
                     </div>
-                  ) : (
-                    <div className="space-y-1">
-                      <div className="text-2xl font-bold text-gray-900">
-                        €{event.price}
+                  )}
+                  
+                  {event.additionalInfo && (
+                    <div className="mt-6">
+                      <h3 className="text-xl font-bold text-gray-800 mb-2">Additional Information</h3>
+                      <p className="text-gray-600">{event.additionalInfo}</p>
+                    </div>
+                  )}
+                  
+                  {/* Tags */}
+                  {event.tags && event.tags.length > 0 && (
+                    <div className="mt-6">
+                      <h3 className="text-xl font-bold text-gray-800 mb-2">Tags</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {event.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
                       </div>
-                      {event.memberPrice && event.memberPrice < event.price && (
-                        <div className="text-sm text-green-600">
-                          €{event.memberPrice} with ESN Card
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
+              </div>
 
-                {/* Date & Time */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                    When
-                  </h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <svg
-                        className="w-5 h-5 text-gray-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                      <div>
-                        <div className="font-medium text-gray-900">
-                          {startDateTime.date}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {startDateTime.time} - {endDateTime.time}
-                        </div>
-                      </div>
-                    </div>
+              {/* Right Column: Registration Panel */}
+              <div className="lg:col-span-1">
+                <div className="bg-gray-50 rounded-xl shadow-inner p-6 sticky top-8">
+                  <h2 className="text-2xl font-bold text-center mb-4">Register for this Event</h2>
+                  
+                  {/* Price Display */}
+                  <div className="text-center mb-4">
+                    {event.type === "FREE" ? (
+                      <p className="text-5xl font-extrabold text-green-600">FREE</p>
+                    ) : (
+                      <>
+                        <p className="text-5xl font-extrabold text-gray-800">
+                          €{event.price?.toFixed(2)}
+                        </p>
+                        <p className="text-gray-500">Standard Price</p>
+                      </>
+                    )}
                   </div>
-                </div>
-
-                {/* Location */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                    Where
-                  </h3>
-                  <div className="flex items-start gap-3">
-                    <svg
-                      className="w-5 h-5 text-gray-500 mt-0.5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                    </svg>
-                    <div>
-                      <div className="font-medium text-gray-900">
-                        {event.location}
-                      </div>
-                      {event.address && (
-                        <div className="text-sm text-gray-600 mt-1">
-                          {event.address}
-                        </div>
-                      )}
+                  
+                  {/* ESN Card Discount */}
+                  {event.memberPrice && event.memberPrice < (event.price || 0) && (
+                    <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-3 rounded-md text-center mb-4">
+                      <p className="font-bold">
+                        ESN Card holders pay only €{event.memberPrice.toFixed(2)}!
+                      </p>
                     </div>
-                  </div>
-                </div>
-
-                {/* Capacity */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                    Capacity
-                  </h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Registered</span>
-                      <span className="font-medium">
-                        {event.registrationCount}/{event.maxParticipants}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                        style={{
-                          width: `${
-                            (event.registrationCount / event.maxParticipants) *
-                            100
-                          }%`,
-                        }}
-                      ></div>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {spotsLeft > 0
-                        ? `${spotsLeft} spots remaining`
-                        : "Event is full"}
-                      {event.allowWaitlist &&
-                        spotsLeft <= 0 &&
-                        " • Waitlist available"}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Registration Button */}
-                <div className="space-y-3">
+                  )}
+                  
+                  {/* Registration Button */}
                   {event.canRegister ? (
-                    <Button
-                      className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors"
+                    <button 
                       onClick={handleRegisterClick}
+                      className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-300 text-lg"
                     >
                       {spotsLeft > 0 ? "Register Now" : "Join Waitlist"}
-                    </Button>
+                    </button>
                   ) : event.isRegistered ? (
-                    <div className="w-full bg-green-100 text-green-800 font-semibold py-3 rounded-lg text-center">
+                    <div className="w-full bg-green-100 text-green-800 font-bold py-3 px-4 rounded-lg text-center text-lg">
                       ✅ You're registered!
                     </div>
                   ) : (
-                    <div className="w-full bg-gray-100 text-gray-600 font-semibold py-3 rounded-lg text-center">
+                    <div className="w-full bg-gray-100 text-gray-600 font-bold py-3 px-4 rounded-lg text-center text-lg">
                       Registration Closed
                     </div>
                   )}
-
-                  <button className="w-full text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors">
-                    Share Event
-                  </button>
-                </div>
-
-                {/* Registration Deadline */}
-                {event.registrationDeadline && (
-                  <div className="pt-4 border-t border-gray-100">
-                    <div className="text-sm text-gray-600">
-                      <strong>Registration Deadline:</strong>
-                      <br />
-                      {formatDateTime(event.registrationDeadline).date} at{" "}
-                      {formatDateTime(event.registrationDeadline).time}
+                  
+                  {/* Spots Left */}
+                  <p className="text-center text-red-600 font-bold mt-3">
+                    {spotsLeft > 0 ? `${spotsLeft} SPOTS LEFT` : "EVENT FULL"}
+                  </p>
+                  
+                  {/* Organizer Info */}
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Organizer</h3>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                        {event.organizer.firstName[0]}{event.organizer.lastName[0]}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {event.organizer.firstName} {event.organizer.lastName}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {event.organizer.email}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             </div>
 
-            {/* Organizer Card */}
-            <div className="bg-white rounded-2xl shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Organizer
-              </h3>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                  {event.organizer.firstName[0]}
-                  {event.organizer.lastName[0]}
+            {/* Comments Section */}
+            <div className="mt-12 pt-8 border-t border-gray-200">
+              <h2 className="text-3xl font-bold text-gray-800 mb-6">Community Discussion</h2>
+              <div className="space-y-6">
+                {mockComments.map(comment => (
+                  <Comment key={comment.id} {...comment} />
+                ))}
+              </div>
+              <div className="mt-8 flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <UserIcon />
                 </div>
-                <div>
-                  <div className="font-medium text-gray-900">
-                    {event.organizer.firstName} {event.organizer.lastName}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {event.organizer.email}
-                  </div>
+                <div className="flex-1">
+                  <textarea
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows={3}
+                    placeholder="Add a public comment..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                  ></textarea>
+                  <button 
+                    className="mt-2 bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-blue-700 transition duration-300"
+                    onClick={() => {
+                      // TODO: Implement comment posting
+                      console.log("Posting comment:", newComment);
+                      setNewComment("");
+                    }}
+                  >
+                    Post Comment
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Registration Modal */}
-      <EventRegistrationModal
-        event={event}
-        isOpen={isRegistrationModalOpen}
-        onClose={() => setIsRegistrationModalOpen(false)}
-        onSuccess={handleRegistrationSuccess}
-      />
     </div>
   );
 };
