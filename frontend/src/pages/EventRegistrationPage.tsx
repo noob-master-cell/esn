@@ -1,18 +1,20 @@
 // frontend/src/pages/EventRegistrationPage.tsx
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation } from "@apollo/client";
 import { useAuth, useUser } from "@clerk/clerk-react";
+import { useQuery, useMutation } from "@apollo/client";
 import { GET_EVENT } from "../lib/graphql/events";
-import { REGISTER_FOR_EVENT } from "../lib/graphql/registrations";
+import {
+  REGISTER_FOR_EVENT,
+  GET_MY_REGISTRATIONS,
+} from "../lib/graphql/registrations";
 import { Button } from "../components/ui/Button";
 import { Alert } from "../components/ui/Alert";
 
-// ----------- SVG Icon Components ----------- //
-
+// SVG Icon Components
 const CalendarIcon = () => (
   <svg
-    className="w-5 h-5 mr-3 text-gray-500"
+    className="w-6 h-6 mr-3 text-gray-500"
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
@@ -27,26 +29,9 @@ const CalendarIcon = () => (
   </svg>
 );
 
-const ClockIcon = () => (
+const LocationIcon = () => (
   <svg
-    className="w-5 h-5 mr-3 text-gray-500"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-    ></path>
-  </svg>
-);
-
-const LocationPinIcon = () => (
-  <svg
-    className="w-5 h-5 mr-3 text-gray-500"
+    className="w-6 h-6 mr-3 text-gray-500"
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
@@ -84,23 +69,6 @@ const UserIcon = () => (
   </svg>
 );
 
-const InfoIcon = () => (
-  <svg
-    className="w-6 h-6 mr-3 text-gray-500"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-    ></path>
-  </svg>
-);
-
 // A reusable component to display event info with an icon
 const InfoBlock = ({
   icon,
@@ -126,11 +94,23 @@ const EventRegistrationPage: React.FC<EventRegistrationPageProps> = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
+  // Get event data
   const { data, loading, error } = useQuery(GET_EVENT, {
     variables: { id },
     skip: !id,
   });
 
+  // Get user's registrations to check if already registered
+  const {
+    data: registrationsData,
+    loading: registrationsLoading,
+    error: registrationsError,
+  } = useQuery(GET_MY_REGISTRATIONS, {
+    skip: !isSignedIn,
+    fetchPolicy: "cache-and-network", // Ensure we get fresh data
+  });
+
+  // Registration mutation
   const [registerForEvent, { loading: registering, error: registrationError }] =
     useMutation(REGISTER_FOR_EVENT, {
       onCompleted: () => {
@@ -139,7 +119,19 @@ const EventRegistrationPage: React.FC<EventRegistrationPageProps> = () => {
           navigate(`/events/${id}`);
         }, 3000);
       },
+      // Refetch registrations after successful registration
+      refetchQueries: [
+        { query: GET_MY_REGISTRATIONS },
+        { query: GET_EVENT, variables: { id } },
+      ],
     });
+
+  // Check if user is already registered for this event
+  const userRegistration = registrationsData?.myRegistrations?.find(
+    (reg: any) => reg.event.id === id && reg.status !== "CANCELLED"
+  );
+
+  const isAlreadyRegistered = !!userRegistration;
 
   // Format date and time
   const formatDateTime = (dateString: string) => {
@@ -167,6 +159,12 @@ const EventRegistrationPage: React.FC<EventRegistrationPageProps> = () => {
       return;
     }
 
+    // Prevent registration if already registered
+    if (isAlreadyRegistered) {
+      console.warn("User is already registered for this event");
+      return;
+    }
+
     if (!acceptTerms) {
       alert("Please accept the terms and conditions");
       return;
@@ -185,7 +183,8 @@ const EventRegistrationPage: React.FC<EventRegistrationPageProps> = () => {
     }
   };
 
-  if (loading) {
+  // Loading state
+  if (loading || registrationsLoading) {
     return (
       <div className="bg-gray-50 min-h-screen font-sans">
         <div className="container mx-auto p-4 md:p-8">
@@ -237,6 +236,11 @@ const EventRegistrationPage: React.FC<EventRegistrationPageProps> = () => {
     event.imageUrl ||
     `https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=400&fit=crop`;
 
+  // Check if registration deadline has passed
+  const isRegistrationClosed = event.registrationDeadline
+    ? new Date(event.registrationDeadline) < new Date()
+    : false;
+
   if (!isSignedIn) {
     return (
       <div className="bg-gray-50 min-h-screen font-sans flex items-center justify-center">
@@ -268,6 +272,173 @@ const EventRegistrationPage: React.FC<EventRegistrationPageProps> = () => {
     );
   }
 
+  // Already Registered State
+  if (isAlreadyRegistered) {
+    const getRegistrationStatusDisplay = () => {
+      const status = userRegistration.status;
+      const statusConfig = {
+        CONFIRMED: {
+          bg: "bg-green-50 border-green-200",
+          text: "text-green-800",
+          icon: "✅",
+          title: "Registration Confirmed",
+          message: "You're all set for this event!",
+        },
+        PENDING: {
+          bg: "bg-yellow-50 border-yellow-200",
+          text: "text-yellow-800",
+          icon: "⏳",
+          title: "Registration Pending",
+          message: userRegistration.paymentRequired
+            ? "Payment required to confirm your registration"
+            : "Your registration is being processed",
+        },
+        WAITLISTED: {
+          bg: "bg-blue-50 border-blue-200",
+          text: "text-blue-800",
+          icon: "⏰",
+          title: "On Waitlist",
+          message: userRegistration.position
+            ? `You're #${userRegistration.position} on the waitlist`
+            : "You'll be notified if a spot becomes available",
+        },
+      };
+
+      const config =
+        statusConfig[status as keyof typeof statusConfig] ||
+        statusConfig.CONFIRMED;
+
+      return (
+        <div className={`border rounded-lg p-6 ${config.bg}`}>
+          <div className={`text-center ${config.text}`}>
+            <div className="text-4xl mb-3">{config.icon}</div>
+            <h3 className="text-xl font-bold mb-2">{config.title}</h3>
+            <p className="text-base">{config.message}</p>
+
+            {/* Additional registration details */}
+            <div className="mt-4 space-y-2 text-sm">
+              <p>
+                <strong>Registered:</strong>{" "}
+                {new Date(userRegistration.registeredAt).toLocaleDateString()}
+              </p>
+              {userRegistration.amountDue > 0 && (
+                <p>
+                  <strong>Amount Due:</strong> €{userRegistration.amountDue}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    return (
+      <div className="bg-gray-50 min-h-screen font-sans">
+        <div className="container mx-auto p-4 md:p-8">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            {/* Event Image */}
+            <div
+              className="h-48 bg-cover bg-center relative"
+              style={{ backgroundImage: `url(${eventImage})` }}
+            >
+              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-end">
+                <div className="text-white p-6">
+                  <h1 className="text-3xl font-bold">{event.title}</h1>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 md:p-10">
+              {/* Event Details */}
+              <div className="mb-8">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <InfoBlock icon={<CalendarIcon />}>
+                    <div>
+                      <p className="font-medium">{startDateTime.date}</p>
+                      <p className="text-gray-600">
+                        {startDateTime.time} - {endDateTime.time}
+                      </p>
+                    </div>
+                  </InfoBlock>
+
+                  <InfoBlock icon={<LocationIcon />}>
+                    <div>
+                      <p className="font-medium">{event.location}</p>
+                      {event.address && (
+                        <p className="text-gray-600">{event.address}</p>
+                      )}
+                    </div>
+                  </InfoBlock>
+                </div>
+              </div>
+
+              {/* Registration Status */}
+              <div className="mb-8">{getRegistrationStatusDisplay()}</div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button
+                  onClick={() => navigate(`/events/${id}`)}
+                  variant="primary"
+                  className="flex-1"
+                >
+                  View Event Details
+                </Button>
+                <Button
+                  onClick={() => navigate("/profile")}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  View My Registrations
+                </Button>
+                <Button
+                  onClick={() => navigate("/events")}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Browse Events
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Registration closed state
+  if (isRegistrationClosed) {
+    return (
+      <div className="bg-gray-50 min-h-screen font-sans flex items-center justify-center">
+        <div className="max-w-md w-full text-center">
+          <div className="bg-white p-8 rounded-2xl shadow-sm">
+            <div className="text-6xl mb-4">⏰</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Registration Closed
+            </h2>
+            <p className="text-gray-600 mb-6">
+              The registration deadline for this event has passed.
+            </p>
+            <Button
+              onClick={() => navigate(`/events/${id}`)}
+              className="w-full mb-3"
+            >
+              View Event Details
+            </Button>
+            <Button
+              onClick={() => navigate("/events")}
+              variant="outline"
+              className="w-full"
+            >
+              Browse Other Events
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
       {/* Success Message */}
@@ -276,355 +447,222 @@ const EventRegistrationPage: React.FC<EventRegistrationPageProps> = () => {
           <Alert
             type="success"
             title="Registration Successful!"
-            message="You have been successfully registered for this event. Redirecting..."
-            onClose={() => setRegistrationSuccess(false)}
+            message="You have been successfully registered for this event. Redirecting to event details..."
           />
         </div>
       )}
 
-      {/* Back Button */}
-      <div className="container mx-auto p-4 pt-8">
-        <button
-          onClick={() => navigate(`/events/${id}`)}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-6"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          Back to Event Details
-        </button>
-      </div>
-
       <div className="container mx-auto p-4 md:p-8">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* Header with Event Summary */}
+          {/* Event Image */}
           <div
             className="h-48 bg-cover bg-center relative"
-            style={{ backgroundImage: `url('${eventImage}')` }}
+            style={{ backgroundImage: `url(${eventImage})` }}
           >
-            <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-            <div className="absolute bottom-6 left-6 text-white">
-              <h1 className="text-3xl md:text-4xl font-extrabold leading-tight">
-                {isWaitlistRegistration
-                  ? "Join Waitlist"
-                  : "Register for Event"}
-              </h1>
-              <p className="text-xl opacity-90 mt-2">{event.title}</p>
+            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-end">
+              <div className="text-white p-6">
+                <h1 className="text-3xl font-bold">{event.title}</h1>
+              </div>
             </div>
           </div>
 
+          {/* Content */}
           <div className="p-6 md:p-10">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-              {/* Left Column: Registration Form */}
-              <div className="lg:col-span-2">
-                {/* Event Summary */}
-                <div className="bg-gray-50 rounded-xl p-6 mb-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                    Event Summary
-                  </h2>
-                  <div className="space-y-3">
-                    <InfoBlock icon={<CalendarIcon />}>
-                      {startDateTime.date}
-                    </InfoBlock>
-                    <InfoBlock icon={<ClockIcon />}>
+            {/* Event Details */}
+            <div className="mb-8">
+              <div className="grid md:grid-cols-2 gap-6">
+                <InfoBlock icon={<CalendarIcon />}>
+                  <div>
+                    <p className="font-medium">{startDateTime.date}</p>
+                    <p className="text-gray-600">
                       {startDateTime.time} - {endDateTime.time}
-                    </InfoBlock>
-                    <InfoBlock icon={<LocationPinIcon />}>
-                      {event.location}
-                      {event.address && (
-                        <span className="block text-sm text-gray-500 ml-8">
-                          {event.address}
-                        </span>
-                      )}
-                    </InfoBlock>
+                    </p>
                   </div>
-                </div>
+                </InfoBlock>
 
-                {/* Waitlist Warning */}
-                {isWaitlistRegistration && (
-                  <div className="mb-8">
-                    <Alert
-                      type="warning"
-                      title="Event is Full"
-                      message="This event has reached maximum capacity. You'll be added to the waitlist and notified if a spot becomes available."
-                    />
+                <InfoBlock icon={<LocationIcon />}>
+                  <div>
+                    <p className="font-medium">{event.location}</p>
+                    {event.address && (
+                      <p className="text-gray-600">{event.address}</p>
+                    )}
                   </div>
-                )}
-
-                {/* Error Display */}
-                {registrationError && (
-                  <div className="mb-8">
-                    <Alert
-                      type="error"
-                      title="Registration Failed"
-                      message={registrationError.message}
-                    />
-                  </div>
-                )}
-
-                {/* Registration Form */}
-                <form onSubmit={handleSubmit} className="space-y-8">
-                  {/* User Information Display */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
-                    <div className="flex items-center mb-6">
-                      <UserIcon />
-                      <h3 className="text-xl font-bold text-gray-900">
-                        Your Information
-                      </h3>
-                    </div>
-
-                    <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600 font-medium">Name:</span>
-                        <span className="text-gray-900">
-                          {user?.firstName} {user?.lastName}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600 font-medium">
-                          Email:
-                        </span>
-                        <span className="text-gray-900">
-                          {user?.primaryEmailAddress?.emailAddress}
-                        </span>
-                      </div>
-                      {user?.phoneNumbers?.[0]?.phoneNumber && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600 font-medium">
-                            Phone:
-                          </span>
-                          <span className="text-gray-900">
-                            {user.phoneNumbers[0].phoneNumber}
-                          </span>
-                        </div>
-                      )}
-                      {user?.publicMetadata?.university && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600 font-medium">
-                            University:
-                          </span>
-                          <span className="text-gray-900">
-                            {user.publicMetadata.university as string}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-sm text-blue-800">
-                        <strong>Note:</strong> This information will be used for
-                        your registration. To update your details, please visit
-                        your{" "}
-                        <button
-                          type="button"
-                          onClick={() => navigate("/profile")}
-                          className="text-blue-600 hover:text-blue-800 underline"
-                        >
-                          profile page
-                        </button>
-                        .
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Terms and Conditions */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
-                    <div className="flex items-center mb-4">
-                      <InfoIcon />
-                      <h3 className="text-xl font-bold text-gray-900">
-                        Terms & Conditions
-                      </h3>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="checkbox"
-                        id="acceptTerms"
-                        checked={acceptTerms}
-                        onChange={(e) => setAcceptTerms(e.target.checked)}
-                        className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        required
-                      />
-                      <label
-                        htmlFor="acceptTerms"
-                        className="text-sm text-gray-700"
-                      >
-                        I accept the{" "}
-                        <a
-                          href="#"
-                          className="text-blue-600 hover:text-blue-800 underline"
-                        >
-                          terms and conditions
-                        </a>{" "}
-                        and{" "}
-                        <a
-                          href="#"
-                          className="text-blue-600 hover:text-blue-800 underline"
-                        >
-                          cancellation policy
-                        </a>
-                        . I understand that this registration is binding and may
-                        be subject to cancellation fees.
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="flex gap-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => navigate(`/events/${id}`)}
-                      className="flex-1"
-                      disabled={registering}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
-                      loading={registering}
-                      disabled={registering || !acceptTerms}
-                    >
-                      {registering
-                        ? "Registering..."
-                        : isWaitlistRegistration
-                        ? "Join Waitlist"
-                        : event.type === "FREE"
-                        ? "Register for Free"
-                        : `Pay €${effectivePrice} & Register`}
-                    </Button>
-                  </div>
-                </form>
+                </InfoBlock>
               </div>
 
-              {/* Right Column: Event Details & Pricing */}
-              <div className="lg:col-span-1">
-                <div className="bg-gray-50 rounded-xl shadow-inner p-6 sticky top-8">
-                  <h2 className="text-2xl font-bold text-center mb-6">
-                    Registration Details
-                  </h2>
-
-                  {/* Price Display */}
-                  <div className="text-center mb-6">
-                    {event.type === "FREE" ? (
-                      <p className="text-4xl font-extrabold text-green-600">
-                        FREE
-                      </p>
-                    ) : (
-                      <>
-                        <p className="text-4xl font-extrabold text-gray-800">
-                          €{effectivePrice.toFixed(2)}
-                        </p>
-                        <p className="text-gray-500">
-                          {event.memberPrice &&
-                          event.memberPrice < (event.price || 0)
-                            ? "ESN Member Price"
-                            : "Standard Price"}
-                        </p>
-                      </>
-                    )}
-                  </div>
-
-                  {/* ESN Card Discount */}
-                  {event.memberPrice &&
-                    event.memberPrice < (event.price || 0) && (
-                      <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-3 rounded-md mb-6">
-                        <p className="font-bold text-sm">
-                          You're getting the ESN Card discount!
-                        </p>
-                        <p className="text-sm">
-                          Regular price: €{event.price?.toFixed(2)}
-                        </p>
-                      </div>
-                    )}
-
-                  {/* Event Status */}
-                  <div className="space-y-4 mb-6">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Capacity:</span>
-                      <span className="font-medium">
-                        {event.registrationCount}/{event.maxParticipants}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                        style={{
-                          width: `${
-                            (event.registrationCount / event.maxParticipants) *
-                            100
-                          }%`,
-                        }}
-                      ></div>
-                    </div>
-                    <div className="text-center">
-                      <span
-                        className={`font-bold ${
-                          spotsLeft > 0 ? "text-green-600" : "text-red-600"
-                        }`}
-                      >
-                        {spotsLeft > 0
-                          ? `${spotsLeft} spots remaining`
-                          : "Event is full"}
-                      </span>
-                      {isWaitlistRegistration && (
-                        <p className="text-sm text-orange-600 mt-1">
-                          Waitlist registration available
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Payment Information */}
-                  {event.type !== "FREE" && (
-                    <div className="bg-blue-50 rounded-lg p-4 mb-6">
-                      <h3 className="font-semibold text-blue-900 mb-2">
-                        Payment Information
-                      </h3>
-                      <p className="text-blue-800 text-sm">
-                        You will be charged <strong>€{effectivePrice}</strong>{" "}
-                        for this registration.
-                        {!isWaitlistRegistration
-                          ? " Payment will be processed immediately upon confirmation."
-                          : " You will only be charged if your waitlist registration is confirmed."}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Organizer Info */}
-                  <div className="border-t border-gray-200 pt-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                      Organizer
-                    </h3>
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                        {event.organizer.firstName[0]}
-                        {event.organizer.lastName[0]}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {event.organizer.firstName} {event.organizer.lastName}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {event.organizer.email}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+              {/* Event Description */}
+              {event.description && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    About This Event
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    {event.description}
+                  </p>
                 </div>
+              )}
+            </div>
+
+            {/* Capacity Information */}
+            <div className="mb-8">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-600">Event Capacity</span>
+                  <span className="font-medium">
+                    {event.registrationCount} / {event.maxParticipants}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full ${
+                      isEventFull ? "bg-red-500" : "bg-blue-600"
+                    }`}
+                    style={{
+                      width: `${Math.min(
+                        (event.registrationCount / event.maxParticipants) * 100,
+                        100
+                      )}%`,
+                    }}
+                  />
+                </div>
+                {spotsLeft > 0 ? (
+                  <p className="text-sm text-gray-600 mt-2">
+                    {spotsLeft} spot{spotsLeft !== 1 ? "s" : ""} remaining
+                  </p>
+                ) : (
+                  <p className="text-sm text-red-600 mt-2 font-medium">
+                    Event is full
+                    {event.allowWaitlist && " - Join waitlist below"}
+                  </p>
+                )}
               </div>
             </div>
+
+            {/* Waitlist Notice */}
+            {isWaitlistRegistration && (
+              <div className="mb-8">
+                <Alert
+                  type="info"
+                  title="Join Waitlist"
+                  message="This event is full, but you can join the waitlist. You'll be added to the waitlist and notified if a spot becomes available."
+                />
+              </div>
+            )}
+
+            {/* Error Display */}
+            {registrationError && (
+              <div className="mb-8">
+                <Alert
+                  type="error"
+                  title="Registration Failed"
+                  message={registrationError.message}
+                />
+              </div>
+            )}
+
+            {/* Registration Form */}
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* User Information Display */}
+              <div className="bg-white border border-gray-200 rounded-xl p-6">
+                <div className="flex items-center mb-6">
+                  <UserIcon />
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Your Information
+                  </h3>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600 font-medium">Name:</span>
+                    <span className="text-gray-900">
+                      {user?.firstName} {user?.lastName}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600 font-medium">Email:</span>
+                    <span className="text-gray-900">
+                      {user?.primaryEmailAddress?.emailAddress}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Terms and Conditions */}
+              <div className="bg-white border border-gray-200 rounded-xl p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
+                  Terms and Conditions
+                </h3>
+                <div className="bg-gray-50 rounded-lg p-4 mb-4 max-h-40 overflow-y-auto">
+                  <p className="text-sm text-gray-700">
+                    By registering for this event, you agree to abide by our
+                    community guidelines and event policies...
+                  </p>
+                </div>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={acceptTerms}
+                    onChange={(e) => setAcceptTerms(e.target.checked)}
+                    className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span className="text-gray-700">
+                    I accept the terms and conditions
+                  </span>
+                </label>
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button
+                  type="submit"
+                  disabled={!acceptTerms || registering}
+                  className="flex-1"
+                >
+                  {registering ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      {isWaitlistRegistration
+                        ? "Joining Waitlist..."
+                        : "Registering..."}
+                    </div>
+                  ) : (
+                    <>
+                      {isWaitlistRegistration
+                        ? "Join Waitlist"
+                        : "Register for Event"}
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate(`/events/${id}`)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+
+              {/* Price Information */}
+              {effectivePrice > 0 && (
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-gray-900">
+                    Registration Fee: €{effectivePrice}
+                  </p>
+                  {event.memberPrice &&
+                    event.price &&
+                    event.memberPrice < event.price && (
+                      <p className="text-sm text-blue-600">
+                        ESN Members: €{event.memberPrice} (Regular: €
+                        {event.price})
+                      </p>
+                    )}
+                  <p className="text-sm text-gray-600 mt-2">
+                    Payment will be processed after registration
+                  </p>
+                </div>
+              )}
+            </form>
           </div>
         </div>
       </div>

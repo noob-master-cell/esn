@@ -5,25 +5,25 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from './../../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateEventInput } from './dto/create-event.input';
 import { UpdateEventInput } from './dto/update-event.input';
 import { EventsFilterInput } from './dto/events-filter.input';
-// Import EventStatus from Prisma instead of GraphQL entity
-import { EventStatus, UserRole } from '@prisma/client';
+import { EventStatus, UserRole, RegistrationStatus } from '@prisma/client';
 
 @Injectable()
 export class EventsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createEventInput: CreateEventInput, organizerId: string) {
-    console.log('🎪 Events Service: Creating event:', createEventInput.title);
+    console.log('🎪 Events Service: Creating new event');
 
     // Validate dates
     if (createEventInput.endDate <= createEventInput.startDate) {
       throw new BadRequestException('End date must be after start date');
     }
 
+    // Validate registration deadline
     if (
       createEventInput.registrationDeadline &&
       createEventInput.registrationDeadline >= createEventInput.startDate
@@ -33,26 +33,29 @@ export class EventsService {
       );
     }
 
-    // Use organizer relation
     const event = await this.prisma.event.create({
       data: {
         ...createEventInput,
-        organizer: { connect: { id: organizerId } },
-        status: EventStatus.DRAFT, // Use Prisma enum
+        organizerId,
       },
       include: {
         organizer: true,
         registrations: {
+          where: {
+            status: {
+              not: RegistrationStatus.CANCELLED,
+            },
+          },
           include: { user: true },
         },
       },
     });
 
-    console.log('✅ Events Service: Event created:', event.id);
+    console.log('✅ Events Service: Event created:', event.title);
     return this.transformEvent(event);
   }
 
-  async findAll(filter: EventsFilterInput, userId?: string) {
+  async findAll(filter: EventsFilterInput = {}, userId?: string) {
     console.log('📋 Events Service: Finding events with filter:', filter);
 
     const where: any = {};
@@ -91,7 +94,7 @@ export class EventsService {
 
     // Only show published events to regular users
     if (!userId) {
-      where.status = EventStatus.PUBLISHED; // Use Prisma enum
+      where.status = EventStatus.PUBLISHED;
       where.isPublic = true;
     }
 
@@ -103,6 +106,11 @@ export class EventsService {
       include: {
         organizer: true,
         registrations: {
+          where: {
+            status: {
+              not: RegistrationStatus.CANCELLED,
+            },
+          },
           include: { user: true },
         },
       },
@@ -112,7 +120,7 @@ export class EventsService {
     });
 
     console.log(`✅ Events Service: Found ${events.length} events`);
-    return events.map((event) => this.transformEvent(event));
+    return events.map((event) => this.transformEvent(event, userId));
   }
 
   async findOne(id: string, userId?: string) {
@@ -123,6 +131,11 @@ export class EventsService {
       include: {
         organizer: true,
         registrations: {
+          where: {
+            status: {
+              not: RegistrationStatus.CANCELLED,
+            },
+          },
           include: { user: true },
         },
       },
@@ -176,6 +189,11 @@ export class EventsService {
       include: {
         organizer: true,
         registrations: {
+          where: {
+            status: {
+              not: RegistrationStatus.CANCELLED,
+            },
+          },
           include: { user: true },
         },
       },
@@ -192,7 +210,13 @@ export class EventsService {
       where: { id },
       include: {
         organizer: true,
-        registrations: true,
+        registrations: {
+          where: {
+            status: {
+              not: RegistrationStatus.CANCELLED,
+            },
+          },
+        },
       },
     });
 
@@ -205,7 +229,7 @@ export class EventsService {
       throw new ForbiddenException('You can only delete your own events');
     }
 
-    // Check if event has registrations
+    // Check if event has active registrations
     if (eventData.registrations.length > 0) {
       throw new BadRequestException(
         'Cannot delete event with registered participants',
@@ -236,10 +260,15 @@ export class EventsService {
 
     const publishedEvent = await this.prisma.event.update({
       where: { id },
-      data: { status: EventStatus.PUBLISHED }, // Use Prisma enum
+      data: { status: EventStatus.PUBLISHED },
       include: {
         organizer: true,
         registrations: {
+          where: {
+            status: {
+              not: RegistrationStatus.CANCELLED,
+            },
+          },
           include: { user: true },
         },
       },
@@ -257,6 +286,11 @@ export class EventsService {
       include: {
         organizer: true,
         registrations: {
+          where: {
+            status: {
+              not: RegistrationStatus.CANCELLED,
+            },
+          },
           include: { user: true },
         },
       },
@@ -269,17 +303,50 @@ export class EventsService {
 
   // Helper method to transform prisma event to GraphQL event
   private transformEvent(event: any, userId?: string) {
-    const registrationCount = event.registrations?.length || 0;
-    const waitlistCount = 0; // TODO: Implement waitlist logic
+    // Safely get registrations array - ensure it's always an array
+    const registrations = Array.isArray(event.registrations)
+      ? event.registrations
+      : [];
+
+    // Filter active registrations (not cancelled)
+    const activeRegistrations = registrations.filter(
+      (reg: any) => reg.status !== RegistrationStatus.CANCELLED,
+    );
+
+    // Count confirmed/pending registrations (these take up event spots)
+    const confirmedRegistrations = activeRegistrations.filter(
+      (reg: any) =>
+        reg.status === RegistrationStatus.CONFIRMED ||
+        reg.status === RegistrationStatus.PENDING,
+    );
+
+    // Count waitlisted registrations
+    const waitlistedRegistrations = activeRegistrations.filter(
+      (reg: any) => reg.status === RegistrationStatus.WAITLISTED,
+    );
+
+    const registrationCount = confirmedRegistrations.length;
+    const waitlistCount = waitlistedRegistrations.length;
+
+    // Check if current user is registered
+    const isRegistered = userId
+      ? activeRegistrations.some((reg: any) => reg.userId === userId)
+      : false;
+
+    // Check if user can register (spots available and not already registered)
+    const canRegister =
+      !isRegistered && registrationCount < event.maxParticipants;
+
+    console.log(
+      `📊 Transform Event ${event.title}: registrationCount=${registrationCount}, waitlistCount=${waitlistCount}`,
+    );
 
     return {
       ...event,
       registrationCount,
       waitlistCount,
-      isRegistered: userId
-        ? event.registrations?.some((reg: any) => reg.userId === userId)
-        : false,
-      canRegister: registrationCount < event.maxParticipants,
+      isRegistered,
+      canRegister,
     };
   }
 }

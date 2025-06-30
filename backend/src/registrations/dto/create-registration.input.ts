@@ -6,13 +6,24 @@ import {
   IsEmail,
   MaxLength,
   MinLength,
+  IsEnum,
 } from 'class-validator';
+import { RegistrationType } from '../entities/registration.entity';
 
 @InputType()
 export class CreateRegistrationInput {
   @Field(() => ID)
   @IsString()
   eventId: string;
+
+  @Field(() => RegistrationType, {
+    nullable: true,
+    description:
+      'The type of registration (e.g., REGULAR, WAITLIST). If not provided, it will be determined by the service.',
+  })
+  @IsOptional()
+  @IsEnum(RegistrationType)
+  registrationType?: RegistrationType;
 
   @Field({ nullable: true })
   @IsOptional()

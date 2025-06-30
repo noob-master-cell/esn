@@ -15,7 +15,7 @@ import {
   RegistrationType,
   PaymentStatus,
 } from './entities/registration.entity';
-import { UserRole } from '@prisma/client';
+import { UserRole, EventStatus } from '@prisma/client';
 
 @Injectable()
 export class RegistrationsService {
@@ -26,16 +26,39 @@ export class RegistrationsService {
     userId: string,
   ) {
     console.log(
-      '🎫 Registration Service: Creating registration for event:',
+      '🎫 Registration Service: Creating registration for user:',
+      userId,
+      'event:',
       createRegistrationInput.eventId,
     );
 
-    // Check if event exists and is active
+    // Check if user already has an active registration for this event
+    const existingRegistration = await this.prisma.registration.findFirst({
+      where: {
+        userId,
+        eventId: createRegistrationInput.eventId,
+        status: {
+          not: RegistrationStatus.CANCELLED,
+        },
+      },
+    });
+
+    if (existingRegistration) {
+      throw new BadRequestException(
+        'You are already registered for this event',
+      );
+    }
+
+    // Get event details to check capacity and pricing
     const event = await this.prisma.event.findUnique({
       where: { id: createRegistrationInput.eventId },
       include: {
         registrations: {
-          where: { status: { not: RegistrationStatus.CANCELLED } },
+          where: {
+            status: {
+              not: RegistrationStatus.CANCELLED,
+            },
+          },
         },
       },
     });
@@ -44,37 +67,29 @@ export class RegistrationsService {
       throw new NotFoundException('Event not found');
     }
 
-    if (event.status !== 'PUBLISHED') {
-      throw new BadRequestException('Event is not available for registration');
+    // Check if event is published and registration is open
+    if (event.status !== EventStatus.PUBLISHED) {
+      throw new BadRequestException('Event is not open for registration');
     }
 
-    // Check if registration deadline has passed
+    // Check registration deadline
     if (event.registrationDeadline && new Date() > event.registrationDeadline) {
       throw new BadRequestException('Registration deadline has passed');
     }
 
-    // Check if user is already registered
-    const existingRegistration = await this.prisma.registration.findUnique({
-      where: {
-        userId_eventId: {
-          userId,
-          eventId: createRegistrationInput.eventId,
-        },
-      },
-    });
+    // Count current confirmed registrations
+    const confirmedRegistrations = event.registrations.filter(
+      (reg) =>
+        reg.status === RegistrationStatus.CONFIRMED ||
+        reg.status === RegistrationStatus.PENDING,
+    );
 
-    if (existingRegistration) {
-      throw new ConflictException('You are already registered for this event');
-    }
-
-    // Calculate current registrations (excluding cancelled)
-    const currentRegistrations = event.registrations.length;
-    const isEventFull = currentRegistrations >= event.maxParticipants;
+    const isEventFull = confirmedRegistrations.length >= event.maxParticipants;
 
     // Determine registration type and status
-    let registrationType = RegistrationType.REGULAR;
-    let registrationStatus = RegistrationStatus.PENDING;
-    let position: number | null = null;
+    let registrationType =
+      createRegistrationInput.registrationType || RegistrationType.REGULAR;
+    let status = RegistrationStatus.PENDING;
 
     if (isEventFull) {
       if (!event.allowWaitlist) {
@@ -83,67 +98,85 @@ export class RegistrationsService {
         );
       }
       registrationType = RegistrationType.WAITLIST;
-      registrationStatus = RegistrationStatus.WAITLISTED;
+      status = RegistrationStatus.WAITLISTED;
+    } else {
+      // For regular registrations, check if payment is required
+      if (event.price && event.price > 0) {
+        status = RegistrationStatus.PENDING; // Will need payment confirmation
+      } else {
+        status = RegistrationStatus.CONFIRMED; // Free events auto-confirm
+      }
+    }
 
-      // Calculate waitlist position
+    // Calculate position for waitlisted registrations
+    let position: number | null = null;
+    if (status === RegistrationStatus.WAITLISTED) {
       const waitlistCount = await this.prisma.registration.count({
         where: {
           eventId: createRegistrationInput.eventId,
-          registrationType: RegistrationType.WAITLIST,
           status: RegistrationStatus.WAITLISTED,
         },
       });
       position = waitlistCount + 1;
-    } else {
-      registrationStatus = RegistrationStatus.CONFIRMED;
     }
 
-    // Calculate payment details
-    const paymentRequired = (event.price || 0) > 0;
-    let amountDue = event.price || 0;
-
-    // Apply ESN card discount if user has verified ESN card
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (user?.esnCardVerified && event.memberPrice !== null) {
-      amountDue = event.memberPrice || 0;
+    // Calculate amount due
+    let amountDue = 0;
+    if (
+      event.price &&
+      event.price > 0 &&
+      status !== RegistrationStatus.WAITLISTED
+    ) {
+      // TODO: Check if user has ESN card for member pricing
+      amountDue = event.price;
     }
 
-    // Create registration
+    // Create the registration
     const registration = await this.prisma.registration.create({
       data: {
         userId,
         eventId: createRegistrationInput.eventId,
-        status: registrationStatus,
+        status,
         registrationType,
         position,
-        paymentRequired,
-        paymentStatus: paymentRequired
-          ? PaymentStatus.PENDING
-          : PaymentStatus.COMPLETED,
+        paymentRequired: amountDue > 0,
         amountDue,
         currency: 'EUR',
         specialRequests: createRegistrationInput.specialRequests,
-        emergencyContact: createRegistrationInput.emergencyContact,
         dietary: createRegistrationInput.dietary,
+        emergencyContact: createRegistrationInput.emergencyContact,
         registeredAt: new Date(),
         confirmedAt:
-          registrationStatus === RegistrationStatus.CONFIRMED
-            ? new Date()
-            : null,
+          status === RegistrationStatus.CONFIRMED ? new Date() : null,
       },
       include: {
         user: true,
-        event: true,
+        event: {
+          include: {
+            organizer: true,
+            registrations: {
+              where: {
+                status: {
+                  not: RegistrationStatus.CANCELLED,
+                },
+              },
+              include: { user: true },
+            },
+          },
+        },
       },
     });
 
     console.log(
       '✅ Registration Service: Registration created successfully:',
       registration.id,
+      'Status:',
+      registration.status,
+      'Type:',
+      registration.registrationType,
     );
+
+    // Transform the registration with updated event counts
     return this.transformRegistration(registration);
   }
 
@@ -350,11 +383,25 @@ export class RegistrationsService {
     const registrations = await this.prisma.registration.findMany({
       where: {
         userId,
-        status: { not: RegistrationStatus.CANCELLED },
+        status: {
+          not: RegistrationStatus.CANCELLED,
+        },
       },
       include: {
         user: true,
-        event: true,
+        event: {
+          include: {
+            organizer: true,
+            registrations: {
+              where: {
+                status: {
+                  not: RegistrationStatus.CANCELLED,
+                },
+              },
+              include: { user: true },
+            },
+          },
+        },
       },
       orderBy: { registeredAt: 'desc' },
     });
@@ -362,9 +409,14 @@ export class RegistrationsService {
     console.log(
       `✅ Registration Service: Found ${registrations.length} user registrations`,
     );
-    return registrations.map((registration) =>
-      this.transformRegistration(registration),
-    );
+
+    return registrations.map((registration) => {
+      const transformedReg = this.transformRegistration(registration);
+      console.log(
+        `🔍 Transformed registration for event: ${transformedReg.event?.title}, registrationCount: ${transformedReg.event?.registrationCount}`,
+      );
+      return transformedReg;
+    });
   }
 
   // Helper method to promote someone from waitlist when a spot opens up
@@ -423,11 +475,58 @@ export class RegistrationsService {
     }
   }
 
-  // Helper method to transform prisma registration to GraphQL registration
+  // Update the transformRegistration method
   private transformRegistration(registration: any) {
     return {
       ...registration,
       amountDue: parseFloat(registration.amountDue.toString()),
+      event: this.transformEventForRegistration(registration.event),
+    };
+  }
+
+  // Enhanced event transformation for registration context
+  private transformEventForRegistration(event: any) {
+    if (!event) return null;
+
+    // Safely get registrations array
+    const registrations = Array.isArray(event.registrations)
+      ? event.registrations
+      : [];
+
+    // Filter active registrations (not cancelled)
+    const activeRegistrations = registrations.filter(
+      (reg: any) => reg.status !== RegistrationStatus.CANCELLED,
+    );
+
+    // Count confirmed/pending registrations
+    const confirmedRegistrations = activeRegistrations.filter(
+      (reg: any) =>
+        reg.status === RegistrationStatus.CONFIRMED ||
+        reg.status === RegistrationStatus.PENDING,
+    );
+
+    // Count waitlisted registrations
+    const waitlistedRegistrations = activeRegistrations.filter(
+      (reg: any) => reg.status === RegistrationStatus.WAITLISTED,
+    );
+
+    const registrationCount = confirmedRegistrations.length;
+    const waitlistCount = waitlistedRegistrations.length;
+
+    // For registration context, we know this user is now registered
+    const isRegistered = true;
+    const canRegister = false; // User just registered, so they can't register again
+
+    console.log(
+      `📊 Transform Event for Registration ${event.title}: registrationCount=${registrationCount}, waitlistCount=${waitlistCount}`,
+    );
+
+    return {
+      ...event,
+      registrationCount,
+      waitlistCount,
+      isRegistered,
+      canRegister,
     };
   }
 }

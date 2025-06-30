@@ -9,11 +9,17 @@ export const REGISTER_FOR_EVENT = gql`
       id
       status
       registrationType
+      position
       paymentRequired
       paymentStatus
       amountDue
       currency
+      specialRequests
+      dietary
+      emergencyContact
       registeredAt
+      confirmedAt
+      cancelledAt
       user {
         id
         firstName
@@ -23,8 +29,26 @@ export const REGISTER_FOR_EVENT = gql`
       event {
         id
         title
+        shortDescription
+        startDate
+        endDate
+        location
+        address
+        imageUrl
+        category
+        type
+        price
+        memberPrice
+        maxParticipants
         registrationCount
         waitlistCount
+        isRegistered
+        canRegister
+        organizer {
+          id
+          firstName
+          lastName
+        }
       }
     }
   }
@@ -63,6 +87,8 @@ export const GET_MY_REGISTRATIONS = gql`
         maxParticipants
         registrationCount
         waitlistCount
+        isRegistered
+        canRegister
         organizer {
           id
           firstName
@@ -87,6 +113,8 @@ export const UPDATE_REGISTRATION = gql`
         id
         registrationCount
         waitlistCount
+        isRegistered
+        canRegister
       }
     }
   }
@@ -104,6 +132,8 @@ export const CANCEL_REGISTRATION = gql`
         id
         registrationCount
         waitlistCount
+        isRegistered
+        canRegister
       }
     }
   }
@@ -154,24 +184,20 @@ export const GET_REGISTRATION_DETAILS = gql`
         firstName
         lastName
         email
-        phone
-        esnCardVerified
       }
       event {
         id
         title
-        description
         startDate
         endDate
         location
-        address
-        price
-        memberPrice
+        maxParticipants
+        registrationCount
+        waitlistCount
         organizer {
           id
           firstName
           lastName
-          email
         }
       }
     }

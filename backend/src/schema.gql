@@ -269,6 +269,11 @@ input UpdateEventInput {
 
 input CreateRegistrationInput {
   eventId: ID!
+
+  """
+  The type of registration (e.g., REGULAR, WAITLIST). If not provided, it will be determined by the service.
+  """
+  registrationType: RegistrationType
   specialRequests: String
   dietary: String
   emergencyContact: String
@@ -277,6 +282,11 @@ input CreateRegistrationInput {
 
 input UpdateRegistrationInput {
   eventId: ID
+
+  """
+  The type of registration (e.g., REGULAR, WAITLIST). If not provided, it will be determined by the service.
+  """
+  registrationType: RegistrationType
   specialRequests: String
   dietary: String
   emergencyContact: String

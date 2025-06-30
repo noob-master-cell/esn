@@ -580,8 +580,18 @@ const ProfilePage: React.FC = () => {
           onClick={() => navigate("/")}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-6"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
           Back to Home
         </button>
@@ -589,7 +599,6 @@ const ProfilePage: React.FC = () => {
 
       <div className="container mx-auto p-4 md:p-8">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          
           {/* Header with Profile Card */}
           <div className="h-48 bg-gradient-to-r from-blue-500 to-blue-600 relative">
             <div className="absolute inset-0 bg-black bg-opacity-20"></div>
@@ -598,7 +607,11 @@ const ProfilePage: React.FC = () => {
                 <div className="relative group">
                   <div className="w-20 h-20 bg-white bg-opacity-20 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold text-2xl border-4 border-white shadow-lg overflow-hidden">
                     {user?.imageUrl ? (
-                      <img src={user.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                      <img
+                        src={user.imageUrl}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       user?.firstName?.[0]?.toUpperCase() || "U"
                     )}
@@ -607,9 +620,24 @@ const ProfilePage: React.FC = () => {
                     onClick={() => setIsChangingPhoto(true)}
                     className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -617,9 +645,13 @@ const ProfilePage: React.FC = () => {
                   <h1 className="text-3xl md:text-4xl font-extrabold leading-tight">
                     {user?.firstName} {user?.lastName}
                   </h1>
-                  <p className="text-xl opacity-90">ESN Member since {memberSince}</p>
+                  <p className="text-xl opacity-90">
+                    ESN Member since {memberSince}
+                  </p>
                   {(user?.publicMetadata?.university as string) && (
-                    <p className="text-lg opacity-75">{user.publicMetadata.university}</p>
+                    <p className="text-lg opacity-75">
+                      {user.publicMetadata.university}
+                    </p>
                   )}
                 </div>
               </div>
@@ -630,21 +662,21 @@ const ProfilePage: React.FC = () => {
           <div className="border-b border-gray-200 px-6 md:px-10">
             <div className="flex space-x-1 py-4">
               <TabButton
-                active={activeTab === 'overview'}
-                onClick={() => setActiveTab('overview')}
+                active={activeTab === "overview"}
+                onClick={() => setActiveTab("overview")}
               >
                 Overview
               </TabButton>
               <TabButton
-                active={activeTab === 'events'}
-                onClick={() => setActiveTab('events')}
+                active={activeTab === "events"}
+                onClick={() => setActiveTab("events")}
                 count={allRegistrations.length}
               >
                 Events
               </TabButton>
               <TabButton
-                active={activeTab === 'settings'}
-                onClick={() => setActiveTab('settings')}
+                active={activeTab === "settings"}
+                onClick={() => setActiveTab("settings")}
               >
                 Settings
               </TabButton>
@@ -653,51 +685,69 @@ const ProfilePage: React.FC = () => {
 
           <div className="p-6 md:p-10">
             {/* Overview Tab */}
-            {activeTab === 'overview' && (
+            {activeTab === "overview" && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-                
                 {/* Left Column: Profile Details */}
                 <div className="lg:col-span-2 space-y-8">
-                  
                   {/* User Information Section */}
                   <div className="bg-white border border-gray-200 rounded-xl p-6">
-                    <SectionHeader icon={<UserIcon />} title="Personal Information" />
-                    
+                    <SectionHeader
+                      icon={<UserIcon />}
+                      title="Personal Information"
+                    />
+
                     <div className="grid md:grid-cols-2 gap-6 mb-6">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Email Address
+                        </label>
                         <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
                           {user?.primaryEmailAddress?.emailAddress}
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Phone Number
+                        </label>
                         <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
-                          {user?.phoneNumbers?.[0]?.phoneNumber || "Not provided"}
+                          {user?.phoneNumbers?.[0]?.phoneNumber ||
+                            "Not provided"}
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">University</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          University
+                        </label>
                         <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
-                          {(user?.publicMetadata?.university as string) || "Not set"}
+                          {(user?.publicMetadata?.university as string) ||
+                            "Not set"}
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Nationality
+                        </label>
                         <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
-                          {(user?.publicMetadata?.nationality as string) || "Not set"}
+                          {(user?.publicMetadata?.nationality as string) ||
+                            "Not set"}
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">ESN Chapter</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          ESN Chapter
+                        </label>
                         <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
-                          {(user?.publicMetadata?.chapter as string) || "Not set"}
+                          {(user?.publicMetadata?.chapter as string) ||
+                            "Not set"}
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Telegram</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Telegram
+                        </label>
                         <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
-                          {(user?.publicMetadata?.telegram as string) || "Not set"}
+                          {(user?.publicMetadata?.telegram as string) ||
+                            "Not set"}
                         </p>
                       </div>
                     </div>
@@ -705,7 +755,9 @@ const ProfilePage: React.FC = () => {
                     {/* Bio Section */}
                     {(user?.publicMetadata?.bio as string) && (
                       <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Bio
+                        </label>
                         <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
                           {user.publicMetadata.bio}
                         </p>
@@ -733,26 +785,38 @@ const ProfilePage: React.FC = () => {
                   {/* Recent Events Preview */}
                   <div className="bg-white border border-gray-200 rounded-xl p-6">
                     <div className="flex items-center justify-between mb-6">
-                      <SectionHeader icon={<CalendarIcon />} title="Recent Events" />
+                      <SectionHeader
+                        icon={<CalendarIcon />}
+                        title="Recent Events"
+                      />
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setActiveTab('events')}
+                        onClick={() => setActiveTab("events")}
                       >
                         View All
                       </Button>
                     </div>
-                    
+
                     {registrationsLoading ? (
                       <div className="space-y-3">
                         {[...Array(3)].map((_, i) => (
-                          <div key={i} className="bg-gray-100 rounded-lg h-16 animate-pulse"></div>
+                          <div
+                            key={i}
+                            className="bg-gray-100 rounded-lg h-16 animate-pulse"
+                          ></div>
                         ))}
                       </div>
                     ) : registrationsError ? (
                       <div className="text-center py-4">
-                        <p className="text-red-500 mb-2">Failed to load events</p>
-                        <Button onClick={() => refetchRegistrations()} variant="outline" size="sm">
+                        <p className="text-red-500 mb-2">
+                          Failed to load events
+                        </p>
+                        <Button
+                          onClick={() => refetchRegistrations()}
+                          variant="outline"
+                          size="sm"
+                        >
                           Try Again
                         </Button>
                       </div>
@@ -773,14 +837,18 @@ const ProfilePage: React.FC = () => {
                           <div
                             key={registration.id}
                             className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                            onClick={() => navigate(`/events/${registration.event.id}`)}
+                            onClick={() =>
+                              navigate(`/events/${registration.event.id}`)
+                            }
                           >
                             <div>
                               <p className="font-medium text-gray-900">
                                 {registration.event.title}
                               </p>
                               <p className="text-sm text-gray-600">
-                                {new Date(registration.event.startDate).toLocaleDateString("en-US", {
+                                {new Date(
+                                  registration.event.startDate
+                                ).toLocaleDateString("en-US", {
                                   weekday: "long",
                                   year: "numeric",
                                   month: "long",
@@ -798,15 +866,14 @@ const ProfilePage: React.FC = () => {
 
                 {/* Right Column: ESN Card & Quick Actions */}
                 <div className="lg:col-span-1 space-y-8">
-                  
                   {/* ESN Card Section */}
                   <div className="bg-gray-50 rounded-xl shadow-inner p-6 sticky top-8">
                     <SectionHeader icon={<CreditCardIcon />} title="ESN Card" />
-                    
+
                     <div className="space-y-4">
                       <p className="text-gray-700 text-sm">
-                        With an ESN card, you can enjoy discounts on most of our events. 
-                        Check out all the offers on{" "}
+                        With an ESN card, you can enjoy discounts on most of our
+                        events. Check out all the offers on{" "}
                         <a
                           href="https://esncard.org"
                           target="_blank"
@@ -822,8 +889,18 @@ const ProfilePage: React.FC = () => {
                       {user?.publicMetadata?.esnCardNumber && (
                         <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                           <div className="flex items-center gap-2">
-                            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            <svg
+                              className="w-5 h-5 text-green-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
                             </svg>
                             <div>
                               <p className="text-sm font-medium text-green-800">
@@ -836,7 +913,10 @@ const ProfilePage: React.FC = () => {
                               </p>
                               {user.publicMetadata.esnCardExpiry && (
                                 <p className="text-xs text-green-600">
-                                  Expires: {new Date(user.publicMetadata.esnCardExpiry as string).toLocaleDateString()}
+                                  Expires:{" "}
+                                  {new Date(
+                                    user.publicMetadata.esnCardExpiry as string
+                                  ).toLocaleDateString()}
                                 </p>
                               )}
                             </div>
@@ -846,13 +926,17 @@ const ProfilePage: React.FC = () => {
 
                       <Button
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                        onClick={() => window.open("https://esncard.org", "_blank")}
+                        onClick={() =>
+                          window.open("https://esncard.org", "_blank")
+                        }
                       >
                         Get ESN Card
                       </Button>
 
                       <div className="border-t border-gray-200 pt-4">
-                        <h4 className="font-semibold text-gray-900 mb-3">Add Your ESN Card</h4>
+                        <h4 className="font-semibold text-gray-900 mb-3">
+                          Add Your ESN Card
+                        </h4>
                         <div className="space-y-3">
                           <input
                             type="text"
@@ -883,8 +967,11 @@ const ProfilePage: React.FC = () => {
 
                   {/* Quick Actions */}
                   <div className="bg-white border border-gray-200 rounded-xl p-6">
-                    <SectionHeader icon={<SettingsIcon />} title="Quick Actions" />
-                    
+                    <SectionHeader
+                      icon={<SettingsIcon />}
+                      title="Quick Actions"
+                    />
+
                     <div className="space-y-3">
                       <Button
                         variant="outline"
@@ -923,38 +1010,55 @@ const ProfilePage: React.FC = () => {
             )}
 
             {/* Events Tab */}
-            {activeTab === 'events' && (
+            {activeTab === "events" && (
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <h2 className="text-2xl font-bold text-gray-900">My Events</h2>
-                  
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    My Events
+                  </h2>
+
                   {/* Event Filters */}
                   <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
                     <TabButton
-                      active={eventFilter === 'all'}
-                      onClick={() => setEventFilter('all')}
+                      active={eventFilter === "all"}
+                      onClick={() => setEventFilter("all")}
                       count={allRegistrations.length}
                     >
                       All
                     </TabButton>
                     <TabButton
-                      active={eventFilter === 'upcoming'}
-                      onClick={() => setEventFilter('upcoming')}
-                      count={allRegistrations.filter(r => new Date(r.event.startDate) > new Date() && r.status !== 'CANCELLED').length}
+                      active={eventFilter === "upcoming"}
+                      onClick={() => setEventFilter("upcoming")}
+                      count={
+                        allRegistrations.filter(
+                          (r) =>
+                            new Date(r.event.startDate) > new Date() &&
+                            r.status !== "CANCELLED"
+                        ).length
+                      }
                     >
                       Upcoming
                     </TabButton>
                     <TabButton
-                      active={eventFilter === 'past'}
-                      onClick={() => setEventFilter('past')}
-                      count={allRegistrations.filter(r => new Date(r.event.startDate) <= new Date() || r.status === 'ATTENDED').length}
+                      active={eventFilter === "past"}
+                      onClick={() => setEventFilter("past")}
+                      count={
+                        allRegistrations.filter(
+                          (r) =>
+                            new Date(r.event.startDate) <= new Date() ||
+                            r.status === "ATTENDED"
+                        ).length
+                      }
                     >
                       Past
                     </TabButton>
                     <TabButton
-                      active={eventFilter === 'cancelled'}
-                      onClick={() => setEventFilter('cancelled')}
-                      count={allRegistrations.filter(r => r.status === 'CANCELLED').length}
+                      active={eventFilter === "cancelled"}
+                      onClick={() => setEventFilter("cancelled")}
+                      count={
+                        allRegistrations.filter((r) => r.status === "CANCELLED")
+                          .length
+                      }
                     >
                       Cancelled
                     </TabButton>
@@ -964,7 +1068,10 @@ const ProfilePage: React.FC = () => {
                 {registrationsLoading ? (
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[...Array(6)].map((_, i) => (
-                      <div key={i} className="bg-white rounded-xl shadow-sm p-6 animate-pulse">
+                      <div
+                        key={i}
+                        className="bg-white rounded-xl shadow-sm p-6 animate-pulse"
+                      >
                         <div className="space-y-4">
                           <div className="h-4 bg-gray-200 rounded w-3/4"></div>
                           <div className="h-3 bg-gray-200 rounded w-1/2"></div>
@@ -980,7 +1087,10 @@ const ProfilePage: React.FC = () => {
                       title="Failed to load events"
                       message="There was an error loading your events. Please try again."
                     />
-                    <Button onClick={() => refetchRegistrations()} className="mt-4">
+                    <Button
+                      onClick={() => refetchRegistrations()}
+                      className="mt-4"
+                    >
                       Try Again
                     </Button>
                   </div>
@@ -988,10 +1098,10 @@ const ProfilePage: React.FC = () => {
                   <div className="text-center py-12">
                     <div className="text-6xl mb-4">📅</div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      No {eventFilter !== 'all' ? eventFilter : ''} events found
+                      No {eventFilter !== "all" ? eventFilter : ""} events found
                     </h3>
                     <p className="text-gray-600 mb-6">
-                      {eventFilter === 'all' 
+                      {eventFilter === "all"
                         ? "You haven't registered for any events yet."
                         : `You don't have any ${eventFilter} events.`}
                     </p>
@@ -1008,7 +1118,9 @@ const ProfilePage: React.FC = () => {
                       <div
                         key={registration.id}
                         className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer"
-                        onClick={() => navigate(`/events/${registration.event.id}`)}
+                        onClick={() =>
+                          navigate(`/events/${registration.event.id}`)
+                        }
                       >
                         <div className="p-6">
                           <div className="flex items-start justify-between mb-4">
@@ -1017,14 +1129,26 @@ const ProfilePage: React.FC = () => {
                             </h3>
                             <StatusBadge status={registration.status} />
                           </div>
-                          
+
                           <div className="space-y-2 text-sm text-gray-600 mb-4">
                             <div className="flex items-center gap-2">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
                               </svg>
                               <span>
-                                {new Date(registration.event.startDate).toLocaleDateString("en-US", {
+                                {new Date(
+                                  registration.event.startDate
+                                ).toLocaleDateString("en-US", {
                                   weekday: "short",
                                   month: "short",
                                   day: "numeric",
@@ -1033,16 +1157,31 @@ const ProfilePage: React.FC = () => {
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                />
                               </svg>
-                              <span className="line-clamp-1">{registration.event.location}</span>
+                              <span className="line-clamp-1">
+                                {registration.event.location}
+                              </span>
                             </div>
                           </div>
 
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-500">
-                              Registered {new Date(registration.registeredAt).toLocaleDateString()}
+                              Registered{" "}
+                              {new Date(
+                                registration.registeredAt
+                              ).toLocaleDateString()}
                             </span>
                             {registration.amountDue > 0 && (
                               <span className="font-medium text-gray-900">
@@ -1059,37 +1198,33 @@ const ProfilePage: React.FC = () => {
             )}
 
             {/* Settings Tab */}
-            {activeTab === 'settings' && (
+            {activeTab === "settings" && (
               <div className="max-w-4xl space-y-8">
-                
                 {/* Account Settings */}
                 <div className="bg-white border border-gray-200 rounded-xl p-6">
-                  <SectionHeader icon={<SettingsIcon />} title="Account Settings" />
-                  
+                  <SectionHeader
+                    icon={<SettingsIcon />}
+                    title="Account Settings"
+                  />
+
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">Change Password</h4>
+                      <h4 className="font-semibold text-gray-900 mb-2">
+                        Change Password
+                      </h4>
                       <p className="text-sm text-gray-600 mb-4">
                         Update your password to keep your account secure.
                       </p>
                       <Button
                         variant="outline"
-                        onClick={() => window.open(user?.passwordChangeUrl || '/change-password', '_blank')}
+                        onClick={() =>
+                          window.open(
+                            user?.passwordChangeUrl || "/change-password",
+                            "_blank"
+                          )
+                        }
                       >
                         Change Password
-                      </Button>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">Two-Factor Authentication</h4>
-                      <p className="text-sm text-gray-600 mb-4">
-                        Add an extra layer of security to your account.
-                      </p>
-                      <Button
-                        variant="outline"
-                        onClick={() => alert("Two-factor authentication setup coming soon!")}
-                      >
-                        Setup 2FA
                       </Button>
                     </div>
                   </div>
@@ -1098,7 +1233,10 @@ const ProfilePage: React.FC = () => {
                 {/* Privacy & Visibility */}
                 <div className="bg-white border border-gray-200 rounded-xl p-6">
                   <div className="flex items-center justify-between mb-6">
-                    <SectionHeader icon={<ShieldIcon />} title="Privacy & Visibility" />
+                    <SectionHeader
+                      icon={<ShieldIcon />}
+                      title="Privacy & Visibility"
+                    />
                     <Button
                       variant="outline"
                       size="sm"
@@ -1108,39 +1246,79 @@ const ProfilePage: React.FC = () => {
                       Manage
                     </Button>
                   </div>
-                  
+
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">Profile visible to others</span>
-                        <span className={`text-sm font-medium ${privacy.profileVisible ? 'text-green-600' : 'text-gray-500'}`}>
-                          {privacy.profileVisible ? 'Public' : 'Private'}
+                        <span className="text-sm text-gray-700">
+                          Profile visible to others
+                        </span>
+                        <span
+                          className={`text-sm font-medium ${
+                            privacy.profileVisible
+                              ? "text-green-600"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          {privacy.profileVisible ? "Public" : "Private"}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">Show email address</span>
-                        <span className={`text-sm font-medium ${privacy.showEmail ? 'text-green-600' : 'text-gray-500'}`}>
-                          {privacy.showEmail ? 'Visible' : 'Hidden'}
+                        <span className="text-sm text-gray-700">
+                          Show email address
+                        </span>
+                        <span
+                          className={`text-sm font-medium ${
+                            privacy.showEmail
+                              ? "text-green-600"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          {privacy.showEmail ? "Visible" : "Hidden"}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">Show phone number</span>
-                        <span className={`text-sm font-medium ${privacy.showPhone ? 'text-green-600' : 'text-gray-500'}`}>
-                          {privacy.showPhone ? 'Visible' : 'Hidden'}
+                        <span className="text-sm text-gray-700">
+                          Show phone number
+                        </span>
+                        <span
+                          className={`text-sm font-medium ${
+                            privacy.showPhone
+                              ? "text-green-600"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          {privacy.showPhone ? "Visible" : "Hidden"}
                         </span>
                       </div>
                     </div>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">Show university</span>
-                        <span className={`text-sm font-medium ${privacy.showUniversity ? 'text-green-600' : 'text-gray-500'}`}>
-                          {privacy.showUniversity ? 'Visible' : 'Hidden'}
+                        <span className="text-sm text-gray-700">
+                          Show university
+                        </span>
+                        <span
+                          className={`text-sm font-medium ${
+                            privacy.showUniversity
+                              ? "text-green-600"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          {privacy.showUniversity ? "Visible" : "Hidden"}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">Allow messages from others</span>
-                        <span className={`text-sm font-medium ${privacy.allowMessages ? 'text-green-600' : 'text-gray-500'}`}>
-                          {privacy.allowMessages ? 'Enabled' : 'Disabled'}
+                        <span className="text-sm text-gray-700">
+                          Allow messages from others
+                        </span>
+                        <span
+                          className={`text-sm font-medium ${
+                            privacy.allowMessages
+                              ? "text-green-600"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          {privacy.allowMessages ? "Enabled" : "Disabled"}
                         </span>
                       </div>
                     </div>
@@ -1150,7 +1328,10 @@ const ProfilePage: React.FC = () => {
                 {/* Notification Settings */}
                 <div className="bg-white border border-gray-200 rounded-xl p-6">
                   <div className="flex items-center justify-between mb-6">
-                    <SectionHeader icon={<BellIcon />} title="Notification Settings" />
+                    <SectionHeader
+                      icon={<BellIcon />}
+                      title="Notification Settings"
+                    />
                     <Button
                       variant="outline"
                       size="sm"
@@ -1159,39 +1340,79 @@ const ProfilePage: React.FC = () => {
                       Manage
                     </Button>
                   </div>
-                  
+
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">Event notifications</span>
-                        <span className={`text-sm font-medium ${notifications.emailEvents ? 'text-green-600' : 'text-gray-500'}`}>
-                          {notifications.emailEvents ? 'On' : 'Off'}
+                        <span className="text-sm text-gray-700">
+                          Event notifications
+                        </span>
+                        <span
+                          className={`text-sm font-medium ${
+                            notifications.emailEvents
+                              ? "text-green-600"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          {notifications.emailEvents ? "On" : "Off"}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">Event reminders</span>
-                        <span className={`text-sm font-medium ${notifications.emailReminders ? 'text-green-600' : 'text-gray-500'}`}>
-                          {notifications.emailReminders ? 'On' : 'Off'}
+                        <span className="text-sm text-gray-700">
+                          Event reminders
+                        </span>
+                        <span
+                          className={`text-sm font-medium ${
+                            notifications.emailReminders
+                              ? "text-green-600"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          {notifications.emailReminders ? "On" : "Off"}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">Newsletter</span>
-                        <span className={`text-sm font-medium ${notifications.emailNewsletter ? 'text-green-600' : 'text-gray-500'}`}>
-                          {notifications.emailNewsletter ? 'On' : 'Off'}
+                        <span className="text-sm text-gray-700">
+                          Newsletter
+                        </span>
+                        <span
+                          className={`text-sm font-medium ${
+                            notifications.emailNewsletter
+                              ? "text-green-600"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          {notifications.emailNewsletter ? "On" : "Off"}
                         </span>
                       </div>
                     </div>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">Push notifications</span>
-                        <span className={`text-sm font-medium ${notifications.pushEvents ? 'text-green-600' : 'text-gray-500'}`}>
-                          {notifications.pushEvents ? 'On' : 'Off'}
+                        <span className="text-sm text-gray-700">
+                          Push notifications
+                        </span>
+                        <span
+                          className={`text-sm font-medium ${
+                            notifications.pushEvents
+                              ? "text-green-600"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          {notifications.pushEvents ? "On" : "Off"}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">SMS reminders</span>
-                        <span className={`text-sm font-medium ${notifications.smsReminders ? 'text-green-600' : 'text-gray-500'}`}>
-                          {notifications.smsReminders ? 'On' : 'Off'}
+                        <span className="text-sm text-gray-700">
+                          SMS reminders
+                        </span>
+                        <span
+                          className={`text-sm font-medium ${
+                            notifications.smsReminders
+                              ? "text-green-600"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          {notifications.smsReminders ? "On" : "Off"}
                         </span>
                       </div>
                     </div>
@@ -1200,25 +1421,29 @@ const ProfilePage: React.FC = () => {
 
                 {/* Data & Calendar */}
                 <div className="bg-white border border-gray-200 rounded-xl p-6">
-                  <SectionHeader icon={<LinkIcon />} title="Data & Integrations" />
-                  
+                  <SectionHeader
+                    icon={<LinkIcon />}
+                    title="Data & Integrations"
+                  />
+
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">Export Your Data</h4>
+                      <h4 className="font-semibold text-gray-900 mb-2">
+                        Export Your Data
+                      </h4>
                       <p className="text-sm text-gray-600 mb-4">
                         Download all your data in JSON format.
                       </p>
-                      <Button
-                        variant="outline"
-                        onClick={handleExportData}
-                      >
+                      <Button variant="outline" onClick={handleExportData}>
                         <DownloadIcon />
                         Export Data
                       </Button>
                     </div>
-                    
+
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">Calendar Integration</h4>
+                      <h4 className="font-semibold text-gray-900 mb-2">
+                        Calendar Integration
+                      </h4>
                       <p className="text-sm text-gray-600 mb-4">
                         Subscribe to your personal event calendar.
                       </p>
@@ -1248,13 +1473,15 @@ const ProfilePage: React.FC = () => {
 
                 {/* Danger Zone */}
                 <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-red-900 mb-4">Danger Zone</h3>
                   
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium text-red-900">Sign Out</h4>
-                        <p className="text-sm text-red-700">Sign out of your account on this device.</p>
+                        <p className="text-sm text-red-700">
+                          Sign out of your account on this device.
+                        </p>
                       </div>
                       <Button
                         variant="outline"
@@ -1264,11 +1491,15 @@ const ProfilePage: React.FC = () => {
                         Sign Out
                       </Button>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="font-medium text-red-900">Delete Account</h4>
-                        <p className="text-sm text-red-700">Permanently delete your account and all data.</p>
+                        <h4 className="font-medium text-red-900">
+                          Delete Account
+                        </h4>
+                        <p className="text-sm text-red-700">
+                          Permanently delete your account and all data.
+                        </p>
                       </div>
                       <Button
                         variant="outline"
@@ -1297,13 +1528,25 @@ const ProfilePage: React.FC = () => {
             <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-gray-900">Edit Profile</h3>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Edit Profile
+                  </h3>
                   <button
                     onClick={() => setIsEditingProfile(false)}
                     className="text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -1314,13 +1557,23 @@ const ProfilePage: React.FC = () => {
                   <Input
                     label="First Name"
                     value={profileData.firstName}
-                    onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        firstName: e.target.value,
+                      })
+                    }
                     required
                   />
                   <Input
                     label="Last Name"
                     value={profileData.lastName}
-                    onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        lastName: e.target.value,
+                      })
+                    }
                     required
                   />
                 </div>
@@ -1329,13 +1582,20 @@ const ProfilePage: React.FC = () => {
                   <Input
                     label="Phone Number"
                     value={profileData.phone}
-                    onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                    onChange={(e) =>
+                      setProfileData({ ...profileData, phone: e.target.value })
+                    }
                     placeholder="+49 123 456 7890"
                   />
                   <Input
                     label="University"
                     value={profileData.university}
-                    onChange={(e) => setProfileData({ ...profileData, university: e.target.value })}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        university: e.target.value,
+                      })
+                    }
                     placeholder="Your university"
                   />
                 </div>
@@ -1344,22 +1604,36 @@ const ProfilePage: React.FC = () => {
                   <Input
                     label="Nationality"
                     value={profileData.nationality}
-                    onChange={(e) => setProfileData({ ...profileData, nationality: e.target.value })}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        nationality: e.target.value,
+                      })
+                    }
                     placeholder="Your nationality"
                   />
                   <Input
                     label="ESN Chapter"
                     value={profileData.chapter}
-                    onChange={(e) => setProfileData({ ...profileData, chapter: e.target.value })}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        chapter: e.target.value,
+                      })
+                    }
                     placeholder="ESN Chapter name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Bio
+                  </label>
                   <textarea
                     value={profileData.bio}
-                    onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                    onChange={(e) =>
+                      setProfileData({ ...profileData, bio: e.target.value })
+                    }
                     placeholder="Tell us about yourself..."
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -1370,30 +1644,52 @@ const ProfilePage: React.FC = () => {
                   <Input
                     label="Telegram Username"
                     value={profileData.telegram}
-                    onChange={(e) => setProfileData({ ...profileData, telegram: e.target.value })}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        telegram: e.target.value,
+                      })
+                    }
                     placeholder="@username"
                   />
                   <Input
                     label="Instagram Handle"
                     value={profileData.instagram}
-                    onChange={(e) => setProfileData({ ...profileData, instagram: e.target.value })}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        instagram: e.target.value,
+                      })
+                    }
                     placeholder="@username"
                   />
                 </div>
 
                 <div className="border-t border-gray-200 pt-6">
-                  <h4 className="font-medium text-gray-900 mb-4">Emergency Contact</h4>
+                  <h4 className="font-medium text-gray-900 mb-4">
+                    Emergency Contact
+                  </h4>
                   <div className="grid md:grid-cols-2 gap-4">
                     <Input
                       label="Contact Name"
                       value={profileData.emergencyContactName}
-                      onChange={(e) => setProfileData({ ...profileData, emergencyContactName: e.target.value })}
+                      onChange={(e) =>
+                        setProfileData({
+                          ...profileData,
+                          emergencyContactName: e.target.value,
+                        })
+                      }
                       placeholder="Full name"
                     />
                     <Input
                       label="Contact Phone"
                       value={profileData.emergencyContactPhone}
-                      onChange={(e) => setProfileData({ ...profileData, emergencyContactPhone: e.target.value })}
+                      onChange={(e) =>
+                        setProfileData({
+                          ...profileData,
+                          emergencyContactPhone: e.target.value,
+                        })
+                      }
                       placeholder="+49 123 456 7890"
                     />
                   </div>
@@ -1404,7 +1700,11 @@ const ProfilePage: React.FC = () => {
                     type="submit"
                     className="flex-1 bg-blue-600 hover:bg-blue-700"
                     loading={updating}
-                    disabled={!profileData.firstName || !profileData.lastName || updating}
+                    disabled={
+                      !profileData.firstName ||
+                      !profileData.lastName ||
+                      updating
+                    }
                   >
                     {updating ? "Saving..." : "Save Changes"}
                   </Button>
@@ -1418,14 +1718,23 @@ const ProfilePage: React.FC = () => {
                         firstName: user?.firstName || "",
                         lastName: user?.lastName || "",
                         phone: user?.phoneNumbers?.[0]?.phoneNumber || "",
-                        university: (user?.publicMetadata?.university as string) || "",
-                        nationality: (user?.publicMetadata?.nationality as string) || "",
-                        chapter: (user?.publicMetadata?.chapter as string) || "",
+                        university:
+                          (user?.publicMetadata?.university as string) || "",
+                        nationality:
+                          (user?.publicMetadata?.nationality as string) || "",
+                        chapter:
+                          (user?.publicMetadata?.chapter as string) || "",
                         bio: (user?.publicMetadata?.bio as string) || "",
-                        telegram: (user?.publicMetadata?.telegram as string) || "",
-                        instagram: (user?.publicMetadata?.instagram as string) || "",
-                        emergencyContactName: (user?.publicMetadata?.emergencyContactName as string) || "",
-                        emergencyContactPhone: (user?.publicMetadata?.emergencyContactPhone as string) || "",
+                        telegram:
+                          (user?.publicMetadata?.telegram as string) || "",
+                        instagram:
+                          (user?.publicMetadata?.instagram as string) || "",
+                        emergencyContactName:
+                          (user?.publicMetadata
+                            ?.emergencyContactName as string) || "",
+                        emergencyContactPhone:
+                          (user?.publicMetadata
+                            ?.emergencyContactPhone as string) || "",
                       });
                     }}
                     className="flex-1"
@@ -1449,13 +1758,25 @@ const ProfilePage: React.FC = () => {
           <div className="flex min-h-screen items-center justify-center p-4">
             <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Change Profile Photo</h3>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Change Profile Photo
+                </h3>
                 <button
                   onClick={() => setIsChangingPhoto(false)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -1464,7 +1785,11 @@ const ProfilePage: React.FC = () => {
                 <div className="text-center">
                   <div className="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center overflow-hidden mb-4">
                     {user?.imageUrl ? (
-                      <img src={user.imageUrl} alt="Current profile" className="w-full h-full object-cover" />
+                      <img
+                        src={user.imageUrl}
+                        alt="Current profile"
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       <span className="text-2xl font-bold text-gray-500">
                         {user?.firstName?.[0]?.toUpperCase() || "U"}
@@ -1475,7 +1800,9 @@ const ProfilePage: React.FC = () => {
 
                 <div
                   className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer"
-                  onClick={() => document.getElementById('photo-upload')?.click()}
+                  onClick={() =>
+                    document.getElementById("photo-upload")?.click()
+                  }
                 >
                   <CloudUploadIcon />
                   <p className="text-sm text-gray-600">
@@ -1509,7 +1836,9 @@ const ProfilePage: React.FC = () => {
                     Cancel
                   </Button>
                   <Button
-                    onClick={() => document.getElementById('photo-upload')?.click()}
+                    onClick={() =>
+                      document.getElementById("photo-upload")?.click()
+                    }
                     className="flex-1"
                     loading={isUploadingPhoto}
                     disabled={isUploadingPhoto}
@@ -1533,37 +1862,58 @@ const ProfilePage: React.FC = () => {
           <div className="flex min-h-screen items-center justify-center p-4">
             <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Notification Settings</h3>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Notification Settings
+                </h3>
                 <button
                   onClick={() => setShowNotificationSettings(false)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
 
               <div className="space-y-6">
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-3">Email Notifications</h4>
+                  <h4 className="font-medium text-gray-900 mb-3">
+                    Email Notifications
+                  </h4>
                   <div className="space-y-3">
                     {[
-                      { key: 'emailEvents', label: 'New events' },
-                      { key: 'emailReminders', label: 'Event reminders' },
-                      { key: 'emailNewsletter', label: 'Newsletter' },
-                      { key: 'emailPromotions', label: 'Promotions' },
+                      { key: "emailEvents", label: "New events" },
+                      { key: "emailReminders", label: "Event reminders" },
+                      { key: "emailNewsletter", label: "Newsletter" },
+                      { key: "emailPromotions", label: "Promotions" },
                     ].map(({ key, label }) => (
-                      <div key={key} className="flex items-center justify-between">
+                      <div
+                        key={key}
+                        className="flex items-center justify-between"
+                      >
                         <span className="text-sm text-gray-700">{label}</span>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={notifications[key as keyof NotificationSettings]}
-                            onChange={(e) => setNotifications({
-                              ...notifications,
-                              [key]: e.target.checked,
-                            })}
+                            checked={
+                              notifications[key as keyof NotificationSettings]
+                            }
+                            onChange={(e) =>
+                              setNotifications({
+                                ...notifications,
+                                [key]: e.target.checked,
+                              })
+                            }
                             className="sr-only peer"
                           />
                           <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -1574,23 +1924,32 @@ const ProfilePage: React.FC = () => {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-3">Push Notifications</h4>
+                  <h4 className="font-medium text-gray-900 mb-3">
+                    Push Notifications
+                  </h4>
                   <div className="space-y-3">
                     {[
-                      { key: 'pushEvents', label: 'New events' },
-                      { key: 'pushReminders', label: 'Event reminders' },
-                      { key: 'pushUpdates', label: 'System updates' },
+                      { key: "pushEvents", label: "New events" },
+                      { key: "pushReminders", label: "Event reminders" },
+                      { key: "pushUpdates", label: "System updates" },
                     ].map(({ key, label }) => (
-                      <div key={key} className="flex items-center justify-between">
+                      <div
+                        key={key}
+                        className="flex items-center justify-between"
+                      >
                         <span className="text-sm text-gray-700">{label}</span>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={notifications[key as keyof NotificationSettings]}
-                            onChange={(e) => setNotifications({
-                              ...notifications,
-                              [key]: e.target.checked,
-                            })}
+                            checked={
+                              notifications[key as keyof NotificationSettings]
+                            }
+                            onChange={(e) =>
+                              setNotifications({
+                                ...notifications,
+                                [key]: e.target.checked,
+                              })
+                            }
                             className="sr-only peer"
                           />
                           <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -1604,15 +1963,19 @@ const ProfilePage: React.FC = () => {
                   <h4 className="font-medium text-gray-900 mb-3">SMS</h4>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">SMS reminders</span>
+                      <span className="text-sm text-gray-700">
+                        SMS reminders
+                      </span>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
                           checked={notifications.smsReminders}
-                          onChange={(e) => setNotifications({
-                            ...notifications,
-                            smsReminders: e.target.checked,
-                          })}
+                          onChange={(e) =>
+                            setNotifications({
+                              ...notifications,
+                              smsReminders: e.target.checked,
+                            })
+                          }
                           className="sr-only peer"
                         />
                         <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -1652,38 +2015,63 @@ const ProfilePage: React.FC = () => {
           <div className="flex min-h-screen items-center justify-center p-4">
             <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Privacy Settings</h3>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Privacy Settings
+                </h3>
                 <button
                   onClick={() => setShowPrivacySettings(false)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
 
               <div className="space-y-6">
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-3">Profile Visibility</h4>
+                  <h4 className="font-medium text-gray-900 mb-3">
+                    Profile Visibility
+                  </h4>
                   <div className="space-y-3">
                     {[
-                      { key: 'profileVisible', label: 'Profile visible to other members' },
-                      { key: 'showEmail', label: 'Show email address' },
-                      { key: 'showPhone', label: 'Show phone number' },
-                      { key: 'showUniversity', label: 'Show university' },
-                      { key: 'allowMessages', label: 'Allow messages from other members' },
+                      {
+                        key: "profileVisible",
+                        label: "Profile visible to other members",
+                      },
+                      { key: "showEmail", label: "Show email address" },
+                      { key: "showPhone", label: "Show phone number" },
+                      { key: "showUniversity", label: "Show university" },
+                      {
+                        key: "allowMessages",
+                        label: "Allow messages from other members",
+                      },
                     ].map(({ key, label }) => (
-                      <div key={key} className="flex items-center justify-between">
+                      <div
+                        key={key}
+                        className="flex items-center justify-between"
+                      >
                         <span className="text-sm text-gray-700">{label}</span>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
                             type="checkbox"
                             checked={privacy[key as keyof PrivacySettings]}
-                            onChange={(e) => setPrivacy({
-                              ...privacy,
-                              [key]: e.target.checked,
-                            })}
+                            onChange={(e) =>
+                              setPrivacy({
+                                ...privacy,
+                                [key]: e.target.checked,
+                              })
+                            }
                             className="sr-only peer"
                           />
                           <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -1695,7 +2083,9 @@ const ProfilePage: React.FC = () => {
 
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <p className="text-sm text-blue-800">
-                    <strong>Note:</strong> Even with privacy settings enabled, event organizers and admins may still be able to view your contact information for event management purposes.
+                    <strong>Note:</strong> Even with privacy settings enabled,
+                    event organizers and admins may still be able to view your
+                    contact information for event management purposes.
                   </p>
                 </div>
 
@@ -1731,13 +2121,18 @@ const ProfilePage: React.FC = () => {
             <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
               <div className="text-center">
                 <div className="text-6xl mb-4">⚠️</div>
-                <h3 className="text-xl font-bold text-red-900 mb-2">Delete Account</h3>
+                <h3 className="text-xl font-bold text-red-900 mb-2">
+                  Delete Account
+                </h3>
                 <p className="text-gray-600 mb-6">
-                  This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
+                  This action cannot be undone. This will permanently delete
+                  your account and remove all your data from our servers.
                 </p>
 
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                  <h4 className="font-medium text-red-900 mb-2">What will be deleted:</h4>
+                  <h4 className="font-medium text-red-900 mb-2">
+                    What will be deleted:
+                  </h4>
                   <ul className="text-sm text-red-800 text-left space-y-1">
                     <li>• Your profile and personal information</li>
                     <li>• All event registrations and history</li>
