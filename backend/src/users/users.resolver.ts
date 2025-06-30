@@ -15,7 +15,7 @@ export class UsersResolver {
 
   @Query(() => [User])
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.ADMIN)
   async users() {
     return this.usersService.findAll();
   }

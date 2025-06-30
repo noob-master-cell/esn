@@ -29,9 +29,8 @@ scalar DateTime
 
 enum UserRole {
   USER
-  ORGANIZER
   ADMIN
-  SUPER_ADMIN
+  ORGANIZER
 }
 
 type Event {

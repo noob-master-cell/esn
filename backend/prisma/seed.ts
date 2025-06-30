@@ -16,13 +16,13 @@ async function main() {
 
   // Create admin user
   const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@esn.org' },
+    where: { email: 'dheerajkarwasra28@gmail.com' },
     update: {},
     create: {
-      clerkId: 'clerk_admin_id_placeholder',
-      email: 'admin@esn.org',
-      firstName: 'Admin',
-      lastName: 'User',
+      clerkId: 'user_2z4OnZdiUxYBhJ4nSxKpT8Qs90n',
+      email: 'dheerajkarwasra28@gmail.com',
+      firstName: 'Dheeraj',
+      lastName: 'Karwasra',
       role: UserRole.ADMIN,
       emailVerified: true,
       esnCardNumber: 'ESN001',
