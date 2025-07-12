@@ -12,7 +12,7 @@ async function bootstrap() {
       'http://localhost:5173',
       'http://127.0.0.1:5173',
       'http://0.0.0.0:5173',
-      'http://192.168.0.200:5173', // Your specific IP
+      'http://192.168.0.197:5173', // Your specific IP
       // Allow all for development
       '*',
     ],
@@ -34,7 +34,7 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0');
 
   console.log(`🚀 Server running on http://0.0.0.0:${port}`);
-  console.log(`📊 GraphQL Playground: http://192.168.0.200:${port}/graphql`);
-  console.log(`📱 Mobile access: http://192.168.0.200:${port}/graphql`);
+  console.log(`📊 GraphQL Playground: http://192.168.0.197:${port}/graphql`);
+  console.log(`📱 Mobile access: http://192.168.0.197:${port}/graphql`);
 }
 bootstrap();

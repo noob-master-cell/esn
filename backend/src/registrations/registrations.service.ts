@@ -32,21 +32,49 @@ export class RegistrationsService {
       createRegistrationInput.eventId,
     );
 
-    // Check if user already has an active registration for this event
     const existingRegistration = await this.prisma.registration.findFirst({
       where: {
         userId,
         eventId: createRegistrationInput.eventId,
         status: {
-          not: RegistrationStatus.CANCELLED,
+          in: [
+            RegistrationStatus.CONFIRMED,
+            RegistrationStatus.PENDING,
+            RegistrationStatus.WAITLISTED,
+          ],
+        },
+      },
+      include: {
+        event: {
+          select: { title: true },
         },
       },
     });
 
     if (existingRegistration) {
-      throw new BadRequestException(
-        'You are already registered for this event',
+      console.warn(
+        `⚠️ User ${userId} already has registration ${existingRegistration.id} for event ${createRegistrationInput.eventId} with status ${existingRegistration.status}`,
       );
+
+      // Return more specific error messages based on status
+      switch (existingRegistration.status) {
+        case RegistrationStatus.CONFIRMED:
+          throw new ConflictException(
+            `You are already confirmed for "${existingRegistration.event.title}". Check your registrations for details.`,
+          );
+        case RegistrationStatus.PENDING:
+          throw new ConflictException(
+            `You have a pending registration for "${existingRegistration.event.title}". Please complete your registration or contact support.`,
+          );
+        case RegistrationStatus.WAITLISTED:
+          throw new ConflictException(
+            `You are already on the waitlist for "${existingRegistration.event.title}". You'll be notified if a spot becomes available.`,
+          );
+        default:
+          throw new ConflictException(
+            `You already have an active registration for "${existingRegistration.event.title}".`,
+          );
+      }
     }
 
     // Get event details to check capacity and pricing
@@ -56,7 +84,7 @@ export class RegistrationsService {
         registrations: {
           where: {
             status: {
-              not: RegistrationStatus.CANCELLED,
+              in: [RegistrationStatus.CONFIRMED, RegistrationStatus.PENDING],
             },
           },
         },
@@ -77,14 +105,9 @@ export class RegistrationsService {
       throw new BadRequestException('Registration deadline has passed');
     }
 
-    // Count current confirmed registrations
-    const confirmedRegistrations = event.registrations.filter(
-      (reg) =>
-        reg.status === RegistrationStatus.CONFIRMED ||
-        reg.status === RegistrationStatus.PENDING,
-    );
-
-    const isEventFull = confirmedRegistrations.length >= event.maxParticipants;
+    // Count current confirmed registrations (excluding waitlist)
+    const confirmedRegistrations = event.registrations.length;
+    const isEventFull = confirmedRegistrations >= event.maxParticipants;
 
     // Determine registration type and status
     let registrationType =
@@ -99,18 +122,28 @@ export class RegistrationsService {
       }
       registrationType = RegistrationType.WAITLIST;
       status = RegistrationStatus.WAITLISTED;
-    } else {
-      // For regular registrations, check if payment is required
-      if (event.price && event.price > 0) {
-        status = RegistrationStatus.PENDING; // Will need payment confirmation
-      } else {
-        status = RegistrationStatus.CONFIRMED; // Free events auto-confirm
-      }
     }
 
-    // Calculate position for waitlisted registrations
+    // Calculate pricing
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    let amountDue = 0;
+    let paymentRequired = false;
+
+    if (event.type !== 'FREE') {
+      // Use member price if user has valid ESN card, otherwise regular price
+      amountDue =
+        user?.esnCardVerified && event.memberPrice
+          ? event.memberPrice
+          : event.price || 0;
+      paymentRequired = amountDue > 0;
+    }
+
+    // Calculate position for waitlist
     let position: number | null = null;
-    if (status === RegistrationStatus.WAITLISTED) {
+    if (registrationType === RegistrationType.WAITLIST) {
       const waitlistCount = await this.prisma.registration.count({
         where: {
           eventId: createRegistrationInput.eventId,
@@ -120,64 +153,73 @@ export class RegistrationsService {
       position = waitlistCount + 1;
     }
 
-    // Calculate amount due
-    let amountDue = 0;
-    if (
-      event.price &&
-      event.price > 0 &&
-      status !== RegistrationStatus.WAITLISTED
-    ) {
-      // TODO: Check if user has ESN card for member pricing
-      amountDue = event.price;
-    }
-
-    // Create the registration
-    const registration = await this.prisma.registration.create({
-      data: {
-        userId,
-        eventId: createRegistrationInput.eventId,
-        status,
-        registrationType,
-        position,
-        paymentRequired: amountDue > 0,
-        amountDue,
-        currency: 'EUR',
-        specialRequests: createRegistrationInput.specialRequests,
-        dietary: createRegistrationInput.dietary,
-        emergencyContact: createRegistrationInput.emergencyContact,
-        registeredAt: new Date(),
-        confirmedAt:
-          status === RegistrationStatus.CONFIRMED ? new Date() : null,
-      },
-      include: {
-        user: true,
-        event: {
-          include: {
-            organizer: true,
-            registrations: {
-              where: {
-                status: {
-                  not: RegistrationStatus.CANCELLED,
-                },
-              },
-              include: { user: true },
+    try {
+      // Create the registration with enhanced error handling
+      const registration = await this.prisma.registration.create({
+        data: {
+          userId,
+          eventId: createRegistrationInput.eventId,
+          status,
+          registrationType,
+          position,
+          paymentRequired,
+          paymentStatus: paymentRequired
+            ? PaymentStatus.PENDING
+            : PaymentStatus.COMPLETED,
+          amountDue,
+          currency: 'EUR',
+          specialRequests: createRegistrationInput.specialRequests,
+          emergencyContact: createRegistrationInput.emergencyContact,
+          dietary: createRegistrationInput.dietary,
+          registeredAt: new Date(),
+        },
+        include: {
+          event: {
+            select: {
+              id: true,
+              title: true,
+              startDate: true,
+              location: true,
+              price: true,
+              memberPrice: true,
+              type: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
             },
           },
         },
-      },
-    });
+      });
 
-    console.log(
-      '✅ Registration Service: Registration created successfully:',
-      registration.id,
-      'Status:',
-      registration.status,
-      'Type:',
-      registration.registrationType,
-    );
+      console.log(
+        `✅ Registration created successfully: ${registration.id} for user ${userId} on event ${createRegistrationInput.eventId}`,
+      );
 
-    // Transform the registration with updated event counts
-    return this.transformRegistration(registration);
+      return registration;
+    } catch (error) {
+      // Handle Prisma unique constraint errors more gracefully
+      if (
+        error.code === 'P2002' &&
+        error.meta?.target?.includes('userId') &&
+        error.meta?.target?.includes('eventId')
+      ) {
+        console.error(
+          '🔥 Unique constraint violation caught at creation time:',
+          error,
+        );
+        throw new ConflictException(
+          'You are already registered for this event. If you believe this is an error, please refresh the page and try again.',
+        );
+      }
+
+      console.error('❌ Registration creation failed:', error);
+      throw error;
+    }
   }
 
   async findAll(

@@ -7,7 +7,11 @@ module.exports = {
     "./node_modules/@material-tailwind/react/theme/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      spacing: {
+        "safe-area-inset-bottom": "env(safe-area-inset-bottom)",
+      },
+    },
   },
   plugins: [],
 };

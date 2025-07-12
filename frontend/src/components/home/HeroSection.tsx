@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 
 const images = [
-  "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2670&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1558228134-2e8a5f799298?q=80&w=2512&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1518152006812-edab29b0a9ac?q=80&w=2512&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1431794062232-2a99a5431c6c?q=80&w=2512&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8NGslMjBuYXR1cmV8ZW58MHx8MHx8fDA%3D",
+  "https://images.unsplash.com/photo-1552083375-1447ce886485?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bmF0dXJlJTIwd2FsbHBhcGVyfGVufDB8fDB8fHww",
+  "https://images.unsplash.com/photo-1485470733090-0aae1788d5af?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bmF0dXJlJTIwNGt8ZW58MHx8MHx8fDA%3D",
 ];
 
 const HeroSlideshow = () => {

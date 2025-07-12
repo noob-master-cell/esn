@@ -26,6 +26,9 @@ import { AdminUsersPage } from "./pages/admin/AdminUsersPage";
 import { AdminRegistrationsPage } from "./pages/admin/AdminRegistrationsPage";
 import { EventCreatePage } from "./pages/admin/EventCreatePage";
 import { EventEditPage } from "./pages/admin/EventEditPage";
+import { AdminPaymentsPage } from "./pages/admin/AdminPaymentsPage";
+import { AdminAnalyticsPage } from "./pages/admin/AdminAnalyticsPage";
+import { AdminSettingsPage } from "./pages/admin/AdminSettingsPage";
 
 // Layout Components
 import { Footer } from "./components/layout/Footer";
@@ -34,7 +37,7 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 import "./App.css";
 import "./styles/App.css";
-import { AdminDashboardPage } from "./pages/admin/AdminDashboard";
+import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 
 function App() {
   const { user } = useUser();
@@ -87,15 +90,12 @@ function App() {
                   </>
                 }
               />
-
               {/* Auth Routes */}
               <Route path="/sign-in/*" element={<SignInPage />} />
               <Route path="/sign-up/*" element={<SignUpPage />} />
-
               {/* Events Routes */}
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/:id" element={<EventDetailsPage />} />
-
               {/* Protected User Routes */}
               <Route
                 path="/events/:id/register"
@@ -105,7 +105,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-
               <Route
                 path="/profile"
                 element={
@@ -114,7 +113,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-
               {/* Admin Routes - Protected */}
               <Route
                 path="/admin"
@@ -124,7 +122,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-
               <Route
                 path="/admin/events"
                 element={
@@ -135,7 +132,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-
               <Route
                 path="/admin/events/create"
                 element={
@@ -146,7 +142,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-
               <Route
                 path="/admin/events/:id/edit"
                 element={
@@ -157,7 +152,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-
               <Route
                 path="/admin/users"
                 element={
@@ -166,7 +160,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-
               <Route
                 path="/admin/registrations"
                 element={
@@ -177,53 +170,43 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-
-              {/* Future Admin Routes */}
               <Route
                 path="/admin/payments"
                 element={
                   <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN"]}>
-                    <div className="p-8 text-center">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                        Payments Management
-                      </h2>
-                      <p className="text-gray-600">Coming soon...</p>
-                    </div>
+                    <AdminPaymentsPage />
                   </ProtectedRoute>
                 }
               />
-
+              {/* Analytics Dashboard - Replace placeholder */}
               <Route
                 path="/admin/analytics"
                 element={
                   <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN"]}>
-                    <div className="p-8 text-center">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                        Analytics Dashboard
-                      </h2>
-                      <p className="text-gray-600">Coming soon...</p>
-                    </div>
+                    <AdminAnalyticsPage />
                   </ProtectedRoute>
                 }
               />
-
+              {/* Settings Panel - Replace placeholder */}
               <Route
                 path="/admin/settings"
                 element={
-                  <ProtectedRoute requiredRoles={["SUPER_ADMIN"]}>
-                    <div className="p-8 text-center">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                        System Settings
-                      </h2>
-                      <p className="text-gray-600">Coming soon...</p>
-                    </div>
+                  <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN"]}>
+                    <AdminSettingsPage />
                   </ProtectedRoute>
                 }
               />
-
+              // Optional: Add sub-routes for settings sections
+              <Route
+                path="/admin/settings/:section"
+                element={
+                  <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN"]}>
+                    <AdminSettingsPage />
+                  </ProtectedRoute>
+                }
+              />
               {/* Debug Route */}
               <Route path="/debug" element={<DebugPage />} />
-
               {/* 404 Route */}
               <Route
                 path="*"

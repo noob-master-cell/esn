@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useQuery } from "@apollo/client";
+import { useNavigate } from "react-router-dom";
 import { GET_EVENTS } from "../../lib/graphql/events";
-import { EventCard } from "./EventCard";
+import EventCard from "./EventCard"; // Updated import - now default export
+import { transformEventToCardProps } from "./eventCardUtils"; // New import
 import { EventsListSkeleton } from "./EventsListSkeleton";
 
 interface Event {
@@ -28,6 +30,36 @@ interface Event {
     lastName: string;
   };
 }
+
+// Wrapper component to handle click functionality with new EventCard
+const ClickableEventCard: React.FC<{ event: Event }> = ({ event }) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    console.log("🎯 Event card clicked:", event.title);
+    navigate(`/events/${event.id}`);
+  };
+
+  // Transform event data to new EventCard props
+  const cardProps = transformEventToCardProps(event);
+
+  return (
+    <div
+      className="cursor-pointer"
+      onClick={handleCardClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
+    >
+      <EventCard {...cardProps} />
+    </div>
+  );
+};
 
 export const EventsList: React.FC = () => {
   const [sortBy, setSortBy] = useState("date");
@@ -97,7 +129,7 @@ export const EventsList: React.FC = () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
           </div>
@@ -107,121 +139,39 @@ export const EventsList: React.FC = () => {
           <p className="text-gray-600 mb-6 max-w-md mx-auto">
             Check back soon for exciting new events and activities!
           </p>
-          <button
-            onClick={() => refetch()}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-          >
-            Refresh Events
-          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header Section */}
-      <div className="mb-6 md:mb-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          {/* Title and Count */}
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Upcoming Events
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 mt-1">
               {events.length} event{events.length !== 1 ? "s" : ""} available
             </p>
           </div>
 
-          {/* Controls */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            {/* Sort Dropdown */}
-            <div className="relative">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors cursor-pointer"
-              >
-                <option value="date">Sort by Date</option>
-                <option value="popularity">Sort by Popularity</option>
-                <option value="price">Sort by Price</option>
-                <option value="category">Sort by Category</option>
-              </select>
-              <svg
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
-
-            {/* View Controls */}
-            <div className="flex items-center gap-2">
-              {/* View Toggle */}
-              <div className="flex bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setViewType("grid")}
-                  className={`p-2 rounded-md transition-colors ${
-                    viewType === "grid"
-                      ? "bg-white shadow-sm text-gray-900"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                  title="Grid view"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                    />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setViewType("list")}
-                  className={`p-2 rounded-md transition-colors ${
-                    viewType === "list"
-                      ? "bg-white shadow-sm text-gray-900"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                  title="List view"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 10h16M4 14h16M4 18h16"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Refresh Button */}
+          {/* View Controls */}
+          <div className="flex items-center gap-3">
+            <div className="flex bg-gray-100 rounded-lg p-1">
               <button
-                onClick={() => refetch()}
-                className="p-2.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors group"
-                title="Refresh events"
+                onClick={() => setViewType("grid")}
+                className={`p-2 rounded-md transition-colors ${
+                  viewType === "grid"
+                    ? "bg-white shadow-sm text-gray-900"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+                title="Grid view"
               >
                 <svg
-                  className="w-4 h-4 text-gray-600 group-hover:rotate-180 transition-transform duration-300"
+                  className="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -230,11 +180,55 @@ export const EventsList: React.FC = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={() => setViewType("list")}
+                className={`p-2 rounded-md transition-colors ${
+                  viewType === "list"
+                    ? "bg-white shadow-sm text-gray-900"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+                title="List view"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 10h16M4 14h16M4 18h16"
                   />
                 </svg>
               </button>
             </div>
+
+            {/* Refresh Button */}
+            <button
+              onClick={() => refetch()}
+              className="p-2.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors group"
+              title="Refresh events"
+            >
+              <svg
+                className="w-4 h-4 text-gray-600 group-hover:rotate-180 transition-transform duration-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -252,7 +246,7 @@ export const EventsList: React.FC = () => {
                   animationFillMode: "forwards",
                 }}
               >
-                <EventCard event={event} />
+                <ClickableEventCard event={event} />
               </div>
             ))}
           </div>
@@ -267,7 +261,7 @@ export const EventsList: React.FC = () => {
                   animationFillMode: "forwards",
                 }}
               >
-                <EventCard event={event} variant="list" />
+                <ClickableEventCard event={event} />
               </div>
             ))}
           </div>

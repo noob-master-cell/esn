@@ -116,24 +116,23 @@ const getEventIcon = (category: string) => {
 
 const getIconColors = (category: string) => {
   const colorMap = {
-    PARTY: { bgColor: "bg-purple-100", textColor: "text-purple-500" },
-    CULTURAL: { bgColor: "bg-pink-100", textColor: "text-pink-500" },
-    SPORTS: { bgColor: "bg-green-100", textColor: "text-green-500" },
-    TRAVEL: { bgColor: "bg-blue-100", textColor: "text-blue-500" },
-    SOCIAL: { bgColor: "bg-orange-100", textColor: "text-orange-500" },
-    EDUCATIONAL: { bgColor: "bg-indigo-100", textColor: "text-indigo-500" },
-    VOLUNTEER: { bgColor: "bg-yellow-100", textColor: "text-yellow-500" },
-    NETWORKING: { bgColor: "bg-gray-100", textColor: "text-gray-500" },
-    WORKSHOP: { bgColor: "bg-red-100", textColor: "text-red-500" },
-    CONFERENCE: { bgColor: "bg-teal-100", textColor: "text-teal-500" },
-    OTHER: { bgColor: "bg-gray-100", textColor: "text-gray-500" },
+    PARTY: { bgColor: "bg-purple-100", textColor: "text-purple-600" },
+    CULTURAL: { bgColor: "bg-pink-100", textColor: "text-pink-600" },
+    SPORTS: { bgColor: "bg-green-100", textColor: "text-green-600" },
+    TRAVEL: { bgColor: "bg-blue-100", textColor: "text-blue-600" },
+    SOCIAL: { bgColor: "bg-orange-100", textColor: "text-orange-600" },
+    EDUCATIONAL: { bgColor: "bg-indigo-100", textColor: "text-indigo-600" },
+    VOLUNTEER: { bgColor: "bg-yellow-100", textColor: "text-yellow-600" },
+    NETWORKING: { bgColor: "bg-gray-100", textColor: "text-gray-600" },
+    WORKSHOP: { bgColor: "bg-red-100", textColor: "text-red-600" },
+    CONFERENCE: { bgColor: "bg-teal-100", textColor: "text-teal-600" },
+    OTHER: { bgColor: "bg-gray-100", textColor: "text-gray-600" },
   };
 
   return colorMap[category as keyof typeof colorMap] || colorMap.OTHER;
 };
 
-// Interface that works with your existing event structure
-interface EventCardProps {
+interface MobileEventCardProps {
   event: {
     id: string;
     title: string;
@@ -145,13 +144,17 @@ interface EventCardProps {
     type?: string;
     status?: string;
   };
+  variant?: "compact" | "full";
 }
 
-const EventCard: React.FC<EventCardProps> = ({ event }) => {
+const MobileEventCard: React.FC<MobileEventCardProps> = ({
+  event,
+  variant = "full",
+}) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    console.log("🎯 Event card clicked:", event.title);
+    console.log("🎯 Mobile event card clicked:", event.title);
     navigate(`/events/${event.id}`);
   };
 
@@ -170,17 +173,29 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
 
   const getSpotsInfo = (spotsLeft: number, maxParticipants: number) => {
     if (spotsLeft <= 0) {
-      return { text: "Full", category: "full" as const };
+      return { text: "Full", category: "full" as const, shortText: "Full" };
     }
 
     const percentageLeft = (spotsLeft / maxParticipants) * 100;
 
     if (percentageLeft > 50) {
-      return { text: "Many Spots Left", category: "many" as const };
+      return {
+        text: "Many Spots Left",
+        category: "many" as const,
+        shortText: `${spotsLeft} left`,
+      };
     } else if (percentageLeft > 10) {
-      return { text: "Few Spots Left", category: "few" as const };
+      return {
+        text: "Few Spots Left",
+        category: "few" as const,
+        shortText: `${spotsLeft} left`,
+      };
     } else {
-      return { text: `${spotsLeft} Spots Left`, category: "few" as const };
+      return {
+        text: `${spotsLeft} Spots Left`,
+        category: "few" as const,
+        shortText: `${spotsLeft} left`,
+      };
     }
   };
 
@@ -203,9 +218,69 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
   const { bgColor, textColor } = getIconColors(event.category);
   const spotsInfo = getSpotsInfo(spotsLeft, event.maxParticipants);
 
+  if (variant === "compact") {
+    // Compact version for mobile list view
+    return (
+      <div
+        className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 active:bg-gray-50 transition-colors touch-manipulation"
+        onClick={handleCardClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleCardClick();
+          }
+        }}
+      >
+        <div className="flex items-center gap-3">
+          {/* Icon */}
+          <div className={`p-2 rounded-lg ${bgColor} flex-shrink-0`}>
+            {React.cloneElement(icon, { className: `w-5 h-5 ${textColor}` })}
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-semibold text-gray-900 truncate">
+              {event.title}
+            </h3>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-xs text-gray-500">
+                {formatTime(event.startDate)}
+              </span>
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full ${getBadgeClasses(
+                  spotsInfo.category
+                )}`}
+              >
+                {spotsInfo.shortText}
+              </span>
+            </div>
+          </div>
+
+          {/* Chevron */}
+          <svg
+            className="w-5 h-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
+  // Full version - mobile-optimized but larger
   return (
     <div
-      className="bg-white rounded-2xl shadow-lg overflow-hidden w-72 transform hover:scale-105 transition-transform duration-300 ease-in-out relative cursor-pointer"
+      className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden active:scale-[0.98] transition-all duration-200 touch-manipulation w-full max-w-sm mx-auto"
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
@@ -216,36 +291,71 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
         }
       }}
     >
-      {/* Main content area with icon and text */}
-      <div className="p-3 flex items-center h-full">
-        {/* Icon container */}
-        <div className="flex-shrink-0 mr-4">
-          <div className={`p-3 rounded-full ${bgColor}`}>
+      {/* Main content */}
+      <div className="p-4">
+        <div className="flex items-start gap-3">
+          {/* Icon */}
+          <div className={`p-3 rounded-xl ${bgColor} flex-shrink-0`}>
             {React.cloneElement(icon, { className: `w-6 h-6 ${textColor}` })}
           </div>
-        </div>
-        {/* Event details container */}
-        <div className="flex-grow">
-          <h3 className="text-base font-semibold text-gray-800 truncate">
-            {event.title}
-          </h3>
-          <p className="text-sm font-medium text-gray-500">
-            {formatTime(event.startDate)}
-          </p>
-        </div>
-      </div>
-      {/* Availability Badge (absolutely positioned) */}
-      <div className="absolute bottom-2 right-2">
-        <div
-          className={`text-xs font-semibold px-2.5 py-0.5 rounded-full inline-block ${getBadgeClasses(
-            spotsInfo.category
-          )}`}
-        >
-          {spotsInfo.text}
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base font-semibold text-gray-900 leading-tight mb-1">
+              {event.title}
+            </h3>
+            <p className="text-sm text-gray-600 mb-2">
+              {formatTime(event.startDate)}
+            </p>
+
+            {/* Location if available */}
+            {event.location && (
+              <div className="flex items-center gap-1 mb-3">
+                <svg
+                  className="w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                <span className="text-xs text-gray-500 truncate">
+                  {event.location}
+                </span>
+              </div>
+            )}
+
+            {/* Availability badge */}
+            <div className="flex justify-between items-center">
+              <span
+                className={`text-xs font-medium px-3 py-1 rounded-full ${getBadgeClasses(
+                  spotsInfo.category
+                )}`}
+              >
+                {spotsInfo.text}
+              </span>
+
+              {/* Quick action button */}
+              <button className="text-xs text-blue-600 font-medium py-1 px-2 rounded hover:bg-blue-50 active:bg-blue-100 transition-colors">
+                View Details
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default EventCard;
+export default MobileEventCard;
