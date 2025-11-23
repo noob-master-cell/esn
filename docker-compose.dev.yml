@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database - Development
+  postgres:
+    environment:
+      POSTGRES_DB: esn_db_dev
+    ports:
+      - "5433:5432" # Different port for dev
+
+  # Redis - Development
+  redis:
+    ports:
+      - "6380:6379" # Different port for dev
+
+  # Backend - Development with hot reload
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: dependencies # Use dependencies stage for dev
+    container_name: esn_backend_dev
+    ports:
+      - "4000:4000"
+      - "9229:9229" # Debug port
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/esn_db_dev?schema=public
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - ./backend/uploads:/app/uploads
+    command: npm run start:dev
+
+  # Frontend - Development with Vite dev server
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: build # Use build stage for dev
+    container_name: esn_frontend_dev
+    ports:
+      - "5173:5173"
+    environment:
+      NODE_ENV: development
+      VITE_API_URL: http://localhost:4000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0

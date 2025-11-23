@@ -1,0 +1,334 @@
+// backend/prisma/schema.prisma
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ================================
+// USER MANAGEMENT
+// ================================
+
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Auth Integration - supporting both Clerk (legacy) and Auth0
+  clerkId   String?  @unique  // Made optional for migration
+  auth0Id   String?  @unique  // New Auth0 user ID
+
+  // Basic Info
+  email     String  @unique
+  firstName String?
+  lastName  String?
+  avatar    String?
+  phone     String?
+
+  // ESN Specific
+  esnCardNumber   String?  @unique
+  esnCardVerified Boolean  @default(false)
+  esnCardExpiry   DateTime?
+  university      String?
+  chapter         String?
+  nationality     String?
+  bio             String?
+  telegram        String?
+  instagram       String?
+  emergencyContactName String?
+  emergencyContactPhone String?
+
+  // Account Status
+  emailVerified Boolean @default(false)
+  isActive      Boolean @default(true)
+  role          UserRole @default(USER)
+
+  // Preferences
+  notifications NotificationSettings?
+  preferences   UserPreferences?
+
+  // Relations
+  registrations Registration[]
+  payments      Payment[]
+  reviews       Review[]
+  createdEvents Event[] @relation("EventCreator")
+
+  @@map("users")
+}
+
+model UserPreferences {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Email preferences
+  emailEvents       Boolean @default(true)
+  emailReminders    Boolean @default(true)
+  emailNewsletter   Boolean @default(false)
+  emailPromotions   Boolean @default(false)
+
+  // Language and display
+  language String @default("en")
+  timezone String @default("UTC")
+
+  @@map("user_preferences")
+}
+
+model NotificationSettings {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Push notifications
+  pushEvents     Boolean @default(true)
+  pushReminders  Boolean @default(true)
+  pushUpdates    Boolean @default(true)
+
+  // SMS notifications
+  smsReminders   Boolean @default(false)
+  smsUpdates     Boolean @default(false)
+
+  @@map("notification_settings")
+}
+
+// ================================
+// EVENT MANAGEMENT
+// ================================
+
+model Event {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Basic Info
+  title       String
+  description String
+  shortDescription String?
+  
+  // Event Details
+  category    EventCategory
+  type        EventType
+  status      EventStatus @default(DRAFT)
+  
+  // Dates
+  startDate   DateTime
+  endDate     DateTime
+  registrationDeadline DateTime?
+  
+  // Location
+  location    String
+  address     String?
+  
+  // Capacity
+  maxParticipants Int
+  
+  // Pricing
+  price       Float?
+  memberPrice Float?
+  
+  // Media & Info
+  imageUrl    String?
+  tags        String[]
+  requirements String?
+  additionalInfo String?
+  
+  // Settings
+  isPublic     Boolean @default(true)
+  allowWaitlist Boolean @default(true)
+  
+  // Relations - Only ADMIN can create events
+  organizer    User     @relation("EventCreator", fields: [organizerId], references: [id])
+  organizerId  String
+  
+  registrations Registration[]
+  reviews      Review[]
+  payments     Payment[]
+
+  @@map("events")
+}
+
+// ================================
+// REGISTRATION SYSTEM
+// ================================
+
+model Registration {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  // Registration Details
+  status          RegistrationStatus @default(PENDING)
+  registrationType RegistrationType  @default(REGULAR)
+  position        Int?               // Position in waitlist if applicable
+  
+  // Payment
+  paymentRequired Boolean @default(false)
+  paymentStatus   PaymentStatus @default(PENDING)
+  amountDue       Decimal @default(0)
+  currency        String @default("EUR")
+
+  // Additional Info
+  specialRequests String?
+  emergencyContact String?
+  dietary         String?
+  
+  // Timestamps
+  registeredAt DateTime @default(now())
+  confirmedAt  DateTime?
+  cancelledAt  DateTime?
+
+  // Relations
+  payments Payment[]
+
+  @@unique([userId, eventId])
+  @@map("registrations")
+}
+
+// ================================
+// PAYMENT SYSTEM
+// ================================
+
+model Payment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  eventId        String
+  event          Event        @relation(fields: [eventId], references: [id])
+  registrationId String
+  registration   Registration @relation(fields: [registrationId], references: [id])
+
+  // Payment Details
+  amount         Decimal
+  currency       String        @default("EUR")
+  status         PaymentStatus @default(PENDING)
+  method         PaymentMethod @default(STRIPE)
+
+  // Stripe Integration
+  stripePaymentIntentId String? @unique
+  stripeSessionId       String? @unique
+  stripeFeeAmount       Decimal @default(0)
+
+  // Metadata
+  description    String?
+  refundAmount   Decimal @default(0)
+  refundedAt     DateTime?
+  failureReason  String?
+
+  @@map("payments")
+}
+
+// ================================
+// REVIEW SYSTEM
+// ================================
+
+model Review {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  // Review Content
+  rating  Int    // 1-5 stars
+  title   String?
+  comment String?
+
+  // Moderation
+  isPublic  Boolean @default(true)
+  isVerified Boolean @default(false) // Only users who attended can review
+
+  @@unique([userId, eventId])
+  @@map("reviews")
+}
+
+// ================================
+// ENUMS - SIMPLIFIED
+// ================================
+
+enum UserRole {
+  USER
+  ORGANIZER
+  ADMIN
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum EventCategory {
+  SOCIAL
+  CULTURAL
+  EDUCATIONAL
+  SPORTS
+  TRAVEL
+  VOLUNTEER
+  NETWORKING
+  PARTY
+  WORKSHOP
+  CONFERENCE
+  OTHER
+}
+
+enum EventType {
+  FREE
+  PAID
+  MEMBERS_ONLY
+}
+
+enum RegistrationStatus {
+  PENDING
+  CONFIRMED
+  WAITLISTED
+  CANCELLED
+  ATTENDED
+  NO_SHOW
+}
+
+enum RegistrationType {
+  REGULAR
+  WAITLIST
+  VIP
+  ORGANIZER
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  STRIPE
+  CASH
+  BANK_TRANSFER
+  FREE
+}

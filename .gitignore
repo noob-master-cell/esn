@@ -1,0 +1,91 @@
+###########################################
+# 1. DEPENDENCIES & PACKAGE LOCKS (CRITICAL)
+###########################################
+# Directories managed by package managers (pnpm is the primary one here)
+# Exclude globally-installed modules and specific lock files not managed by pnpm
+/backend/node_modules
+/frontend/node_modules
+
+# Exclude all lock files that are NOT the primary pnpm-lock.yaml.
+# We are committing pnpm-lock.yaml to ensure repeatable builds.
+package-lock.json
+/backend/package-lock.json
+/frontend/package-lock.json
+
+# If you rely on the pnpm-lock.yaml for consistent builds, DO NOT uncomment these:
+# pnpm-lock.yaml
+# /backend/pnpm-lock.yaml
+# /frontend/pnpm-lock.yaml
+
+
+###########################################
+# 2. BUILD OUTPUTS & COMPILED ARTIFACTS
+###########################################
+# NestJS/TypeScript compiled output directory
+/backend/dist
+
+# Frontend build output (Vite default or similar)
+/frontend/dist
+
+# Compiled TypeScript files and sourcemaps outside of 'dist'
+*.js.map
+*.d.ts
+
+# TypeScript build info files
+/backend/tsconfig.build.tsbuildinfo
+/frontend/.vite/
+/frontend/out/
+
+# Automatically generated GraphQL schema (if not intended to be committed)
+/backend/src/schema.gql
+
+
+###########################################
+# 3. ENVIRONMENT & SECRETS (CRITICAL)
+###########################################
+# Never commit files containing sensitive environment variables, tokens, or keys.
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+.env.staging
+
+# Prisma local data files (like SQLite DB files if used)
+/backend/prisma/*.db
+/backend/prisma/*.sqlite
+/backend/prisma/dev.db
+
+# Any temporary database file used during testing
+/backend/test-db.js
+
+
+###########################################
+# 4. DOCKER & CONTAINERIZATION
+###########################################
+# Docker build/cache files (should be handled more rigorously by .dockerignore)
+# These should be in your .dockerignore file, but good practice to exclude here too.
+# Note: The Docker Compose files themselves are committed.
+.dockerignore
+.docker-compose.local.yml
+
+
+###########################################
+# 5. OS & IDE FILES
+###########################################
+# macOS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*~
+
+# Large static assets/media
+/frontend/src/assets
