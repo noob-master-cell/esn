@@ -1,0 +1,86 @@
+name: Deploy to Production
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy'
+        required: true
+        default: 'latest'
+
+jobs:
+  deploy-production:
+    name: Deploy to Production Environment
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://yourdomain.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
+
+      - name: Create backup
+        env:
+          PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
+          PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
+        run: |
+          ssh -o StrictHostKeyChecking=no $PRODUCTION_USER@$PRODUCTION_HOST << 'EOF'
+            docker-compose exec -T postgres pg_dump -U postgres esn_db_prod > /backups/esn_db_$(date +%Y%m%d_%H%M%S).sql
+          EOF
+
+      - name: Deploy to production server
+        env:
+          PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
+          PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
+        run: |
+          ssh -o StrictHostKeyChecking=no $PRODUCTION_USER@$PRODUCTION_HOST << 'EOF'
+            cd /opt/esn
+            git fetch --all
+            git checkout ${{ github.event.inputs.version || github.ref_name }}
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build --no-deps backend frontend
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec -T backend npx prisma migrate deploy
+          EOF
+
+      - name: Health check
+        run: |
+          sleep 30
+          for i in {1..5}; do
+            if curl -f https://yourdomain.com/health; then
+              echo "Health check passed"
+              exit 0
+            fi
+            echo "Health check failed, attempt $i/5"
+            sleep 10
+          done
+          exit 1
+
+      - name: Rollback on failure
+        if: failure()
+        env:
+          PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
+          PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
+        run: |
+          ssh -o StrictHostKeyChecking=no $PRODUCTION_USER@$PRODUCTION_HOST << 'EOF'
+            cd /opt/esn
+            git checkout main
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+          EOF
+
+      - name: Notify deployment
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: 'Production deployment ${{ job.status }}'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

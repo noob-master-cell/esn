@@ -1,0 +1,322 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  id: ID!
+  email: String!
+  firstName: String
+  lastName: String
+  avatar: String
+  phone: String
+  esnCardNumber: String
+  esnCardVerified: Boolean!
+  esnCardExpiry: DateTime
+  university: String
+  chapter: String
+  nationality: String
+  bio: String
+  telegram: String
+  instagram: String
+  emergencyContactName: String
+  emergencyContactPhone: String
+  emailVerified: Boolean!
+  isActive: Boolean!
+  role: UserRole!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+enum UserRole {
+  USER
+  ORGANIZER
+  ADMIN
+}
+
+type Event {
+  id: ID!
+  title: String!
+  description: String!
+  shortDescription: String
+  category: EventCategory!
+  type: EventType!
+  status: EventStatus!
+  startDate: DateTime!
+  endDate: DateTime!
+  registrationDeadline: DateTime
+  location: String!
+  address: String
+  maxParticipants: Int!
+  price: Float
+  memberPrice: Float
+  imageUrl: String
+  tags: [String!]
+  requirements: String
+  additionalInfo: String
+  isPublic: Boolean!
+  allowWaitlist: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  organizer: User!
+  organizerId: String!
+  registrationCount: Int!
+  waitlistCount: Int!
+  isRegistered: Boolean
+  canRegister: Boolean
+}
+
+"""Event category options"""
+enum EventCategory {
+  SOCIAL
+  CULTURAL
+  EDUCATIONAL
+  SPORTS
+  TRAVEL
+  VOLUNTEER
+  NETWORKING
+  PARTY
+  WORKSHOP
+  CONFERENCE
+  OTHER
+}
+
+"""Event type options"""
+enum EventType {
+  FREE
+  PAID
+  MEMBERS_ONLY
+}
+
+"""Event status options"""
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+type Registration {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+  event: Event!
+  eventId: String!
+  status: RegistrationStatus!
+  registrationType: RegistrationType!
+  position: Int
+  paymentRequired: Boolean!
+  paymentStatus: PaymentStatus!
+  amountDue: Float!
+  currency: String!
+  specialRequests: String
+  emergencyContact: String
+  dietary: String
+  registeredAt: DateTime!
+  confirmedAt: DateTime
+  cancelledAt: DateTime
+}
+
+"""Registration status options"""
+enum RegistrationStatus {
+  PENDING
+  CONFIRMED
+  WAITLISTED
+  CANCELLED
+  ATTENDED
+  NO_SHOW
+}
+
+"""Registration type options"""
+enum RegistrationType {
+  REGULAR
+  WAITLIST
+  VIP
+  ORGANIZER
+}
+
+"""Payment status options"""
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+type AdminStats {
+  totalEvents: Int!
+  activeUsers: Int!
+  totalRegistrations: Int!
+  totalRevenue: Float!
+  eventsThisMonth: Int!
+  registrationsThisMonth: Int!
+  revenueThisMonth: Float!
+}
+
+type Query {
+  me: User!
+  hello: String!
+  healthCheck: String!
+  users: [User!]!
+  user(id: String!): User
+  myProfile: User!
+  events(filter: EventsFilterInput, includePrivate: Boolean = false): [Event!]!
+  myEvents: [Event!]!
+  event(id: ID!): Event!
+  eventsCount(filter: EventsFilterInput): Int!
+  registrations(filter: RegistrationFilterInput): [Registration!]!
+  myRegistrations: [Registration!]!
+  eventRegistrations(eventId: ID!, filter: RegistrationFilterInput): [Registration!]!
+  registration(id: ID!): Registration!
+  registrationsCount(filter: RegistrationFilterInput): Int!
+  eventCapacityInfo(eventId: ID!): Int!
+  waitlistRegistrations(eventId: ID!): [Registration!]!
+  adminStats: AdminStats!
+}
+
+input EventsFilterInput {
+  search: String
+  category: EventCategory
+  type: EventType
+  status: EventStatus
+  startDate: DateTime
+  endDate: DateTime
+  location: String
+  tags: [String!]
+  availableOnly: Boolean = false
+  skip: Int = 0
+  take: Int = 20
+  orderBy: String = "startDate"
+  orderDirection: String = "asc"
+}
+
+input RegistrationFilterInput {
+  status: RegistrationStatus
+  registrationType: RegistrationType
+  paymentStatus: PaymentStatus
+  eventId: String
+  userId: String
+  registeredAfter: DateTime
+  registeredBefore: DateTime
+  skip: Int = 0
+  take: Int = 20
+  orderBy: String = "registeredAt"
+  orderDirection: String = "desc"
+}
+
+type Mutation {
+  updateUserProfile(updateUserInput: UpdateUserInput!): User!
+  verifyEsnCard(userId: String!, verified: Boolean!): User!
+  deleteUser: Boolean!
+  updateUserRole(userId: String!, role: UserRole!): User!
+  adminDeleteUser(userId: String!): Boolean!
+  createEvent(createEventInput: CreateEventInput!): Event!
+  updateEvent(updateEventInput: UpdateEventInput!): Event!
+  removeEvent(id: ID!): Boolean!
+  publishEvent(id: ID!): Event!
+  registerForEvent(createRegistrationInput: CreateRegistrationInput!): Registration!
+  updateRegistration(updateRegistrationInput: UpdateRegistrationInput!): Registration!
+  cancelRegistration(id: ID!): Registration!
+  markAttendance(registrationId: ID!, attended: Boolean!): Boolean!
+  promoteFromWaitlist(registrationId: ID!): Registration!
+}
+
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  phone: String
+  university: String
+  nationality: String
+  avatar: String
+  chapter: String
+  bio: String
+  telegram: String
+  instagram: String
+  esnCardNumber: String
+  emergencyContactName: String
+  emergencyContactPhone: String
+}
+
+input CreateEventInput {
+  title: String!
+  description: String!
+  shortDescription: String
+  category: EventCategory!
+  type: EventType!
+  startDate: DateTime!
+  endDate: DateTime!
+  registrationDeadline: DateTime
+  location: String!
+  address: String
+  maxParticipants: Int!
+  price: Float
+  memberPrice: Float
+  imageUrl: String
+  tags: [String!]
+  requirements: String
+  additionalInfo: String
+  isPublic: Boolean! = true
+  allowWaitlist: Boolean! = true
+}
+
+input UpdateEventInput {
+  title: String
+  description: String
+  shortDescription: String
+  category: EventCategory
+  type: EventType
+  startDate: DateTime
+  endDate: DateTime
+  registrationDeadline: DateTime
+  location: String
+  address: String
+  maxParticipants: Int
+  price: Float
+  memberPrice: Float
+  imageUrl: String
+  tags: [String!]
+  requirements: String
+  additionalInfo: String
+  isPublic: Boolean = true
+  allowWaitlist: Boolean = true
+  id: ID!
+}
+
+input CreateRegistrationInput {
+  eventId: ID!
+
+  """
+  The type of registration (e.g., REGULAR, WAITLIST). If not provided, it will be determined by the service.
+  """
+  registrationType: RegistrationType
+  specialRequests: String
+  dietary: String
+  emergencyContact: String
+  emergencyEmail: String
+}
+
+input UpdateRegistrationInput {
+  eventId: ID
+
+  """
+  The type of registration (e.g., REGULAR, WAITLIST). If not provided, it will be determined by the service.
+  """
+  registrationType: RegistrationType
+  specialRequests: String
+  dietary: String
+  emergencyContact: String
+  emergencyEmail: String
+  id: ID!
+  status: RegistrationStatus
+}
