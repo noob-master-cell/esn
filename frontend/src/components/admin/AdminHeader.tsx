@@ -1,7 +1,7 @@
 // frontend/src/components/admin/AdminHeader.tsx
 import React, { useState } from "react";
-import { useAuth } from "@clerk/clerk-react";
-import { useNavigate } from "react-router-dom"; 
+import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface AdminHeaderProps {
   onMenuClick: () => void;
@@ -14,17 +14,13 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
   user,
   userRole,
 }) => {
-  const { signOut } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate("/");
-    } catch (error) {
-      console.error("Sign out error:", error);
-    }
+  const handleSignOut = () => {
+    logout({ logoutParams: { returnTo: window.location.origin } });
+    navigate("/");
   };
 
   return (

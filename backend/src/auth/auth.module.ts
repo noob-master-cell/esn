@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule } from '@nestjs/config';
-import { ClerkModule } from '../clerk/clerk.module';
 import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
-import { JwtStrategy } from './strategies/jwt.strategy';
+import { Auth0Guard } from './guards/auth0.guard';
 
 @Module({
-  imports: [PassportModule, ConfigModule, ClerkModule],
+  imports: [PassportModule, ConfigModule],
   controllers: [],
-  providers: [AuthService, AuthResolver, JwtStrategy],
-  exports: [AuthService],
+  providers: [AuthService, AuthResolver, Auth0Guard],
+  exports: [AuthService, Auth0Guard],
 })
-export class AuthModule {}
+export class AuthModule { }

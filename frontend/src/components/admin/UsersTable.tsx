@@ -22,7 +22,8 @@ interface UsersTableProps {
   selectedUsers: string[];
   onSelectionChange: (selected: string[]) => void;
   onUpdateRole: (userId: string, role: string) => void;
-  onToggleActive: (userId: string, isActive: boolean) => void;
+  onVerifyEsnCard?: (userId: string, verified: boolean) => void;
+  onDeleteUser?: (userId: string) => void;
 }
 
 export const UsersTable: React.FC<UsersTableProps> = ({
@@ -32,7 +33,8 @@ export const UsersTable: React.FC<UsersTableProps> = ({
   selectedUsers,
   onSelectionChange,
   onUpdateRole,
-  onToggleActive,
+  onVerifyEsnCard,
+  onDeleteUser,
 }) => {
   const getRoleBadge = (role: string) => {
     const roleConfig = {
@@ -43,11 +45,6 @@ export const UsersTable: React.FC<UsersTableProps> = ({
         label: "Organizer",
       },
       ADMIN: { bg: "bg-purple-100", text: "text-purple-800", label: "Admin" },
-      SUPER_ADMIN: {
-        bg: "bg-red-100",
-        text: "text-red-800",
-        label: "Super Admin",
-      },
     };
 
     const config =
@@ -65,9 +62,8 @@ export const UsersTable: React.FC<UsersTableProps> = ({
   const getStatusBadge = (isActive: boolean) => {
     return (
       <span
-        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-          isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-        }`}
+        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+          }`}
       >
         {isActive ? "Active" : "Inactive"}
       </span>
@@ -208,8 +204,8 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                       ) : (
                         <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                           <span className="text-sm font-medium text-gray-600">
-                            {user.firstName.charAt(0)}
-                            {user.lastName.charAt(0)}
+                            {user.firstName?.charAt(0) || ""}
+                            {user.lastName?.charAt(0) || ""}
                           </span>
                         </div>
                       )}
@@ -231,7 +227,6 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                     <option value="USER">User</option>
                     <option value="ORGANIZER">Organizer</option>
                     <option value="ADMIN">Admin</option>
-                    <option value="SUPER_ADMIN">Super Admin</option>
                   </select>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -289,15 +284,31 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex items-center gap-2">
+                    {!user.esnCardVerified && (
+                      <button
+                        onClick={() => onVerifyEsnCard?.(user.id, true)}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        Verify ESN
+                      </button>
+                    )}
+                    {user.esnCardVerified && (
+                      <button
+                        onClick={() => onVerifyEsnCard?.(user.id, false)}
+                        className="text-orange-600 hover:text-orange-900"
+                      >
+                        Unverify
+                      </button>
+                    )}
                     <button
-                      onClick={() => onToggleActive(user.id, user.isActive)}
-                      className={`${
-                        user.isActive
-                          ? "text-red-600 hover:text-red-900"
-                          : "text-green-600 hover:text-green-900"
-                      }`}
+                      onClick={() => {
+                        if (window.confirm("Are you sure you want to delete this user?")) {
+                          onDeleteUser?.(user.id);
+                        }
+                      }}
+                      className="text-red-600 hover:text-red-900"
                     >
-                      {user.isActive ? "Deactivate" : "Activate"}
+                      Delete
                     </button>
                   </div>
                 </td>

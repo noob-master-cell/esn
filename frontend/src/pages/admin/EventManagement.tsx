@@ -1,12 +1,11 @@
 // frontend/src/pages/admin/EventManagement.tsx
 import React, { useState } from "react";
-import { useQuery, useMutation } from "@apollo/client";
-import { useNavigate } from "react-router-dom";
 import {
-  GET_EVENTS,
-  DELETE_EVENT,
-  PUBLISH_EVENT,
-} from "../../lib/graphql/events";
+  useEvents,
+  useDeleteEvent,
+  usePublishEvent,
+} from "../../hooks/api/useEvents";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import { Alert } from "../../components/ui/Alert";
 
@@ -15,6 +14,23 @@ interface EventFilters {
   category: string;
   search: string;
   dateRange: string;
+}
+
+interface Event {
+  id: string;
+  title: string;
+  location: string;
+  imageUrl?: string;
+  startDate: string;
+  registrationCount: number;
+  maxParticipants: number;
+  waitlistCount: number;
+  status: string;
+  category: string;
+  organizer: {
+    firstName: string;
+    lastName: string;
+  };
 }
 
 const EventManagement: React.FC = () => {
@@ -32,44 +48,19 @@ const EventManagement: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { data, loading, error, refetch } = useQuery(GET_EVENTS, {
-    variables: {
-      filter: {
-        search: filters.search || undefined,
-        status: filters.status !== "all" ? filters.status : undefined,
-        category: filters.category !== "all" ? filters.category : undefined,
-        take: 50,
-        orderBy: "createdAt",
-        orderDirection: "desc",
-      },
-    },
-    errorPolicy: "all",
-  });
-
-  const [deleteEvent, { loading: deleting }] = useMutation(DELETE_EVENT, {
-    onCompleted: () => {
-      setSuccessMessage("Event deleted successfully");
-      setShowDeleteConfirm(null);
-      refetch();
-      setTimeout(() => setSuccessMessage(""), 3000);
-    },
-    onError: (error) => {
-      setErrorMessage(error.message);
-      setTimeout(() => setErrorMessage(""), 5000);
+  const { events, loading, error, refetch } = useEvents({
+    filter: {
+      search: filters.search || undefined,
+      status: filters.status !== "all" ? filters.status : undefined,
+      category: filters.category !== "all" ? filters.category : undefined,
+      take: 50,
+      orderBy: "createdAt",
+      orderDirection: "desc",
     },
   });
 
-  const [publishEvent, { loading: publishing }] = useMutation(PUBLISH_EVENT, {
-    onCompleted: () => {
-      setSuccessMessage("Event published successfully");
-      refetch();
-      setTimeout(() => setSuccessMessage(""), 3000);
-    },
-    onError: (error) => {
-      setErrorMessage(error.message);
-      setTimeout(() => setErrorMessage(""), 5000);
-    },
-  });
+  const { deleteEvent, loading: deleting } = useDeleteEvent();
+  const { publishEvent, loading: publishing } = usePublishEvent();
 
   const handleSelectEvent = (eventId: string) => {
     setSelectedEvents((prev) =>
@@ -80,26 +71,39 @@ const EventManagement: React.FC = () => {
   };
 
   const handleSelectAll = () => {
-    if (selectedEvents.length === data?.events.length) {
+    if (selectedEvents.length === events?.length) {
       setSelectedEvents([]);
     } else {
-      setSelectedEvents(data?.events.map((event: any) => event.id) || []);
+      setSelectedEvents(events?.map((event: Event) => event.id) || []);
     }
   };
 
   const handleDeleteEvent = async (eventId: string) => {
     try {
       await deleteEvent({ variables: { id: eventId } });
+      setSuccessMessage("Event deleted successfully");
+      setShowDeleteConfirm(null);
+      refetch();
+      setTimeout(() => setSuccessMessage(""), 3000);
+      refetch();
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
       console.error("Delete error:", error);
+      setErrorMessage(error instanceof Error ? error.message : "Failed to delete event");
+      setTimeout(() => setErrorMessage(""), 5000);
     }
   };
 
   const handlePublishEvent = async (eventId: string) => {
     try {
       await publishEvent({ variables: { id: eventId } });
+      setSuccessMessage("Event published successfully");
+      refetch();
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
       console.error("Publish error:", error);
+      setErrorMessage(error instanceof Error ? error.message : "Failed to publish event");
+      setTimeout(() => setErrorMessage(""), 5000);
     }
   };
 
@@ -174,7 +178,7 @@ const EventManagement: React.FC = () => {
     );
   };
 
-  const filteredEvents = data?.events || [];
+  const filteredEvents = events || [];
 
   if (loading) {
     return (
@@ -398,8 +402,8 @@ const EventManagement: React.FC = () => {
             </h3>
             <p className="text-gray-600 mb-6">
               {filters.search ||
-              filters.status !== "all" ||
-              filters.category !== "all"
+                filters.status !== "all" ||
+                filters.category !== "all"
                 ? "Try adjusting your filters or search terms."
                 : "Get started by creating your first event."}
             </p>
@@ -447,7 +451,7 @@ const EventManagement: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredEvents.map((event: any) => (
+                {filteredEvents.map((event: Event) => (
                   <tr key={event.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <input
@@ -528,7 +532,7 @@ const EventManagement: React.FC = () => {
                               width: `${Math.min(
                                 (event.registrationCount /
                                   event.maxParticipants) *
-                                  100,
+                                100,
                                 100
                               )}%`,
                             }}

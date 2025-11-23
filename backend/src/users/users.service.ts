@@ -4,7 +4,7 @@ import { PrismaService } from './../../prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll(): Promise<User[]> {
     const prismaUsers = await this.prisma.user.findMany({
@@ -50,6 +50,12 @@ export class UsersService {
         nationality: updateData.nationality,
         avatar: updateData.avatar,
         chapter: updateData.chapter,
+        bio: updateData.bio,
+        telegram: updateData.telegram,
+        instagram: updateData.instagram,
+        esnCardNumber: updateData.esnCardNumber,
+        emergencyContactName: updateData.emergencyContactName,
+        emergencyContactPhone: updateData.emergencyContactPhone,
       },
     });
 
@@ -71,11 +77,57 @@ export class UsersService {
       university: prismaUser.university || undefined,
       chapter: prismaUser.chapter || undefined,
       nationality: prismaUser.nationality || undefined,
+      bio: prismaUser.bio || undefined,
+      telegram: prismaUser.telegram || undefined,
+      instagram: prismaUser.instagram || undefined,
+      emergencyContactName: prismaUser.emergencyContactName || undefined,
+      emergencyContactPhone: prismaUser.emergencyContactPhone || undefined,
       emailVerified: prismaUser.emailVerified,
       isActive: prismaUser.isActive,
       role: prismaUser.role,
       createdAt: prismaUser.createdAt,
       updatedAt: prismaUser.updatedAt,
     };
+  }
+  async verifyEsnCard(userId: string, verified: boolean): Promise<User> {
+    const prismaUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { esnCardVerified: verified },
+    });
+
+    return this.transformPrismaUser(prismaUser);
+  }
+
+  async deleteUser(userId: string): Promise<boolean> {
+    try {
+      await this.prisma.user.delete({
+        where: { id: userId },
+      });
+      return true;
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      return false;
+    }
+  }
+
+
+  async updateUserRole(userId: string, role: any): Promise<User> {
+    const prismaUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { role },
+    });
+    return this.transformPrismaUser(prismaUser);
+  }
+
+  async adminDeleteUser(userId: string): Promise<boolean> {
+    try {
+      await this.prisma.user.delete({
+        where: { id: userId },
+      });
+      return true;
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      return false;
+    }
   }
 }

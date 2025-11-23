@@ -93,7 +93,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({
   // Mock image gallery (you can extend this with real images)
   const images = [
     event.imageUrl ||
-      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop",
     "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&h=400&fit=crop",
     "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=800&h=400&fit=crop",
   ];
@@ -212,11 +212,10 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                 <button
                   key={index}
                   onClick={() => setImageGalleryIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    index === imageGalleryIndex
+                  className={`w-2 h-2 rounded-full transition-all ${index === imageGalleryIndex
                       ? "bg-white"
                       : "bg-white bg-opacity-50"
-                  }`}
+                    }`}
                 />
               ))}
             </div>
@@ -357,14 +356,12 @@ const EventDetails: React.FC<EventDetailsProps> = ({
             <div className="bg-gray-50 rounded-xl p-4">
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                    spotsLeft > 0 ? "bg-yellow-100" : "bg-red-100"
-                  }`}
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${spotsLeft > 0 ? "bg-yellow-100" : "bg-red-100"
+                    }`}
                 >
                   <svg
-                    className={`w-5 h-5 ${
-                      spotsLeft > 0 ? "text-yellow-600" : "text-red-600"
-                    }`}
+                    className={`w-5 h-5 ${spotsLeft > 0 ? "text-yellow-600" : "text-red-600"
+                      }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -402,17 +399,15 @@ const EventDetails: React.FC<EventDetailsProps> = ({
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className={`h-2 rounded-full transition-all duration-500 ${
-                  spotsPercentage > 80
+                className={`h-2 rounded-full transition-all duration-500 ${spotsPercentage > 80
                     ? "bg-red-500"
                     : spotsPercentage > 50
-                    ? "bg-yellow-500"
-                    : "bg-green-500"
-                }`}
+                      ? "bg-yellow-500"
+                      : "bg-green-500"
+                  }`}
                 style={{
-                  width: `${
-                    (event.registrationCount / event.maxParticipants) * 100
-                  }%`,
+                  width: `${(event.registrationCount / event.maxParticipants) * 100
+                    }%`,
                 }}
               ></div>
             </div>
@@ -430,11 +425,10 @@ const EventDetails: React.FC<EventDetailsProps> = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab.id
+                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                     ? "border-blue-500 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+                  }`}
               >
                 <span className="mr-2">{tab.icon}</span>
                 {tab.label}
@@ -540,25 +534,31 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                 </div>
               </div>
 
-              {/* Map placeholder */}
-              <div className="h-64 bg-gray-200 rounded-xl flex items-center justify-center">
-                <div className="text-center">
-                  <svg
-                    className="w-12 h-12 text-gray-400 mx-auto mb-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3l6-3"
-                    />
-                  </svg>
-                  <p className="text-gray-500">Interactive map would go here</p>
-                </div>
+              {/* Map Embed */}
+              <div className="h-64 rounded-xl overflow-hidden border border-gray-200">
+                <iframe
+                  title="Event location map"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(event.address || event.location)}&output=embed`}
+                ></iframe>
               </div>
+              {/* Open in external map app */}
+              <button
+                onClick={() => {
+                  const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                    event.address || event.location
+                  )}`;
+                  window.open(url, '_blank');
+                }}
+                className="mt-4 w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Open in Maps
+              </button>
 
               <button className="w-full py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors">
                 Get Directions

@@ -5,8 +5,8 @@
 type User {
   id: ID!
   email: String!
-  firstName: String!
-  lastName: String!
+  firstName: String
+  lastName: String
   avatar: String
   phone: String
   esnCardNumber: String
@@ -15,6 +15,11 @@ type User {
   university: String
   chapter: String
   nationality: String
+  bio: String
+  telegram: String
+  instagram: String
+  emergencyContactName: String
+  emergencyContactPhone: String
   emailVerified: Boolean!
   isActive: Boolean!
   role: UserRole!
@@ -29,8 +34,8 @@ scalar DateTime
 
 enum UserRole {
   USER
-  ADMIN
   ORGANIZER
+  ADMIN
 }
 
 type Event {
@@ -149,6 +154,16 @@ enum PaymentStatus {
   CANCELLED
 }
 
+type AdminStats {
+  totalEvents: Int!
+  activeUsers: Int!
+  totalRegistrations: Int!
+  totalRevenue: Float!
+  eventsThisMonth: Int!
+  registrationsThisMonth: Int!
+  revenueThisMonth: Float!
+}
+
 type Query {
   me: User!
   hello: String!
@@ -167,6 +182,7 @@ type Query {
   registrationsCount(filter: RegistrationFilterInput): Int!
   eventCapacityInfo(eventId: ID!): Int!
   waitlistRegistrations(eventId: ID!): [Registration!]!
+  adminStats: AdminStats!
 }
 
 input EventsFilterInput {
@@ -201,6 +217,10 @@ input RegistrationFilterInput {
 
 type Mutation {
   updateUserProfile(updateUserInput: UpdateUserInput!): User!
+  verifyEsnCard(userId: String!, verified: Boolean!): User!
+  deleteUser: Boolean!
+  updateUserRole(userId: String!, role: UserRole!): User!
+  adminDeleteUser(userId: String!): Boolean!
   createEvent(createEventInput: CreateEventInput!): Event!
   updateEvent(updateEventInput: UpdateEventInput!): Event!
   removeEvent(id: ID!): Boolean!
@@ -220,6 +240,12 @@ input UpdateUserInput {
   nationality: String
   avatar: String
   chapter: String
+  bio: String
+  telegram: String
+  instagram: String
+  esnCardNumber: String
+  emergencyContactName: String
+  emergencyContactPhone: String
 }
 
 input CreateEventInput {

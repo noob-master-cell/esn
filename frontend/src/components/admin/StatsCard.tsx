@@ -1,5 +1,5 @@
-// frontend/src/components/admin/StatsCard.tsx
 import React from "react";
+import { Card } from "../ui/Card";
 
 interface StatsCardProps {
   title: string;
@@ -87,7 +87,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <Card>
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
@@ -116,6 +116,6 @@ export const StatsCard: React.FC<StatsCardProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 };

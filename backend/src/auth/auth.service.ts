@@ -1,25 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './../../prisma/prisma.service';
-import { ClerkService } from '../clerk/clerk.service';
 import { User } from '../users/entities/user.entity';
 import { UserTransformer } from './../common/transformers/user.transformer';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private prisma: PrismaService,
-    private clerkService: ClerkService,
-  ) {}
+  constructor(private prisma: PrismaService) { }
 
-  async validateUser(clerkUserId: string): Promise<User | null> {
+  async validateUser(auth0UserId: string): Promise<User | null> {
     try {
-      // Sync user from Clerk to our database
-      const dbUser = await this.clerkService.syncUserToDatabase(
-        clerkUserId,
-        this.prisma,
-      );
+      const dbUser = await this.prisma.user.findUnique({
+        where: { auth0Id: auth0UserId, isActive: true },
+      });
 
-      if (!dbUser || !dbUser.isActive) {
+      if (!dbUser) {
         return null;
       }
 
@@ -30,16 +24,7 @@ export class AuthService {
     }
   }
 
-  async getCurrentUser(clerkUserId: string): Promise<User | null> {
-    const dbUser = await this.prisma.user.findUnique({
-      where: { clerkId: clerkUserId, isActive: true },
-    });
-
-    if (!dbUser) {
-      // Try to sync user if not found
-      return this.validateUser(clerkUserId);
-    }
-
-    return UserTransformer.fromPrisma(dbUser);
+  async getCurrentUser(auth0UserId: string): Promise<User | null> {
+    return this.validateUser(auth0UserId);
   }
 }

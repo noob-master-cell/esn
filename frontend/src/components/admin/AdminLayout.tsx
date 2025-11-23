@@ -166,218 +166,6 @@ const menuItems: MenuItem[] = [
   },
 ];
 
-const AdminNavbar: React.FC = () => {
-  const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const isActiveLink = (href: string) => {
-    if (href === "/admin") {
-      return location.pathname === "/admin";
-    }
-    return location.pathname.startsWith(href);
-  };
-
-  const closeMobileMenu = () => setIsMobileMenuOpen(false);
-
-  const renderNavLink = (item: MenuItem, isMobile: boolean = false) => {
-    const isActive = isActiveLink(item.href);
-    const baseClasses =
-      "flex items-center gap-3 rounded-lg text-sm font-medium transition-colors";
-    const mobileClasses = `px-3 py-2.5 ${
-      isActive
-        ? "bg-blue-50 text-blue-700"
-        : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-    }`;
-    const desktopClasses = `px-3 py-2 ${
-      isActive
-        ? "text-blue-600 border-b-2 border-blue-600"
-        : "text-gray-500 hover:text-gray-900"
-    }`;
-
-    return (
-      <NavLink
-        key={item.name}
-        to={item.href}
-        onClick={closeMobileMenu}
-        className={`${baseClasses} ${
-          isMobile ? mobileClasses : desktopClasses
-        }`}
-      >
-        <span className={isActive ? "text-blue-600" : "text-gray-400"}>
-          {item.icon}
-        </span>
-        <span className="truncate">{item.name}</span>
-        {item.badge && (
-          <span className="ml-auto bg-red-100 text-red-600 text-xs font-medium px-2 py-0.5 rounded-full">
-            {item.badge}
-          </span>
-        )}
-      </NavLink>
-    );
-  };
-
-  return (
-    <header className="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-40">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-8">
-            <NavLink
-              to="/admin"
-              className="flex items-center gap-2 flex-shrink-0"
-            >
-              <img
-                src={esnLogo}
-                alt="ESN Logo"
-                className="h-8 w-auto rounded"
-              />
-              <span className="text-lg font-bold text-gray-900 hidden sm:inline">
-                ESN Admin
-              </span>
-            </NavLink>
-            <nav className="hidden lg:flex items-center gap-2">
-              {menuItems.map((item) => renderNavLink(item))}
-            </nav>
-          </div>
-          <div className="flex items-center gap-4">
-            <NavLink
-              to="/admin/events/new"
-              className="hidden sm:flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              New Event
-            </NavLink>
-            <NavLink
-              to="/"
-              className="hidden sm:flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
-              Back to Site
-            </NavLink>
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
-              aria-expanded={isMobileMenuOpen}
-            >
-              <span className="sr-only">Open main menu</span>
-              {isMobileMenuOpen ? (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-      {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-gray-200" id="mobile-menu">
-          <nav className="px-2 pt-2 pb-3 space-y-1">
-            {menuItems.map((item) => renderNavLink(item, true))}
-            <div className="pt-4 mt-4 border-t border-gray-200 space-y-2">
-              <NavLink
-                to="/admin/events/new"
-                onClick={closeMobileMenu}
-                className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                New Event
-              </NavLink>
-              <NavLink
-                to="/"
-                onClick={closeMobileMenu}
-                className="flex items-center justify-center gap-2 w-full px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
-                Back to Site
-              </NavLink>
-            </div>
-            <div className="pt-4 mt-4 border-t border-gray-200">
-              <p className="text-xs text-gray-500 text-center">
-                ESN Event Management v1.0.0
-              </p>
-            </div>
-          </nav>
-        </div>
-      )}
-    </header>
-  );
-};
-
 // --- AdminLayout Component ---
 
 interface AdminLayoutProps {
@@ -393,31 +181,134 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   subtitle,
   actions,
 }) => {
+  const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const isActiveLink = (href: string) => {
+    if (href === "/admin") {
+      return location.pathname === "/admin";
+    }
+    return location.pathname.startsWith(href);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <AdminNavbar />
+      {/* Clean Modern Admin Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between h-16">
+            <NavLink to="/admin" className="flex items-center gap-3">
+              <img src={esnLogo} alt="ESN Logo" className="h-9 w-auto" />
+              <span className="text-lg font-bold text-gray-900 hidden sm:inline">Admin Panel</span>
+            </NavLink>
 
-      <div className="flex-1">
-        <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-6">
-              <div>
-                <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                  {title}
-                </h1>
-                {subtitle && (
-                  <p className="mt-1 text-sm text-gray-500">{subtitle}</p>
+            <div className="flex items-center gap-3">
+              <NavLink
+                to="/"
+                className="hidden sm:flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Site
+              </NavLink>
+
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                {isMobileMenuOpen ? (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
                 )}
-              </div>
-              {actions && (
-                <div className="flex items-center gap-3">{actions}</div>
-              )}
+              </button>
             </div>
           </div>
-        </header>
 
-        <main className="container mx-auto p-4 sm:p-6 lg:p-8">{children}</main>
+          {/* Desktop Navigation - Clean Tabs */}
+          <nav className="hidden lg:flex items-center gap-1 -mb-px">
+            {menuItems.map((item) => {
+              const isActive = isActiveLink(item.href);
+              return (
+                <NavLink
+                  key={item.name}
+                  to={item.href}
+                  className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${isActive
+                      ? "border-blue-600 text-blue-600"
+                      : "border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300"
+                    }`}
+                >
+                  <span className={isActive ? "text-blue-600" : "text-gray-400"}>
+                    {item.icon}
+                  </span>
+                  <span>{item.name}</span>
+                  {item.badge && (
+                    <span className="ml-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      {item.badge}
+                    </span>
+                  )}
+                </NavLink>
+              );
+            })}
+          </nav>
+
+          {/* Mobile Navigation */}
+          {isMobileMenuOpen && (
+            <div className="lg:hidden border-t border-gray-200 py-3 space-y-1">
+              {menuItems.map((item) => {
+                const isActive = isActiveLink(item.href);
+                return (
+                  <NavLink
+                    key={item.name}
+                    to={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive
+                        ? "bg-blue-50 text-blue-700"
+                        : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                  >
+                    <span className={isActive ? "text-blue-600" : "text-gray-400"}>
+                      {item.icon}
+                    </span>
+                    <span>{item.name}</span>
+                  </NavLink>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Page Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                {title}
+              </h1>
+              {subtitle && (
+                <p className="mt-1 text-sm text-gray-600">
+                  {subtitle}
+                </p>
+              )}
+            </div>
+            {actions && (
+              <div className="flex items-center gap-3">
+                {actions}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
+
+      <main className="container mx-auto p-4 sm:p-6 lg:p-8">{children}</main>
     </div>
   );
 };

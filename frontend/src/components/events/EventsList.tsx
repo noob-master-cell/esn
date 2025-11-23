@@ -1,38 +1,12 @@
 import React, { useState } from "react";
-import { useQuery } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
-import { GET_EVENTS } from "../../lib/graphql/events";
+import { useEvents } from "../../hooks/api/useEvents";
 import EventCard from "./EventCard"; // Updated import - now default export
 import { transformEventToCardProps } from "./eventCardUtils"; // New import
 import { EventsListSkeleton } from "./EventsListSkeleton";
 
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  shortDescription?: string;
-  startDate: string;
-  endDate: string;
-  registrationDeadline?: string;
-  location: string;
-  address?: string;
-  maxParticipants: number;
-  registrationCount: number;
-  price?: number;
-  memberPrice?: number;
-  imageUrl?: string;
-  category: string;
-  type: string;
-  status: string;
-  canRegister?: boolean;
-  organizer: {
-    firstName: string;
-    lastName: string;
-  };
-}
-
 // Wrapper component to handle click functionality with new EventCard
-const ClickableEventCard: React.FC<{ event: Event }> = ({ event }) => {
+const ClickableEventCard: React.FC<{ event: any }> = ({ event }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
@@ -65,15 +39,12 @@ export const EventsList: React.FC = () => {
   const [sortBy, setSortBy] = useState("date");
   const [viewType, setViewType] = useState<"grid" | "list">("grid");
 
-  const { data, loading, error, refetch } = useQuery(GET_EVENTS, {
-    variables: {
-      filter: {
-        take: 20,
-        orderBy: "startDate",
-        orderDirection: "asc",
-      },
+  const { events, loading, error, refetch } = useEvents({
+    filter: {
+      take: 20,
+      orderBy: "startDate",
+      orderDirection: "asc",
     },
-    errorPolicy: "all",
   });
 
   if (loading) return <EventsListSkeleton />;
@@ -111,8 +82,6 @@ export const EventsList: React.FC = () => {
       </div>
     );
   }
-
-  const events: Event[] = data?.events || [];
 
   if (events.length === 0) {
     return (
@@ -163,11 +132,10 @@ export const EventsList: React.FC = () => {
             <div className="flex bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => setViewType("grid")}
-                className={`p-2 rounded-md transition-colors ${
-                  viewType === "grid"
+                className={`p-2 rounded-md transition-colors ${viewType === "grid"
                     ? "bg-white shadow-sm text-gray-900"
                     : "text-gray-500 hover:text-gray-700"
-                }`}
+                  }`}
                 title="Grid view"
               >
                 <svg
@@ -186,11 +154,10 @@ export const EventsList: React.FC = () => {
               </button>
               <button
                 onClick={() => setViewType("list")}
-                className={`p-2 rounded-md transition-colors ${
-                  viewType === "list"
+                className={`p-2 rounded-md transition-colors ${viewType === "list"
                     ? "bg-white shadow-sm text-gray-900"
                     : "text-gray-500 hover:text-gray-700"
-                }`}
+                  }`}
                 title="List view"
               >
                 <svg
@@ -291,7 +258,7 @@ export const EventsList: React.FC = () => {
       )}
 
       {/* Custom CSS for animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes fadeInUp {
           from {
             opacity: 0;

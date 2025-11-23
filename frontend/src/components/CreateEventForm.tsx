@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { useMutation, gql } from "@apollo/client";
+import { useCreateEvent } from "../hooks/api/useEvents";
 import { useNavigate } from "react-router-dom";
 import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
 import { Alert } from "./ui/Alert";
-import { CREATE_EVENT_MUTATION } from "../lib/graphql/mutations";
 
 // This is a simplified list of categories and types for the UI dropdowns
 // These should ideally be fetched from the backend or a shared constants file
@@ -33,12 +32,12 @@ export function CreateEventForm() {
     maxParticipants: 100,
     price: 0,
     isPublic: true,
+    imageUrl: "",
   });
 
-  const [createEvent, { loading, error, data }] = useMutation(
-    CREATE_EVENT_MUTATION
-  );
+  const { createEvent, loading, error } = useCreateEvent();
   const [successMessage, setSuccessMessage] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -56,6 +55,28 @@ export function CreateEventForm() {
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, price: parseFloat(e.target.value) });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const uploadData = new FormData();
+    uploadData.append('file', file);
+
+    try {
+      const response = await fetch('http://localhost:4000/upload', {
+        method: 'POST',
+        body: uploadData,
+      });
+      const data = await response.json();
+      setFormData({ ...formData, imageUrl: data.url });
+    } catch (err) {
+      console.error('Upload failed:', err);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -117,6 +138,27 @@ export function CreateEventForm() {
           onChange={handleChange}
           required
         />
+
+        {/* Image Upload Field */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Event Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="mt-1 block w-full text-sm text-gray-500
+              file:mr-4 file:py-2 file:px-4
+              file:rounded-full file:border-0
+              file:text-sm file:font-semibold
+              file:bg-blue-50 file:text-blue-700
+              hover:file:bg-blue-100"
+          />
+          {uploading && <p className="text-sm text-blue-500 mt-1">Uploading...</p>}
+          {formData.imageUrl && (
+            <img src={formData.imageUrl} alt="Preview" className="mt-2 h-32 object-cover rounded" />
+          )}
+        </div>
+
         <div>
           <label
             htmlFor="description"
@@ -213,15 +255,17 @@ export function CreateEventForm() {
             min={1}
             required
           />
-          <Input
-            label="Price"
-            name="price"
-            type="number"
-            step="0.01"
-            value={formData.price}
-            onChange={handlePriceChange}
-            min={0}
-          />
+          {formData.type !== 'FREE' && (
+            <Input
+              label="Price"
+              name="price"
+              type="number"
+              step="0.01"
+              value={formData.price}
+              onChange={handlePriceChange}
+              min={0}
+            />
+          )}
         </div>
         <div className="flex items-center">
           <input
@@ -240,7 +284,7 @@ export function CreateEventForm() {
           </label>
         </div>
 
-        <Button type="submit" loading={loading} disabled={loading}>
+        <Button type="submit" loading={loading} disabled={loading || uploading}>
           {loading ? "Creating..." : "Create Event"}
         </Button>
       </form>

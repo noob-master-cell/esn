@@ -66,7 +66,7 @@ const MobileCalendarHeader: React.FC<MobileCalendarHeaderProps> = ({
   return (
     <div className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
       {/* Main Header */}
-      <div className="flex items-center justify-between p-4">
+      <div className="flex items-center justify-between px-3 py-2">
         {/* Left: Navigation */}
         <div className="flex items-center gap-2">
           <button
@@ -127,9 +127,8 @@ const MobileCalendarHeader: React.FC<MobileCalendarHeaderProps> = ({
           >
             {getViewDisplayName(viewType)}
             <svg
-              className={`w-4 h-4 transform transition-transform ${
-                showViewSelector ? "rotate-180" : ""
-              }`}
+              className={`w-4 h-4 transform transition-transform ${showViewSelector ? "rotate-180" : ""
+                }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -154,11 +153,10 @@ const MobileCalendarHeader: React.FC<MobileCalendarHeaderProps> = ({
                       onViewChange(view);
                       setShowViewSelector(false);
                     }}
-                    className={`w-full text-left px-4 py-3 text-sm transition-colors touch-manipulation ${
-                      viewType === view
-                        ? "bg-blue-50 text-blue-700 font-medium"
-                        : "text-gray-700 hover:bg-gray-50 active:bg-gray-100"
-                    }`}
+                    className={`w-full text-left px-4 py-3 text-sm transition-colors touch-manipulation ${viewType === view
+                      ? "bg-blue-50 text-blue-700 font-medium"
+                      : "text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+                      }`}
                   >
                     {getViewDisplayName(view)}
                   </button>
@@ -171,7 +169,7 @@ const MobileCalendarHeader: React.FC<MobileCalendarHeaderProps> = ({
 
       {/* Optional: Quick Date Navigation for Mobile */}
       {viewType === "monthly" && (
-        <div className="px-4 pb-3">
+        <div className="px-3 pb-2">
           <div className="flex gap-2 overflow-x-auto pb-2">
             {[-2, -1, 0, 1, 2].map((offset) => {
               const date = new Date(currentDate);
@@ -188,11 +186,10 @@ const MobileCalendarHeader: React.FC<MobileCalendarHeaderProps> = ({
                       // You'd need to update the calendar to this date
                     }
                   }}
-                  className={`flex-shrink-0 px-3 py-1 text-xs rounded-full transition-colors touch-manipulation ${
-                    isCurrentMonth
-                      ? "bg-blue-100 text-blue-800 font-medium"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
+                  className={`flex-shrink-0 px-3 py-1 text-xs rounded-full transition-colors touch-manipulation ${isCurrentMonth
+                    ? "bg-blue-100 text-blue-800 font-medium"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
                 >
                   {date.toLocaleDateString("en-US", { month: "short" })}
                 </button>

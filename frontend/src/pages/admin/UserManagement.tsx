@@ -1,61 +1,13 @@
 // frontend/src/pages/admin/UserManagement.tsx
 import React, { useState } from "react";
-import { useQuery, useMutation } from "@apollo/client";
+import {
+  useAdminUsers,
+  useDeactivateUser,
+  useActivateUser,
+  useVerifyEsnCard,
+} from "../../hooks/api/useAdmin";
 import { Button } from "../../components/ui/Button";
-import { Alert } from "../../components/ui/Alert";
-import { GET_USER_PROFILE } from "../../lib/graphql/users";
-
-// Mock data for users - replace with real query
-const mockUsers = [
-  {
-    id: "1",
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@university.edu",
-    role: "USER",
-    university: "Technical University",
-    nationality: "German",
-    esnCardNumber: "ESN001",
-    esnCardVerified: true,
-    emailVerified: true,
-    isActive: true,
-    createdAt: "2025-01-15T10:00:00Z",
-    registrationsCount: 5,
-    lastLogin: "2025-06-29T14:30:00Z",
-  },
-  {
-    id: "2",
-    firstName: "Maria",
-    lastName: "Garcia",
-    email: "maria.garcia@uni.es",
-    role: "USER",
-    university: "Universidad de Madrid",
-    nationality: "Spanish",
-    esnCardNumber: "ESN002",
-    esnCardVerified: false,
-    emailVerified: true,
-    isActive: true,
-    createdAt: "2025-02-20T09:15:00Z",
-    registrationsCount: 12,
-    lastLogin: "2025-06-30T11:20:00Z",
-  },
-  {
-    id: "3",
-    firstName: "Pierre",
-    lastName: "Martin",
-    email: "pierre.martin@sorbonne.fr",
-    role: "ORGANIZER",
-    university: "Sorbonne University",
-    nationality: "French",
-    esnCardNumber: "ESN003",
-    esnCardVerified: true,
-    emailVerified: true,
-    isActive: true,
-    createdAt: "2024-09-10T16:45:00Z",
-    registrationsCount: 3,
-    lastLogin: "2025-06-30T09:00:00Z",
-  },
-];
+import { Badge } from "../../components/ui/Badge";
 
 interface UserFilters {
   search: string;
@@ -63,6 +15,23 @@ interface UserFilters {
   status: string;
   esnCardStatus: string;
   university: string;
+}
+
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+  emailVerified: boolean;
+  esnCardNumber: string | null;
+  esnCardVerified: boolean;
+  registrationsCount: number;
+  lastLogin: string;
+  university?: string;
+  nationality?: string;
+  createdAt: string;
 }
 
 const UserManagement: React.FC = () => {
@@ -74,52 +43,38 @@ const UserManagement: React.FC = () => {
     university: "",
   });
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [showUserModal, setShowUserModal] = useState<any>(null);
-  const [showESNCardModal, setShowESNCardModal] = useState<any>(null);
+  const [showUserModal, setShowUserModal] = useState<User | null>(null);
+  const [showESNCardModal, setShowESNCardModal] = useState<User | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Filter users based on current filters
-  const filteredUsers = mockUsers.filter((user) => {
-    if (filters.search) {
-      const searchTerm = filters.search.toLowerCase();
-      if (
-        !user.firstName.toLowerCase().includes(searchTerm) &&
-        !user.lastName.toLowerCase().includes(searchTerm) &&
-        !user.email.toLowerCase().includes(searchTerm)
-      ) {
-        return false;
-      }
-    }
-
-    if (filters.role !== "all" && user.role !== filters.role) {
-      return false;
-    }
-
-    if (filters.status !== "all") {
-      if (filters.status === "active" && !user.isActive) return false;
-      if (filters.status === "inactive" && user.isActive) return false;
-      if (filters.status === "verified" && !user.emailVerified) return false;
-      if (filters.status === "unverified" && user.emailVerified) return false;
-    }
-
-    if (filters.esnCardStatus !== "all") {
-      if (filters.esnCardStatus === "verified" && !user.esnCardVerified)
-        return false;
-      if (filters.esnCardStatus === "unverified" && user.esnCardVerified)
-        return false;
-      if (filters.esnCardStatus === "none" && user.esnCardNumber) return false;
-    }
-
-    if (
-      filters.university &&
-      !user.university?.toLowerCase().includes(filters.university.toLowerCase())
-    ) {
-      return false;
-    }
-
-    return true;
+  const { users, refetch } = useAdminUsers({
+    filter: {
+      search: filters.search || undefined,
+      role: filters.role !== "all" ? filters.role : undefined,
+      isActive:
+        filters.status === "active"
+          ? true
+          : filters.status === "inactive"
+            ? false
+            : undefined,
+      isEsnCardVerified:
+        filters.esnCardStatus === "verified"
+          ? true
+          : filters.esnCardStatus === "unverified"
+            ? false
+            : undefined,
+      university: filters.university || undefined,
+    },
   });
+
+  const { deactivateUser } = useDeactivateUser();
+  const { activateUser } = useActivateUser();
+  const { verifyEsnCard } = useVerifyEsnCard();
+
+
+
+  const filteredUsers = users || [];
 
   const handleSelectUser = (userId: string) => {
     setSelectedUsers((prev) =>
@@ -133,81 +88,67 @@ const UserManagement: React.FC = () => {
     if (selectedUsers.length === filteredUsers.length) {
       setSelectedUsers([]);
     } else {
-      setSelectedUsers(filteredUsers.map((user) => user.id));
+      setSelectedUsers(filteredUsers.map((user: User) => user.id));
     }
   };
 
   const handleVerifyESNCard = async (userId: string, cardNumber: string) => {
     try {
-      // API call to verify ESN card
+      await verifyEsnCard({ variables: { userId, cardNumber } });
       setSuccessMessage("ESN card verified successfully");
       setShowESNCardModal(null);
+      refetch();
+      setTimeout(() => setSuccessMessage(""), 3000);
+      refetch();
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
-      setErrorMessage("Failed to verify ESN card");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to verify ESN card"
+      );
       setTimeout(() => setErrorMessage(""), 5000);
     }
   };
 
-  const handleToggleUserStatus = async (userId: string) => {
+  const handleToggleUserStatus = async (userId: string, isActive: boolean) => {
     try {
-      // API call to toggle user status
-      setSuccessMessage("User status updated successfully");
+      if (isActive) {
+        await deactivateUser({ variables: { userId } });
+        setSuccessMessage("User deactivated successfully");
+      } else {
+        await activateUser({ variables: { userId } });
+        setSuccessMessage("User activated successfully");
+      }
+      refetch();
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
-      setErrorMessage("Failed to update user status");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to update user status"
+      );
       setTimeout(() => setErrorMessage(""), 5000);
     }
   };
 
   const getRoleBadge = (role: string) => {
-    const roleConfig = {
-      USER: { bg: "bg-gray-100", text: "text-gray-800", label: "User" },
-      ORGANIZER: {
-        bg: "bg-blue-100",
-        text: "text-blue-800",
-        label: "Organizer",
-      },
-      ADMIN: { bg: "bg-purple-100", text: "text-purple-800", label: "Admin" },
-      SUPER_ADMIN: {
-        bg: "bg-red-100",
-        text: "text-red-800",
-        label: "Super Admin",
-      },
+    const roleConfig: Record<string, { variant: "neutral" | "info" | "primary" | "error"; label: string }> = {
+      USER: { variant: "neutral", label: "User" },
+      ORGANIZER: { variant: "info", label: "Organizer" },
+      ADMIN: { variant: "primary", label: "Admin" },
+      SUPER_ADMIN: { variant: "error", label: "Super Admin" },
     };
 
-    const config =
-      roleConfig[role as keyof typeof roleConfig] || roleConfig.USER;
+    const config = roleConfig[role] || roleConfig.USER;
 
-    return (
-      <span
-        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
-      >
-        {config.label}
-      </span>
-    );
+    return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
   const getStatusBadge = (isActive: boolean, emailVerified: boolean) => {
     if (!isActive) {
-      return (
-        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-          Inactive
-        </span>
-      );
+      return <Badge variant="error">Inactive</Badge>;
     }
     if (!emailVerified) {
-      return (
-        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-          Unverified
-        </span>
-      );
+      return <Badge variant="warning">Unverified</Badge>;
     }
-    return (
-      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-        Active
-      </span>
-    );
+    return <Badge variant="success">Active</Badge>;
   };
 
   const getESNCardBadge = (
@@ -215,42 +156,38 @@ const UserManagement: React.FC = () => {
     esnCardVerified: boolean
   ) => {
     if (!esnCardNumber) {
-      return (
-        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          No Card
-        </span>
-      );
+      return <Badge variant="neutral">No Card</Badge>;
     }
     if (!esnCardVerified) {
-      return (
-        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-          Pending
-        </span>
-      );
+      return <Badge variant="warning">Pending</Badge>;
     }
-    return (
-      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-        Verified
-      </span>
-    );
+    return <Badge variant="success">Verified</Badge>;
   };
 
   return (
     <div className="space-y-6">
       {/* Success/Error Messages */}
       {successMessage && (
-        <Alert
-          type="success"
-          message={successMessage}
-          onClose={() => setSuccessMessage("")}
-        />
+        <div className="mb-4 p-4 bg-green-50 text-green-700 rounded-md">
+          {successMessage}
+          <button
+            onClick={() => setSuccessMessage("")}
+            className="ml-2 float-right text-green-900"
+          >
+            &times;
+          </button>
+        </div>
       )}
       {errorMessage && (
-        <Alert
-          type="error"
-          message={errorMessage}
-          onClose={() => setErrorMessage("")}
-        />
+        <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-md">
+          {errorMessage}
+          <button
+            onClick={() => setErrorMessage("")}
+            className="ml-2 float-right text-red-900"
+          >
+            &times;
+          </button>
+        </div>
       )}
 
       {/* Header */}
@@ -262,8 +199,8 @@ const UserManagement: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
+          <button
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center"
             onClick={() => window.open("/admin/users/export", "_blank")}
           >
             <svg
@@ -280,8 +217,8 @@ const UserManagement: React.FC = () => {
               />
             </svg>
             Export Users
-          </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          </button>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 flex items-center">
             <svg
               className="w-4 h-4 mr-2"
               fill="none"
@@ -296,7 +233,7 @@ const UserManagement: React.FC = () => {
               />
             </svg>
             Invite User
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -397,19 +334,17 @@ const UserManagement: React.FC = () => {
               {selectedUsers.length} user(s) selected
             </span>
             <div className="flex gap-2">
-              <Button size="sm" variant="outline">
+              <button className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                 Send Email
-              </Button>
-              <Button size="sm" variant="outline">
+              </button>
+              <button className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                 Change Role
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-red-600 border-red-300 hover:bg-red-50"
+              </button>
+              <button
+                className="px-3 py-1 border border-red-300 rounded-md text-sm font-medium text-red-600 hover:bg-red-50"
               >
                 Deactivate
-              </Button>
+              </button>
             </div>
           </div>
         </div>
@@ -482,7 +417,7 @@ const UserManagement: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.map((user) => (
+                {filteredUsers.map((user: User) => (
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <input
@@ -599,7 +534,9 @@ const UserManagement: React.FC = () => {
                           </svg>
                         </button>
                         <button
-                          onClick={() => handleToggleUserStatus(user.id)}
+                          onClick={() =>
+                            handleToggleUserStatus(user.id, user.isActive)
+                          }
                           className={
                             user.isActive
                               ? "text-red-600 hover:text-red-800"
@@ -752,11 +689,10 @@ const UserManagement: React.FC = () => {
                           {showUserModal.esnCardNumber || "No card"}
                           {showUserModal.esnCardNumber && (
                             <span
-                              className={`ml-2 ${
-                                showUserModal.esnCardVerified
-                                  ? "text-green-600"
-                                  : "text-orange-600"
-                              }`}
+                              className={`ml-2 ${showUserModal.esnCardVerified
+                                ? "text-green-600"
+                                : "text-orange-600"
+                                }`}
                             >
                               (
                               {showUserModal.esnCardVerified
@@ -814,12 +750,17 @@ const UserManagement: React.FC = () => {
                     Change Role
                   </Button>
                   <Button
-                    onClick={() => handleToggleUserStatus(showUserModal.id)}
-                    className={`flex-1 ${
-                      showUserModal.isActive
-                        ? "bg-red-600 hover:bg-red-700"
-                        : "bg-green-600 hover:bg-green-700"
-                    }`}
+                    onClick={() =>
+                      showUserModal &&
+                      handleToggleUserStatus(
+                        showUserModal.id,
+                        showUserModal.isActive
+                      )
+                    }
+                    className={`flex-1 ${showUserModal.isActive
+                      ? "bg-red-600 hover:bg-red-700"
+                      : "bg-green-600 hover:bg-green-700"
+                      }`}
                   >
                     {showUserModal.isActive ? "Deactivate" : "Activate"}
                   </Button>
@@ -827,90 +768,93 @@ const UserManagement: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div >
       )}
 
       {/* ESN Card Verification Modal */}
-      {showESNCardModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50"
-            onClick={() => setShowESNCardModal(null)}
-          ></div>
-          <div className="flex min-h-screen items-center justify-center p-4">
-            <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Verify ESN Card
-                </h3>
-                <button
-                  onClick={() => setShowESNCardModal(null)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-gray-600 mb-2">User:</p>
-                  <p className="font-medium">
-                    {showESNCardModal.firstName} {showESNCardModal.lastName}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-600 mb-2">ESN Card Number:</p>
-                  <p className="font-medium">
-                    {showESNCardModal.esnCardNumber}
-                  </p>
-                </div>
-
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <p className="text-sm text-yellow-800">
-                    Please verify the ESN card details before approving. This
-                    will grant the user access to member discounts and benefits.
-                  </p>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    variant="outline"
+      {
+        showESNCardModal && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div
+              className="fixed inset-0 bg-black bg-opacity-50"
+              onClick={() => setShowESNCardModal(null)}
+            ></div>
+            <div className="flex min-h-screen items-center justify-center p-4">
+              <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Verify ESN Card
+                  </h3>
+                  <button
                     onClick={() => setShowESNCardModal(null)}
-                    className="flex-1"
+                    className="text-gray-400 hover:text-gray-600"
                   >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={() =>
-                      handleVerifyESNCard(
-                        showESNCardModal.id,
-                        showESNCardModal.esnCardNumber
-                      )
-                    }
-                    className="flex-1 bg-green-600 hover:bg-green-700"
-                  >
-                    Verify Card
-                  </Button>
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">User:</p>
+                    <p className="font-medium">
+                      {showESNCardModal.firstName} {showESNCardModal.lastName}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">ESN Card Number:</p>
+                    <p className="font-medium">
+                      {showESNCardModal.esnCardNumber}
+                    </p>
+                  </div>
+
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p className="text-sm text-yellow-800">
+                      Please verify the ESN card details before approving. This
+                      will grant the user access to member discounts and benefits.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowESNCardModal(null)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={() =>
+                        showESNCardModal.esnCardNumber &&
+                        handleVerifyESNCard(
+                          showESNCardModal.id,
+                          showESNCardModal.esnCardNumber
+                        )
+                      }
+                      className="flex-1 bg-green-600 hover:bg-green-700"
+                    >
+                      Verify Card
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 };
 

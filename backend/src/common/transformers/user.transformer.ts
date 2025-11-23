@@ -22,31 +22,4 @@ export class UserTransformer {
       updatedAt: prismaUser.updatedAt,
     };
   }
-
-  static fromClerkUser(clerkUser: any, dbUser?: any): User {
-    return {
-      id: dbUser?.id || clerkUser.id,
-      email: clerkUser.emailAddresses[0]?.emailAddress || '',
-      firstName: clerkUser.firstName || '',
-      lastName: clerkUser.lastName || '',
-      avatar: clerkUser.imageUrl || undefined,
-      phone: clerkUser.phoneNumbers[0]?.phoneNumber || undefined,
-      esnCardNumber: dbUser?.esnCardNumber || undefined,
-      esnCardVerified: dbUser?.esnCardVerified || false,
-      esnCardExpiry: dbUser?.esnCardExpiry || undefined,
-      university:
-        clerkUser.publicMetadata?.university || dbUser?.university || undefined,
-      chapter: dbUser?.chapter || undefined,
-      nationality:
-        clerkUser.publicMetadata?.nationality ||
-        dbUser?.nationality ||
-        undefined,
-      emailVerified:
-        clerkUser.emailAddresses[0]?.verification?.status === 'verified',
-      isActive: dbUser?.isActive ?? true,
-      role: dbUser?.role || 'USER',
-      createdAt: dbUser?.createdAt || new Date(),
-      updatedAt: dbUser?.updatedAt || new Date(),
-    };
-  }
 }

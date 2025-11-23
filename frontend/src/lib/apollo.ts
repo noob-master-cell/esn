@@ -12,21 +12,29 @@ const httpLink = createHttpLink({
   uri: import.meta.env.VITE_API_URL || "http://localhost:4000/graphql",
 });
 
-// Auth link to add Clerk token to requests
+// Token getter function - will be set by Auth0 provider
+let getAccessToken: (() => Promise<string | null>) | null = null;
+
+export const setTokenGetter = (getter: () => Promise<string | null>) => {
+  getAccessToken = getter;
+};
+
+// Auth link to add Auth0 token to requests
 const authLink = setContext(async (_, { headers }) => {
   let token = "";
 
   try {
-    // Try to get token from Clerk
-    if (typeof window !== "undefined" && window.Clerk?.session) {
-      token = await window.Clerk.session.getToken();
+    if (getAccessToken) {
+      token = (await getAccessToken()) || "";
       console.log(
-        "🔑 Token obtained from Clerk:",
+        "🔑 Token obtained from Auth0:",
         token ? "✅ Success" : "❌ Failed"
       );
+    } else {
+      console.warn("⚠️ Token getter not set - user may not be logged in");
     }
   } catch (error) {
-    console.error("❌ Error getting Clerk token:", error);
+    console.error("❌ Error getting Auth0 token:", error);
   }
 
   return {
@@ -39,23 +47,24 @@ const authLink = setContext(async (_, { headers }) => {
 
 // Enhanced error link to handle GraphQL and network errors
 const errorLink = onError(
-  ({ graphQLErrors, networkError, operation, forward }) => {
+  ({ graphQLErrors, networkError }) => {
     if (graphQLErrors) {
       graphQLErrors.forEach(({ message, locations, path, extensions }) => {
         console.error(
-          `🔥 GraphQL error: Message: ${message}, Location: ${JSON.stringify(locations)}, Path: ${path ? JSON.stringify(path) : 'N/A'}`
+          `🔴 GraphQL error: ${message}`,
+          locations ? `at ${JSON.stringify(locations)}` : '',
+          path ? `in path: ${JSON.stringify(path)}` : ''
         );
-        
-        // Handle specific null field errors
+
+        // Check for specific non-nullable field errors
         if (message.includes('Cannot return null for non-nullable field')) {
           console.error('💀 Non-nullable field error detected:', {
             message,
             path,
-            operation: operation.operationName,
-            variables: operation.variables,
+            extensions: extensions ? JSON.stringify(extensions) : undefined
           });
-          
-          // You could potentially retry the operation or show a specific error message
+
+          // Special handling for registrationCount errors
           if (message.includes('registrationCount')) {
             console.error('🎯 Registration count error - this should be fixed in backend');
           }
@@ -64,14 +73,14 @@ const errorLink = onError(
     }
 
     if (networkError) {
-      console.error(`🌐 Network error: ${networkError}`);
-      
-      // Handle specific network errors
-      if (networkError.message?.includes('Failed to fetch')) {
+      console.error(`🌐 Network error: ${networkError.message || networkError}`);
+
+      // Check if it's a connection refused error
+      if (networkError.message?.includes('Failed to fetch') || networkError.message?.includes('ECONNREFUSED')) {
         console.error('🔌 Backend server might be down');
       }
     }
-  }
+  },
 );
 
 // Create Apollo Client with enhanced configuration

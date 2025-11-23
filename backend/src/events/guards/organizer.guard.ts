@@ -17,7 +17,7 @@ export class OrganizerGuard implements CanActivate {
       throw new ForbiddenException('Authentication required');
     }
 
-    if (user.role !== UserRole.ORGANIZER && user.role !== UserRole.ADMIN) {
+    if (user.role !== UserRole.ADMIN && user.role !== UserRole.ORGANIZER) {
       throw new ForbiddenException('Organizer or Admin role required');
     }
 

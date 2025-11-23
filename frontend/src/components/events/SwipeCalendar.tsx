@@ -149,11 +149,11 @@ const SwipeCalendar: React.FC<SwipeCalendarProps> = ({
       setTouchState((prev) =>
         prev
           ? {
-              ...prev,
-              currentX: touch.clientX,
-              currentY: touch.clientY,
-              isDragging: true,
-            }
+            ...prev,
+            currentX: touch.clientX,
+            currentY: touch.clientY,
+            isDragging: true,
+          }
           : null
       );
 
@@ -328,7 +328,7 @@ const SwipeCalendar: React.FC<SwipeCalendarProps> = ({
         )}
 
         {/* Events Content */}
-        <div className="pt-4">
+        <div className="pt-2">
           <MobileEventsByDate
             groupedEvents={groupedEvents}
             viewType={viewType}
@@ -336,8 +336,8 @@ const SwipeCalendar: React.FC<SwipeCalendarProps> = ({
               viewType === "daily"
                 ? "No events scheduled for this day."
                 : viewType === "weekly"
-                ? "No events scheduled for this week."
-                : "No events scheduled for this month."
+                  ? "No events scheduled for this week."
+                  : "No events scheduled for this month."
             }
           />
         </div>

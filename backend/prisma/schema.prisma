@@ -20,13 +20,14 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Clerk Integration
-  clerkId   String   @unique
+  // Auth Integration - supporting both Clerk (legacy) and Auth0
+  clerkId   String?  @unique  // Made optional for migration
+  auth0Id   String?  @unique  // New Auth0 user ID
 
   // Basic Info
   email     String  @unique
-  firstName String
-  lastName  String
+  firstName String?
+  lastName  String?
   avatar    String?
   phone     String?
 
@@ -37,6 +38,11 @@ model User {
   university      String?
   chapter         String?
   nationality     String?
+  bio             String?
+  telegram        String?
+  instagram       String?
+  emergencyContactName String?
+  emergencyContactPhone String?
 
   // Account Status
   emailVerified Boolean @default(false)
@@ -261,6 +267,7 @@ model Review {
 
 enum UserRole {
   USER
+  ORGANIZER
   ADMIN
 }
 

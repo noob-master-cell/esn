@@ -1,9 +1,8 @@
 // frontend/src/components/auth/ProtectedRoute.tsx
 import React from "react";
-import { useUser, SignedIn, SignedOut } from "@clerk/clerk-react";
+import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@apollo/client";
-import { GET_MY_PROFILE } from "../../lib/graphql/users";
+import { useMyProfile } from "../../hooks/api/useUsers";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,18 +15,15 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredRoles = [],
   fallback,
 }) => {
-  const { user, isLoaded } = useUser();
+  const { isAuthenticated, isLoading, user } = useAuth0();
   const navigate = useNavigate();
 
-  const { data: profileData, loading: profileLoading } = useQuery(
-    GET_MY_PROFILE,
-    {
-      skip: !user,
-    }
-  );
+  const { user: profileData, loading: profileLoading } = useMyProfile({
+    skip: !user,
+  });
 
   // Loading state
-  if (!isLoaded || profileLoading) {
+  if (isLoading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -44,7 +40,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const hasRequiredRole = () => {
     if (requiredRoles.length === 0) return true;
 
-    const userRole = profileData?.myProfile?.role;
+    const userRole = profileData?.role;
     if (!userRole) return false;
 
     return requiredRoles.includes(userRole);
@@ -81,7 +77,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             </p>
             <p className="text-sm text-gray-600 mt-1">
               <span className="font-medium">Your role:</span>{" "}
-              {profileData?.myProfile?.role || "None"}
+              {profileData?.role || "None"}
             </p>
           </div>
         )}
@@ -117,14 +113,16 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     </div>
   );
 
-  return (
-    <>
-      <SignedIn>
-        {hasRequiredRole() ? children : fallback || <AccessDeniedPage />}
-      </SignedIn>
-      <SignedOut>
-        <SignInPrompt />
-      </SignedOut>
-    </>
-  );
+  // Not authenticated
+  if (!isAuthenticated) {
+    return <SignInPrompt />;
+  }
+
+  // Authenticated but no required role
+  if (!hasRequiredRole()) {
+    return fallback || <AccessDeniedPage />;
+  }
+
+  // Authenticated and has required role
+  return <>{children}</>;
 };

@@ -9,7 +9,7 @@ import {
 import { CreateRegistrationInput } from './dto/create-registration.input';
 import { UpdateRegistrationInput } from './dto/update-registration.input';
 import { RegistrationFilterInput } from './dto/registration-filter.input';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Auth0Guard } from '../auth/guards/auth0.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -18,10 +18,10 @@ import { UserRole } from '@prisma/client';
 
 @Resolver(() => Registration)
 export class RegistrationsResolver {
-  constructor(private readonly registrationsService: RegistrationsService) {}
+  constructor(private readonly registrationsService: RegistrationsService) { }
 
   @Mutation(() => Registration)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(Auth0Guard)
   async registerForEvent(
     @Args('createRegistrationInput')
     createRegistrationInput: CreateRegistrationInput,
@@ -35,8 +35,8 @@ export class RegistrationsResolver {
   }
 
   @Query(() => [Registration], { name: 'registrations' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.ORGANIZER)
+  @UseGuards(Auth0Guard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   async findAllRegistrations(
     @Args('filter', { nullable: true }) filter: RegistrationFilterInput = {},
     @CurrentUser() user: User,
@@ -49,7 +49,7 @@ export class RegistrationsResolver {
   }
 
   @Query(() => [Registration], { name: 'myRegistrations' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(Auth0Guard)
   async findMyRegistrations(@CurrentUser() user: User) {
     console.log(
       '👤 Registration Resolver: Find my registrations query for:',
@@ -59,7 +59,7 @@ export class RegistrationsResolver {
   }
 
   @Query(() => [Registration], { name: 'eventRegistrations' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(Auth0Guard)
   async findEventRegistrations(
     @Args('eventId', { type: () => ID }) eventId: string,
     @Args('filter', { nullable: true }) filter: RegistrationFilterInput = {},
@@ -77,7 +77,7 @@ export class RegistrationsResolver {
   }
 
   @Query(() => Registration, { name: 'registration' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(Auth0Guard)
   async findOneRegistration(
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() user: User,
@@ -87,7 +87,7 @@ export class RegistrationsResolver {
   }
 
   @Mutation(() => Registration)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(Auth0Guard)
   async updateRegistration(
     @Args('updateRegistrationInput')
     updateRegistrationInput: UpdateRegistrationInput,
@@ -106,7 +106,7 @@ export class RegistrationsResolver {
   }
 
   @Mutation(() => Registration)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(Auth0Guard)
   async cancelRegistration(
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() user: User,
@@ -119,8 +119,8 @@ export class RegistrationsResolver {
   }
 
   @Query(() => Int, { name: 'registrationsCount' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.ORGANIZER)
+  @UseGuards(Auth0Guard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   async getRegistrationsCount(
     @Args('filter', { nullable: true }) filter: RegistrationFilterInput = {},
     @CurrentUser() user: User,
@@ -154,8 +154,8 @@ export class RegistrationsResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.ORGANIZER)
+  @UseGuards(Auth0Guard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   async markAttendance(
     @Args('registrationId', { type: () => ID }) registrationId: string,
     @Args('attended', { type: () => Boolean }) attended: boolean,
@@ -181,8 +181,8 @@ export class RegistrationsResolver {
   }
 
   @Query(() => [Registration], { name: 'waitlistRegistrations' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.ORGANIZER)
+  @UseGuards(Auth0Guard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   async findWaitlistRegistrations(
     @Args('eventId', { type: () => ID }) eventId: string,
     @CurrentUser() user: User,
@@ -203,8 +203,8 @@ export class RegistrationsResolver {
   }
 
   @Mutation(() => Registration)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.ORGANIZER)
+  @UseGuards(Auth0Guard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   async promoteFromWaitlist(
     @Args('registrationId', { type: () => ID }) registrationId: string,
     @CurrentUser() user: User,

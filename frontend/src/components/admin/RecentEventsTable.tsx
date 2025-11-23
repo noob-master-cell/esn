@@ -1,14 +1,11 @@
 // frontend/src/components/admin/RecentEventsTable.tsx
 import React from "react";
-import { useQuery } from "@apollo/client";
+import { useRecentEvents } from "../../hooks/api/useAdmin";
 import { useNavigate } from "react-router-dom";
-import { RECENT_EVENTS } from "../../lib/graphql/admin";
 
 export const RecentEventsTable: React.FC = () => {
   const navigate = useNavigate();
-  const { data, loading, error } = useQuery(RECENT_EVENTS, {
-    variables: { limit: 5 },
-  });
+  const { events, loading, error } = useRecentEvents({ limit: 5 });
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -84,7 +81,7 @@ export const RecentEventsTable: React.FC = () => {
     );
   }
 
-  const events = data?.events || [];
+  // events is already destructured from hook
 
   return (
     <div className="bg-white rounded-lg shadow-sm">
@@ -172,7 +169,7 @@ export const RecentEventsTable: React.FC = () => {
                             width: `${Math.min(
                               (event.registrationCount /
                                 event.maxParticipants) *
-                                100,
+                              100,
                               100
                             )}%`,
                           }}

@@ -1,94 +1,62 @@
-// frontend/src/components/auth/AuthLayout.tsx
-import React from "react";
-import { SignIn, SignUp } from "@clerk/clerk-react";
+import * as React from "react";
+import esnLogo from "../../assets/favicon/mstile-70x70.png";
+import { Carousel } from "../ui/Carousel";
+
+// ESN images for the carousel
+const esnImages = [
+    "/images/esn_image_1.png",
+    "/images/esn_image_2.png",
+    "/images/esn_image_3.png",
+];
 
 interface AuthLayoutProps {
-  mode: "sign-in" | "sign-up";
+    title: string;
+    subtitle: string;
+    children: React.ReactNode;
 }
 
-export const AuthLayout: React.FC<AuthLayoutProps> = ({ mode }) => {
-  return (
-    <div
-      className="auth-background"
-      style={{
-        backgroundImage: `url('https://images.unsplash.com/photo-1506869640319-fe1a24fd76dc?q=80&w=2670&auto=format&fit=crop')`,
-      }}
-    >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/50"></div>
+export const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children }) => {
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/50">
+            <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
+                <div className="w-full max-w-6xl">
+                    <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+                        <div className="grid lg:grid-cols-2">
+                            {/* Left Side - Form/Content */}
+                            <div className="p-8 sm:p-12 lg:p-16 flex flex-col justify-center">
+                                <div className="w-full max-w-md mx-auto">
+                                    {/* Logo - Centered */}
+                                    <div className="text-center mb-8">
+                                        <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl shadow-lg mb-4">
+                                            <img
+                                                src={esnLogo}
+                                                alt="ESN Logo"
+                                                className="h-14 w-14 object-contain"
+                                            />
+                                        </div>
+                                        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-4">
+                                            {title}
+                                        </h1>
+                                        <p className="text-gray-600 text-base mt-2">
+                                            {subtitle}
+                                        </p>
+                                    </div>
 
-      {/* Main Content */}
-      <div className="relative z-10 w-full max-w-md mx-auto">
-        {/* Logo/Brand Section */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-white/10 backdrop-blur-lg rounded-full mb-4 border border-white/20 shadow-lg">
-            <svg
-              className="w-12 h-12 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-              />
-            </svg>
-          </div>
-          <h1 className="text-4xl font-bold text-white mb-2">ESN Community</h1>
-          <p className="text-white/80 text-lg">
-            {mode === "sign-in"
-              ? "Welcome back! Please sign in to your account."
-              : "Join the ESN community and start your journey."}
-          </p>
-        </div>
+                                    {/* Content (Buttons/Form) */}
+                                    <div className="space-y-6">
+                                        {children}
+                                    </div>
+                                </div>
+                            </div>
 
-        {/* Auth Component */}
-        <div className="auth-form-container">
-          {mode === "sign-in" ? (
-            <SignIn
-              routing="path"
-              path="/sign-in"
-              redirectUrl="/dashboard"
-              signUpUrl="/sign-up"
-              appearance={{
-                elements: {
-                  rootBox: "w-full",
-                  card: "auth-card shadow-2xl",
-                },
-              }}
-            />
-          ) : (
-            <SignUp
-              routing="path"
-              path="/sign-up"
-              redirectUrl="/dashboard"
-              signInUrl="/sign-in"
-              appearance={{
-                elements: {
-                  rootBox: "w-full",
-                  card: "auth-card shadow-2xl",
-                },
-              }}
-            />
-          )}
+                            {/* Right Side - Visual Content */}
+                            <div className="hidden lg:flex bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 relative overflow-hidden min-h-[600px]">
+                                <Carousel images={esnImages} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        {/* Footer */}
-        <div className="mt-8 text-center">
-          <p className="text-white/60 text-sm">
-            By continuing, you agree to our{" "}
-            <a href="#" className="text-white/80 hover:text-white underline">
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href="#" className="text-white/80 hover:text-white underline">
-              Privacy Policy
-            </a>
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };

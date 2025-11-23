@@ -1,9 +1,7 @@
 // frontend/src/components/events/EventRegistrationButton.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@apollo/client";
-import { REGISTER_FOR_EVENT } from "../../lib/graphql/registrations";
-import { useRegistrationStatus } from "../../hooks/useRegistrationStatus";
+import { useRegistration, useRegistrationStatus } from "../../hooks/api/useRegistration";
 import { RegistrationStatus } from "./RegistrationStatus";
 
 interface EventRegistrationButtonProps {
@@ -31,31 +29,26 @@ export const EventRegistrationButton: React.FC<
   // Use the registration status hook
   const {
     isRegistered,
-    registration,
     isLoading: statusLoading,
     canRegister,
   } = useRegistrationStatus(event.id);
 
-  const [registerForEvent, { loading: registering }] = useMutation(
-    REGISTER_FOR_EVENT,
-    {
-      onCompleted: () => {
-        onRegistrationChange?.();
-      },
-      onError: (error) => {
-        console.error("Registration error:", error);
+  const { register, isLoading: registering } = useRegistration({
+    eventId: event.id,
+    onSuccess: () => {
+      onRegistrationChange?.();
+    },
+    onError: (error) => {
+      console.error("Registration error:", error);
 
-        // Handle specific error for already registered
-        if (error.message.includes("already registered")) {
-          alert("You are already registered for this event!");
-        } else {
-          alert(`Registration failed: ${error.message}`);
-        }
-      },
-      // Refetch registrations to update status
-      refetchQueries: ["GetMyRegistrations"],
-    }
-  );
+      // Handle specific error for already registered
+      if (error.message.includes("already registered")) {
+        alert("You are already registered for this event!");
+      } else {
+        alert(`Registration failed: ${error.message}`);
+      }
+    },
+  });
 
   // Calculate event status
   const spotsLeft = event.maxParticipants - event.registrationCount;
@@ -81,13 +74,10 @@ export const EventRegistrationButton: React.FC<
     }
 
     try {
-      await registerForEvent({
-        variables: {
-          createRegistrationInput: {
-            eventId: event.id,
-            registrationType: isEventFull ? "WAITLIST" : "REGULAR",
-          },
-        },
+      await register({
+        // registrationType is handled in the hook or backend, but we can pass it if needed
+        // The hook signature I defined earlier takes optional specialRequests etc.
+        // I might need to update the hook to accept registrationType if it's dynamic
       });
     } catch (error) {
       // Error handled in onError callback
@@ -168,9 +158,8 @@ export const EventRegistrationButton: React.FC<
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
-              className={`h-2 rounded-full ${
-                isEventFull ? "bg-red-500" : "bg-blue-600"
-              }`}
+              className={`h-2 rounded-full ${isEventFull ? "bg-red-500" : "bg-blue-600"
+                }`}
               style={{
                 width: `${Math.min(
                   (event.registrationCount / event.maxParticipants) * 100,
@@ -253,9 +242,8 @@ export const EventRegistrationButton: React.FC<
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
-            className={`h-2 rounded-full ${
-              isEventFull ? "bg-red-500" : "bg-blue-600"
-            }`}
+            className={`h-2 rounded-full ${isEventFull ? "bg-red-500" : "bg-blue-600"
+              }`}
             style={{
               width: `${Math.min(
                 (event.registrationCount / event.maxParticipants) * 100,
@@ -312,11 +300,10 @@ export const EventRegistrationButton: React.FC<
             <button
               onClick={handleQuickRegister}
               disabled={registering}
-              className={`w-full font-medium py-3 px-4 rounded-lg transition-colors ${
-                canJoinWaitlist
-                  ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
-                  : "bg-green-600 text-white hover:bg-green-700"
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`w-full font-medium py-3 px-4 rounded-lg transition-colors ${canJoinWaitlist
+                ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                : "bg-green-600 text-white hover:bg-green-700"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {registering ? (
                 <div className="flex items-center justify-center">

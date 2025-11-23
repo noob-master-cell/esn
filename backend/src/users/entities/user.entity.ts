@@ -13,11 +13,11 @@ export class User {
   @Field()
   email: string;
 
-  @Field()
-  firstName: string;
+  @Field({ nullable: true })
+  firstName?: string;
 
-  @Field()
-  lastName: string;
+  @Field({ nullable: true })
+  lastName?: string;
 
   @Field({ nullable: true })
   avatar?: string;
@@ -42,6 +42,21 @@ export class User {
 
   @Field({ nullable: true })
   nationality?: string;
+
+  @Field({ nullable: true })
+  bio?: string;
+
+  @Field({ nullable: true })
+  telegram?: string;
+
+  @Field({ nullable: true })
+  instagram?: string;
+
+  @Field({ nullable: true })
+  emergencyContactName?: string;
+
+  @Field({ nullable: true })
+  emergencyContactPhone?: string;
 
   @Field()
   emailVerified: boolean;

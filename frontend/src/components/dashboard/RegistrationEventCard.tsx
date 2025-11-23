@@ -1,8 +1,7 @@
 // frontend/src/components/dashboard/RegistrationEventCard.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@apollo/client";
-import { CANCEL_REGISTRATION } from "../../lib/graphql/registrations";
+import { useCancelRegistration } from "../../hooks/api/useRegistration";
 import { Button } from "../ui/Button";
 import { Alert } from "../ui/Alert";
 
@@ -45,18 +44,7 @@ export const RegistrationEventCard: React.FC<RegistrationEventCardProps> = ({
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
-  const [cancelRegistration, { loading: cancelling }] = useMutation(
-    CANCEL_REGISTRATION,
-    {
-      onCompleted: () => {
-        setShowCancelConfirm(false);
-        onRegistrationCancelled?.();
-      },
-      onError: (error) => {
-        setCancelError(error.message);
-      },
-    }
-  );
+  const { cancelRegistration, loading: cancelling } = useCancelRegistration();
 
   // Format date and time
   const formatDateTime = (dateString: string) => {
@@ -125,9 +113,8 @@ export const RegistrationEventCard: React.FC<RegistrationEventCardProps> = ({
       WAITLISTED: {
         bg: "bg-orange-100",
         text: "text-orange-800",
-        label: `Waitlisted ${
-          registration.position ? `#${registration.position}` : ""
-        }`,
+        label: `Waitlisted ${registration.position ? `#${registration.position}` : ""
+          }`,
         icon: "⏳",
       },
       PENDING: {
@@ -155,11 +142,12 @@ export const RegistrationEventCard: React.FC<RegistrationEventCardProps> = ({
   // Handle cancel registration
   const handleCancelRegistration = async () => {
     try {
-      await cancelRegistration({
-        variables: { id: registration.id },
-      });
-    } catch (error) {
+      await cancelRegistration(registration.id);
+      setShowCancelConfirm(false);
+      onRegistrationCancelled?.();
+    } catch (error: any) {
       console.error("Cancel registration error:", error);
+      setCancelError(error.message || "Failed to cancel registration");
     }
   };
 
@@ -199,13 +187,12 @@ export const RegistrationEventCard: React.FC<RegistrationEventCardProps> = ({
         {/* Date Badge */}
         <div className="absolute top-3 right-3">
           <div
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              startDateTime.isPast
-                ? "bg-gray-100 text-gray-800"
-                : startDateTime.isUpcoming
+            className={`px-3 py-1 rounded-full text-sm font-medium ${startDateTime.isPast
+              ? "bg-gray-100 text-gray-800"
+              : startDateTime.isUpcoming
                 ? "bg-blue-100 text-blue-800"
                 : "bg-white/90 text-gray-800"
-            }`}
+              }`}
           >
             {startDateTime.dateLabel}
           </div>

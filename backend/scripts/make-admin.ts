@@ -1,69 +1,48 @@
-// backend/scripts/make-admin.ts
-// Create this file in backend/scripts/ directory
-
-import { PrismaClient, UserRole } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function makeAdmin(email: string) {
-  console.log(`🔧 Making ${email} an admin...`);
+async function main() {
+  const email = process.argv[2];
 
-  try {
-    // First, try to find the user
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      console.error(`❌ User with email ${email} not found!`);
-      console.log('💡 Available users:');
-
-      const allUsers = await prisma.user.findMany({
-        select: { email: true, role: true, firstName: true, lastName: true },
-      });
-
-      allUsers.forEach((u) => {
-        console.log(
-          `   - ${u.email} (${u.firstName} ${u.lastName}) - ${u.role}`,
-        );
-      });
-
-      return;
-    }
-
-    // Update user to admin
-    const updatedUser = await prisma.user.update({
-      where: { email },
-      data: {
-        role: UserRole.ADMIN,
-        isActive: true, // Ensure they're active
-      },
-    });
-
-    console.log(`✅ SUCCESS! ${updatedUser.email} is now an ADMIN.`);
-    console.log(`👤 User: ${updatedUser.firstName} ${updatedUser.lastName}`);
-    console.log(`🔑 Role: ${updatedUser.role}`);
-    console.log(`📧 Email: ${updatedUser.email}`);
-  } catch (error) {
-    console.error('❌ Error making user admin:', error);
+  if (!email) {
+    console.error('Please provide an email address as an argument.');
+    console.log('Usage: npx ts-node scripts/make-admin.ts <email>');
+    process.exit(1);
   }
+
+  console.log(`Looking for user with email: ${email}...`);
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    console.error(`User with email ${email} not found.`);
+    process.exit(1);
+  }
+
+  console.log(`Found user: ${user.firstName} ${user.lastName} (${user.id})`);
+  console.log(`Current role: ${user.role}`);
+
+  if (user.role === 'ADMIN') {
+    console.log('User is already an ADMIN.');
+    return;
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { email },
+    data: { role: 'ADMIN' },
+  });
+
+  console.log(`Successfully updated user ${updatedUser.email} to ADMIN role.`);
 }
 
-// Get email from command line argument
-const email = process.argv[2];
-
-if (!email) {
-  console.error('❌ Please provide an email address');
-  console.log('Usage: npm run make-admin your-email@example.com');
-  process.exit(1);
-}
-
-makeAdmin(email)
+main()
   .catch((e) => {
-    console.error('❌ Script failed:', e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
-    console.log('👋 Disconnected from database');
   });

@@ -13,7 +13,7 @@ import { EventStatus, UserRole, RegistrationStatus } from '@prisma/client';
 
 @Injectable()
 export class EventsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(createEventInput: CreateEventInput, organizerId: string) {
     console.log('🎪 Events Service: Creating new event');
@@ -229,11 +229,23 @@ export class EventsService {
       throw new ForbiddenException('You can only delete your own events');
     }
 
-    // Check if event has active registrations
-    if (eventData.registrations.length > 0) {
+    // For non-admin users, prevent deletion if there are active registrations
+    if (userRole !== UserRole.ADMIN && eventData.registrations.length > 0) {
       throw new BadRequestException(
-        'Cannot delete event with registered participants',
+        'Cannot delete event with registered participants. Please cancel all registrations first.',
       );
+    }
+
+    // For admins, allow deletion but cascade delete registrations
+    if (userRole === UserRole.ADMIN && eventData.registrations.length > 0) {
+      console.log(
+        `⚠️ Admin deleting event with ${eventData.registrations.length} active registrations. Cascade deleting...`,
+      );
+      // Delete all registrations for this event first
+      await this.prisma.registration.deleteMany({
+        where: { eventId: id },
+      });
+      console.log('✅ All registrations deleted');
     }
 
     await this.prisma.event.delete({
