@@ -75,25 +75,7 @@ export const RegistrationFilters: React.FC<RegistrationFiltersProps> = ({
           </select>
         </div>
 
-        {/* Payment Status Filter */}
-        <div className="min-w-40">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Payment Status
-          </label>
-          <select
-            value={filters.paymentStatus || ""}
-            onChange={(e) => handleInputChange("paymentStatus", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">All Payments</option>
-            <option value="PENDING">Pending</option>
-            <option value="PROCESSING">Processing</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="FAILED">Failed</option>
-            <option value="REFUNDED">Refunded</option>
-            <option value="CANCELLED">Cancelled</option>
-          </select>
-        </div>
+
 
         {/* Event Filter - Dropdown instead of text input */}
         <div className="min-w-48">
@@ -179,17 +161,7 @@ export const RegistrationFilters: React.FC<RegistrationFiltersProps> = ({
               </button>
             </span>
           )}
-          {filters.paymentStatus && (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-              Payment: {filters.paymentStatus}
-              <button
-                onClick={() => handleInputChange("paymentStatus", "")}
-                className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-purple-200"
-              >
-                ×
-              </button>
-            </span>
-          )}
+
           {filters.eventId && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
               Event: {events.find(e => e.id === filters.eventId)?.title || filters.eventId}

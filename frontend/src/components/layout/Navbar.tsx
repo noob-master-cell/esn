@@ -303,13 +303,13 @@ export const Navbar: React.FC = () => {
 
       {/* Bottom Navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-inset-bottom">
-        <div className="grid grid-cols-4 py-1">
+        <div className="flex justify-around py-1">
           {/* Home & Events */}
           {navItems.map((item) => (
             <Link
               key={item.name}
               to={item.path}
-              className={`flex flex-col items-center py-2 px-1 transition-colors ${isActivePath(item.path) ? "text-blue-600" : "text-gray-500"
+              className={`flex-1 flex flex-col items-center py-2 px-1 transition-colors ${isActivePath(item.path) ? "text-blue-600" : "text-gray-500"
                 }`}
             >
               <div
@@ -326,7 +326,7 @@ export const Navbar: React.FC = () => {
           {isAuthenticated ? (
             <Link
               to="/profile"
-              className={`flex flex-col items-center py-2 px-1 transition-colors ${isActivePath("/profile") ? "text-green-600" : "text-gray-500"
+              className={`flex-1 flex flex-col items-center py-2 px-1 transition-colors ${isActivePath("/profile") ? "text-green-600" : "text-gray-500"
                 }`}
             >
               <div
@@ -355,7 +355,7 @@ export const Navbar: React.FC = () => {
           {isAuthenticated && isOrganizer && (
             <Link
               to="/admin"
-              className={`flex flex-col items-center py-2 px-1 transition-colors ${location.pathname.startsWith("/admin")
+              className={`flex-1 flex flex-col items-center py-2 px-1 transition-colors ${location.pathname.startsWith("/admin")
                 ? "text-purple-600"
                 : "text-gray-500"
                 }`}
@@ -393,7 +393,7 @@ export const Navbar: React.FC = () => {
           {!isAuthenticated && (
             <button
               onClick={() => navigate("/sign-up")}
-              className="flex flex-col items-center py-2 px-1 text-gray-500 transition-colors"
+              className="flex-1 flex flex-col items-center py-2 px-1 text-gray-500 transition-colors"
             >
               <div className="p-2 rounded-lg">
                 <svg

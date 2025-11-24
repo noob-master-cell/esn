@@ -129,7 +129,7 @@ const UserManagement: React.FC = () => {
       USER: { variant: "neutral", label: "User" },
       ORGANIZER: { variant: "info", label: "Organizer" },
       ADMIN: { variant: "primary", label: "Admin" },
-      SUPER_ADMIN: { variant: "error", label: "Super Admin" },
+
     };
 
     const config = roleConfig[role] || roleConfig.USER;
@@ -264,7 +264,7 @@ const UserManagement: React.FC = () => {
               <option value="USER">User</option>
               <option value="ORGANIZER">Organizer</option>
               <option value="ADMIN">Admin</option>
-              <option value="SUPER_ADMIN">Super Admin</option>
+
             </select>
           </div>
 
