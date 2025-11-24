@@ -49,15 +49,15 @@ export const analytics = {
     },
 
     // Event tracking
-    eventView: (eventId: string, eventTitle: string) => {
+    eventView: (_eventId: string, eventTitle: string) => {
         trackEvent('Event', 'View', eventTitle, undefined);
     },
 
-    eventRegister: (eventId: string, eventTitle: string) => {
+    eventRegister: (_eventId: string, eventTitle: string) => {
         trackEvent('Registration', 'Create', eventTitle, undefined);
     },
 
-    eventUnregister: (eventId: string, eventTitle: string) => {
+    eventUnregister: (_eventId: string, eventTitle: string) => {
         trackEvent('Registration', 'Cancel', eventTitle, undefined);
     },
 
@@ -83,8 +83,8 @@ export const analytics = {
         trackEvent('Search', 'Query', query, undefined);
     },
 
-    filterApply: (filterType: string, value: string) => {
-        trackEvent('Filter', 'Apply', `${filterType}: ${value}`, undefined);
+    filterApply: (_filterType: string, value: string) => {
+        trackEvent('Filter', 'Apply', `${_filterType}: ${value}`, undefined);
     },
 
     // Admin actions
@@ -110,8 +110,8 @@ export const analytics = {
     },
 
     // Errors
-    error: (errorType: string, errorMessage: string) => {
-        trackEvent('Error', errorType, errorMessage, undefined);
+    error: (_errorType: string, errorMessage: string) => {
+        trackEvent('Error', _errorType, errorMessage, undefined);
     },
 };
 

@@ -16,7 +16,7 @@ export const GET_EVENTS = gql`
         maxParticipants
         price
         memberPrice
-        imageUrl
+        images
         tags
         registrationCount
 
@@ -51,7 +51,7 @@ export const GET_EVENT = gql`
       maxParticipants
       price
       memberPrice
-      imageUrl
+      images
       tags
       requirements
       additionalInfo

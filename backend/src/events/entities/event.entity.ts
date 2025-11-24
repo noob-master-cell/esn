@@ -74,8 +74,8 @@ export class Event {
   @Field(() => Float, { nullable: true })
   memberPrice?: number;
 
-  @Field({ nullable: true })
-  imageUrl?: string;
+  @Field(() => [String], { nullable: true })
+  images: string[];
 
   @Field(() => [String], { nullable: true })
   tags?: string[];

@@ -3,7 +3,7 @@ import React from "react";
 import {
   useRegistrationStatus,
   getRegistrationStatusInfo,
-} from "../../hooks/useRegistrationStatus";
+} from "../../hooks/api/useRegistration";
 
 interface RegistrationStatusProps {
   eventId: string;

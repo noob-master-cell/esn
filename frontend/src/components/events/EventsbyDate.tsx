@@ -83,22 +83,19 @@ const EventsByDate: React.FC<EventsByDateProps> = ({
           {/* Date Header */}
           <div className="flex items-center gap-4">
             <div
-              className={`flex-shrink-0 ${
-                group.isToday ? "text-blue-600" : "text-gray-900"
-              }`}
+              className={`flex-shrink-0 ${group.isToday ? "text-blue-600" : "text-gray-900"
+                }`}
             >
               <div className="flex flex-col items-center">
                 <div
-                  className={`text-2xl font-bold ${
-                    group.isToday ? "text-blue-600" : "text-gray-900"
-                  }`}
+                  className={`text-2xl font-bold ${group.isToday ? "text-blue-600" : "text-gray-900"
+                    }`}
                 >
                   {group.date.getDate()}
                 </div>
                 <div
-                  className={`text-sm font-medium uppercase tracking-wide ${
-                    group.isToday ? "text-blue-600" : "text-gray-500"
-                  }`}
+                  className={`text-sm font-medium uppercase tracking-wide ${group.isToday ? "text-blue-600" : "text-gray-500"
+                    }`}
                 >
                   {formatDateShort(group.date).split(" ")[0]}
                 </div>
@@ -107,9 +104,8 @@ const EventsByDate: React.FC<EventsByDateProps> = ({
 
             <div className="flex-grow">
               <h2
-                className={`text-lg font-semibold ${
-                  group.isToday ? "text-blue-600" : "text-gray-900"
-                }`}
+                className={`text-lg font-semibold ${group.isToday ? "text-blue-600" : "text-gray-900"
+                  }`}
               >
                 {formatDateHeader(group.date)}
                 {group.isToday && (
@@ -144,7 +140,7 @@ const EventsByDate: React.FC<EventsByDateProps> = ({
       ))}
 
       {/* Custom CSS for animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes fadeInUp {
           from {
             opacity: 0;

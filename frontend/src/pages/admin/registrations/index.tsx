@@ -20,17 +20,25 @@ interface RegistrationFiltersState {
 interface Registration {
   id: string;
   status: string;
+  registrationType: string;
+  paymentRequired: boolean;
   paymentStatus: string;
+  amountDue: number;
+  currency: string;
+  registeredAt: string;
+  confirmedAt?: string;
   user: {
+    id: string;
     firstName: string;
     lastName: string;
     email: string;
   };
   event: {
+    id: string;
     title: string;
     startDate: string;
+    location: string;
   };
-  createdAt: string;
 }
 
 export const AdminRegistrationsPage: React.FC = () => {
@@ -60,7 +68,7 @@ export const AdminRegistrationsPage: React.FC = () => {
   const groupedRegistrations = React.useMemo(() => {
     if (!registrations) return {};
 
-    return registrations.reduce((groups: Record<string, Registration[]>, reg: Registration) => {
+    return (registrations as Registration[]).reduce<Record<string, Registration[]>>((groups, reg) => {
       const eventId = reg.event.id;
       if (!groups[eventId]) {
         groups[eventId] = [];

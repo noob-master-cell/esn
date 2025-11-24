@@ -1,6 +1,6 @@
 // frontend/src/pages/EventRegistrationPage.tsx
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useEvent } from "../../hooks/api/useEvents";
 import { useRegistration, useRegistrationStatus } from "../../hooks/api/useRegistration";
@@ -89,8 +89,15 @@ const EventRegistrationPage: React.FC = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
+  // Handle edge case where "create" might be passed as ID
+  const isCreateRoute = id === "create";
+
   // Get event data
-  const { event, loading, error } = useEvent(id || "");
+  const { event, loading, error } = useEvent(isCreateRoute ? "" : (id || ""));
+
+  if (isCreateRoute) {
+    return <Navigate to="/admin/events/create" replace />;
+  }
 
   // Get registration status
   const {

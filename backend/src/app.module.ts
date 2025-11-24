@@ -18,6 +18,7 @@ import { AdminModule } from './admin/admin.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { UploadController } from './common/upload.controller';
 import { HealthController } from './common/health.controller';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { HealthController } from './common/health.controller';
     RegistrationsModule,
     AdminModule,
     CalendarModule,
+    CloudinaryModule,
   ],
   controllers: [UploadController, HealthController],
   // Note: ThrottlerGuard not applied globally to avoid GraphQL conflicts

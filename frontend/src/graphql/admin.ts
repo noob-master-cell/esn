@@ -39,7 +39,7 @@ export const RECENT_EVENTS = gql`
         status
         maxParticipants
         registrationCount
-        imageUrl
+        images
         category
         type
         price

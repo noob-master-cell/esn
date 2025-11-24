@@ -4,7 +4,7 @@ export const useProfileData = (isSignedIn: boolean) => {
     const {
         user: dbUser,
         loading: profileLoading,
-        error: profileError,
+
         refetch: refetchProfile
     } = useMyProfile({
         skip: !isSignedIn,

@@ -1,42 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useEvents } from "../../hooks/api/useEvents";
-import EventCard from "./EventCard"; // Updated import - now default export
-import { transformEventToCardProps } from "./eventCardUtils"; // New import
+import EventCard from "./EventCard";
 import { EventsListSkeleton } from "./EventsListSkeleton";
 
-// Wrapper component to handle click functionality with new EventCard
-const ClickableEventCard: React.FC<{ event: any }> = ({ event }) => {
-  const navigate = useNavigate();
-
-  const handleCardClick = () => {
-
-    navigate(`/events/${event.id}`);
-  };
-
-  // Transform event data to new EventCard props
-  const cardProps = transformEventToCardProps(event);
-
-  return (
-    <div
-      className="cursor-pointer"
-      onClick={handleCardClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          handleCardClick();
-        }
-      }}
-    >
-      <EventCard {...cardProps} />
-    </div>
-  );
-};
-
 export const EventsList: React.FC = () => {
-  const [sortBy, setSortBy] = useState("date");
   const [viewType, setViewType] = useState<"grid" | "list">("grid");
 
   const { events, loading, error, refetch } = useEvents({
@@ -204,7 +171,7 @@ export const EventsList: React.FC = () => {
       <div className="mb-8">
         {viewType === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {events.map((event, index) => (
+            {events.map((event: any, index: number) => (
               <div
                 key={event.id}
                 className="opacity-0 animate-fadeInUp"
@@ -213,13 +180,13 @@ export const EventsList: React.FC = () => {
                   animationFillMode: "forwards",
                 }}
               >
-                <ClickableEventCard event={event} />
+                <EventCard event={event} />
               </div>
             ))}
           </div>
         ) : (
           <div className="space-y-4">
-            {events.map((event, index) => (
+            {events.map((event: any, index: number) => (
               <div
                 key={event.id}
                 className="opacity-0 animate-fadeInUp"
@@ -228,7 +195,7 @@ export const EventsList: React.FC = () => {
                   animationFillMode: "forwards",
                 }}
               >
-                <ClickableEventCard event={event} />
+                <EventCard event={event} />
               </div>
             ))}
           </div>

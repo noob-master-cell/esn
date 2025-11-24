@@ -149,10 +149,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, events }) => {
               <div className="flex justify-between items-start mb-2">
                 <span
                   className={`text-sm font-medium ${isDayToday
-                      ? "bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center"
-                      : isCurrentMonth
-                        ? "text-gray-900"
-                        : "text-gray-400"
+                    ? "bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center"
+                    : isCurrentMonth
+                      ? "text-gray-900"
+                      : "text-gray-400"
                     }`}
                 >
                   {day.getDate()}
@@ -168,7 +168,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, events }) => {
 
               {/* Events preview */}
               <div className="space-y-1">
-                {dayEvents.slice(0, 3).map((event, eventIndex) => (
+                {dayEvents.slice(0, 3).map((event, _eventIndex) => (
                   <div
                     key={event.id}
                     className="flex items-center gap-2 text-xs p-1 rounded hover:bg-white transition-colors"

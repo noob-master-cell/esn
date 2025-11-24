@@ -154,7 +154,7 @@ async function main() {
           type: isPaid ? EventType.PAID : EventType.FREE,
           status: faker.helpers.arrayElement([EventStatus.PUBLISHED, EventStatus.REGISTRATION_OPEN, EventStatus.COMPLETED]),
           tags: [faker.word.sample(), faker.word.sample(), faker.word.sample()],
-          imageUrl: faker.image.urlLoremFlickr({ category: 'party,event' }),
+          images: [faker.image.urlLoremFlickr({ category: 'party,event' })],
           isPublic: true,
         },
       })

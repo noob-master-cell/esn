@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 
 interface Event {
   id: string;
@@ -40,9 +40,9 @@ const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
   onRegister,
   onCancel,
 }) => {
-  const navigate = useNavigate();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<Partial<RegistrationFormData>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof RegistrationFormData, string>>>({});
 
   const [formData, setFormData] = useState<RegistrationFormData>({
     acceptTerms: false,
@@ -63,7 +63,7 @@ const RegistrationFlow: React.FC<RegistrationFlowProps> = ({
 
   // Form validation
   const validateForm = (): boolean => {
-    const newErrors: Partial<RegistrationFormData> = {};
+    const newErrors: Partial<Record<keyof RegistrationFormData, string>> = {};
 
     if (!formData.acceptTerms) {
       newErrors.acceptTerms = "You must accept the terms and conditions";

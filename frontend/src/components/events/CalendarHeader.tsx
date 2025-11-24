@@ -19,7 +19,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
 }) => {
   // Format display title based on view type
   const getDisplayTitle = () => {
-    const options: Intl.DateTimeFormatOptions = {};
+
 
     switch (viewType) {
       case "daily":
@@ -120,31 +120,28 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         <div className="grid grid-cols-3 bg-gray-100 rounded-lg p-1">
           <button
             onClick={() => onViewChange("daily")}
-            className={`py-2 text-sm font-medium rounded-md transition-colors ${
-              viewType === "daily"
+            className={`py-2 text-sm font-medium rounded-md transition-colors ${viewType === "daily"
                 ? "bg-white text-gray-900 shadow-sm"
                 : "text-gray-600 hover:text-gray-900"
-            }`}
+              }`}
           >
             Day
           </button>
           <button
             onClick={() => onViewChange("weekly")}
-            className={`py-2 text-sm font-medium rounded-md transition-colors ${
-              viewType === "weekly"
+            className={`py-2 text-sm font-medium rounded-md transition-colors ${viewType === "weekly"
                 ? "bg-white text-gray-900 shadow-sm"
                 : "text-gray-600 hover:text-gray-900"
-            }`}
+              }`}
           >
             Week
           </button>
           <button
             onClick={() => onViewChange("monthly")}
-            className={`py-2 text-sm font-medium rounded-md transition-colors ${
-              viewType === "monthly"
+            className={`py-2 text-sm font-medium rounded-md transition-colors ${viewType === "monthly"
                 ? "bg-white text-gray-900 shadow-sm"
                 : "text-gray-600 hover:text-gray-900"
-            }`}
+              }`}
           >
             Month
           </button>
@@ -213,31 +210,28 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         <div className="flex bg-gray-100 rounded-lg p-1">
           <button
             onClick={() => onViewChange("daily")}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              viewType === "daily"
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewType === "daily"
                 ? "bg-white text-gray-900 shadow-sm"
                 : "text-gray-600 hover:text-gray-900"
-            }`}
+              }`}
           >
             Day
           </button>
           <button
             onClick={() => onViewChange("weekly")}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              viewType === "weekly"
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewType === "weekly"
                 ? "bg-white text-gray-900 shadow-sm"
                 : "text-gray-600 hover:text-gray-900"
-            }`}
+              }`}
           >
             Week
           </button>
           <button
             onClick={() => onViewChange("monthly")}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              viewType === "monthly"
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewType === "monthly"
                 ? "bg-white text-gray-900 shadow-sm"
                 : "text-gray-600 hover:text-gray-900"
-            }`}
+              }`}
           >
             Month
           </button>

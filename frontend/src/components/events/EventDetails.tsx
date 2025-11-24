@@ -15,7 +15,7 @@ interface Event {
   registrationCount: number;
   price?: number;
   memberPrice?: number;
-  imageUrl?: string;
+  images: string[];
   category: string;
   type: string;
   status: string;
@@ -90,16 +90,13 @@ const EventDetails: React.FC<EventDetailsProps> = ({
     return colors[category as keyof typeof colors] || colors.OTHER;
   };
 
-  // Mock image gallery (you can extend this with real images)
-  const images = [
-    event.imageUrl ||
-    "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=800&h=400&fit=crop",
-  ];
+  // Use event images or fallback
+  const images = event.images && event.images.length > 0
+    ? event.images
+    : ["https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop"];
 
   const startDateTime = formatDateTime(event.startDate);
-  const endDateTime = formatDateTime(event.endDate);
+
 
   // Social sharing
   const handleShare = (platform: string) => {

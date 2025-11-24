@@ -59,7 +59,7 @@ type Event {
   maxParticipants: Int!
   price: Float
   memberPrice: Float
-  imageUrl: String
+  images: [String!]
   tags: [String!]
   requirements: String
   additionalInfo: String
@@ -275,7 +275,7 @@ input CreateEventInput {
   maxParticipants: Int!
   price: Float
   memberPrice: Float
-  imageUrl: String
+  images: [String!]! = []
   tags: [String!]
   requirements: String
   additionalInfo: String
@@ -296,7 +296,7 @@ input UpdateEventInput {
   maxParticipants: Int
   price: Float
   memberPrice: Float
-  imageUrl: String
+  images: [String!] = []
   tags: [String!]
   requirements: String
   additionalInfo: String

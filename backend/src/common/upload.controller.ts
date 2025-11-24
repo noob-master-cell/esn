@@ -3,22 +3,15 @@ import {
     Post,
     UseInterceptors,
     UploadedFile,
-    Get,
-    Param,
-    Res,
     UseGuards,
     BadRequestException,
-    NotFoundException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, basename } from 'path';
-import { Response } from 'express';
-import { join } from 'path';
+import { memoryStorage } from 'multer';
+import { extname } from 'path';
 import { Auth0Guard } from '../auth/guards/auth0.guard';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
-import * as crypto from 'crypto';
-import { existsSync } from 'fs';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 // Allowed MIME types for uploads
 const ALLOWED_MIME_TYPES = [
@@ -65,22 +58,13 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: any) => {
 @UseGuards(ThrottlerGuard)
 @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 uploads per minute
 export class UploadController {
+    constructor(private readonly cloudinaryService: CloudinaryService) { }
+
     @Post()
     @UseGuards(Auth0Guard) // Require authentication
     @UseInterceptors(
         FileInterceptor('file', {
-            storage: diskStorage({
-                destination: './uploads',
-                filename: (req, file, cb) => {
-                    // Generate secure random filename
-                    const randomName = crypto.randomBytes(16).toString('hex');
-                    const extension = extname(file.originalname).toLowerCase();
-                    const filename = `${randomName}${extension}`;
-
-
-                    return cb(null, filename);
-                },
-            }),
+            storage: memoryStorage(),
             fileFilter: fileFilter,
             limits: {
                 fileSize: MAX_FILE_SIZE,
@@ -88,42 +72,20 @@ export class UploadController {
             },
         }),
     )
-    uploadFile(@UploadedFile() file: Express.Multer.File) {
+    async uploadFile(@UploadedFile() file: Express.Multer.File) {
         if (!file) {
             throw new BadRequestException('No file uploaded');
         }
 
-
-
-        // Return relative URL (not hardcoded localhost)
-        return {
-            url: `/uploads/${file.filename}`,
-            filename: file.filename,
-            size: file.size,
-            mimeType: file.mimetype,
-        };
-    }
-
-    @Get(':filename')
-    serveFile(@Param('filename') filename: string, @Res() res: Response) {
-        // Prevent path traversal attacks
-        const safeFilename = basename(filename);
-
-        // Additional validation: only allow alphanumeric, hyphens, underscores, and dots
-        if (!/^[a-zA-Z0-9._-]+$/.test(safeFilename)) {
-            throw new BadRequestException('Invalid filename');
+        try {
+            const result = await this.cloudinaryService.uploadImage(file);
+            return {
+                url: result.secure_url,
+                publicId: result.public_id,
+            };
+        } catch (error) {
+            console.error('Upload error:', error);
+            throw new BadRequestException(`Image upload failed: ${error.message || 'Unknown error'}`);
         }
-
-        const filePath = join(process.cwd(), 'uploads', safeFilename);
-
-        // Check if file exists
-        if (!existsSync(filePath)) {
-            throw new NotFoundException('File not found');
-        }
-
-        // Set appropriate cache headers
-        res.setHeader('Cache-Control', 'public, max-age=31536000'); // 1 year
-
-        return res.sendFile(filePath);
     }
 }

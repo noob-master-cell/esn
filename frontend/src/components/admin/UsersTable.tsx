@@ -36,28 +36,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
   onVerifyEsnCard,
   onDeleteUser,
 }) => {
-  const getRoleBadge = (role: string) => {
-    const roleConfig = {
-      USER: { bg: "bg-gray-100", text: "text-gray-800", label: "User" },
-      ORGANIZER: {
-        bg: "bg-blue-100",
-        text: "text-blue-800",
-        label: "Organizer",
-      },
-      ADMIN: { bg: "bg-purple-100", text: "text-purple-800", label: "Admin" },
-    };
 
-    const config =
-      roleConfig[role as keyof typeof roleConfig] || roleConfig.USER;
-
-    return (
-      <span
-        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${config.bg} ${config.text}`}
-      >
-        {config.label}
-      </span>
-    );
-  };
 
   const getStatusBadge = (isActive: boolean) => {
     return (

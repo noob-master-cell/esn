@@ -26,6 +26,7 @@ interface EventsTableProps {
   onPublishEvent: (id: string) => void;
   onEditEvent: (id: string) => void;
   onViewEvent: (id: string) => void;
+  onCreateEvent: () => void;
 }
 
 export const EventsTable: React.FC<EventsTableProps> = ({
@@ -38,6 +39,7 @@ export const EventsTable: React.FC<EventsTableProps> = ({
   onPublishEvent,
   onEditEvent,
   onViewEvent,
+  onCreateEvent,
 }) => {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -175,7 +177,7 @@ export const EventsTable: React.FC<EventsTableProps> = ({
             Get started by creating your first event.
           </p>
           <button
-            onClick={() => onEditEvent("create")}
+            onClick={onCreateEvent}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Create Event
@@ -283,7 +285,7 @@ export const EventsTable: React.FC<EventsTableProps> = ({
                         style={{
                           width: `${Math.min(
                             (event.registrationCount / event.maxParticipants) *
-                              100,
+                            100,
                             100
                           )}%`,
                         }}

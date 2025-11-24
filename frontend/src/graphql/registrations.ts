@@ -33,7 +33,7 @@ export const REGISTER_FOR_EVENT = gql`
         endDate
         location
         address
-        imageUrl
+        images
         category
         type
         price
@@ -78,7 +78,7 @@ export const GET_MY_REGISTRATIONS = gql`
         endDate
         location
         address
-        imageUrl
+        images
         category
         type
         price

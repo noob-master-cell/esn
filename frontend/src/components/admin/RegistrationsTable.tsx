@@ -50,43 +50,7 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
   sortDirection = 'desc',
   onSort,
 }) => {
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      PENDING: {
-        bg: "bg-yellow-100",
-        text: "text-yellow-800",
-        label: "Pending",
-      },
-      CONFIRMED: {
-        bg: "bg-green-100",
-        text: "text-green-800",
-        label: "Confirmed",
-      },
-      WAITLISTED: {
-        bg: "bg-blue-100",
-        text: "text-blue-800",
-        label: "Waitlisted",
-      },
-      CANCELLED: { bg: "bg-red-100", text: "text-red-800", label: "Cancelled" },
-      ATTENDED: {
-        bg: "bg-purple-100",
-        text: "text-purple-800",
-        label: "Attended",
-      },
-      NO_SHOW: { bg: "bg-gray-100", text: "text-gray-800", label: "No Show" },
-    };
 
-    const config =
-      statusConfig[status as keyof typeof statusConfig] || statusConfig.PENDING;
-
-    return (
-      <span
-        className={`inline - flex px - 2 py - 1 text - xs font - semibold rounded - full ${config.bg} ${config.text} `}
-      >
-        {config.label}
-      </span>
-    );
-  };
 
   const getPaymentStatusBadge = (status: string) => {
     const statusConfig = {
@@ -139,7 +103,7 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
 
     return (
       <span
-        className={`inline - flex px - 2 py - 1 text - xs font - medium rounded - full ${config.bg} ${config.text} `}
+        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${config.bg} ${config.text}`}
       >
         {config.label}
       </span>

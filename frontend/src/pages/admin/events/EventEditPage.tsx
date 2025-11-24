@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import { useEventForEdit } from "../../../hooks/api/useEvents";
 import { AdminLayout } from "../../../components/admin/AdminLayout";
 import { EventForm } from "../../../components/admin/EventForm";
@@ -7,7 +7,14 @@ import { EventForm } from "../../../components/admin/EventForm";
 export const EventEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
 
-  const { event, loading, error } = useEventForEdit(id || "");
+  // Handle edge case where "create" might be passed as ID
+  const isCreateRoute = id === "create";
+
+  const { event, loading, error } = useEventForEdit(isCreateRoute ? "" : (id || ""));
+
+  if (isCreateRoute) {
+    return <Navigate to="/admin/events/create" replace />;
+  }
 
   if (loading) {
     return (

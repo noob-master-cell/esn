@@ -130,6 +130,7 @@ export const AdminEventsPage: React.FC = () => {
           onPublishEvent={handlePublishEvent}
           onEditEvent={(id: string) => navigate(`/admin/events/${id}/edit`)}
           onViewEvent={(id: string) => navigate(`/events/${id}`)}
+          onCreateEvent={() => navigate("/admin/events/create")}
         />
       </div>
     </AdminLayout>

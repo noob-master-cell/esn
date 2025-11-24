@@ -9,6 +9,8 @@ import {
   IsBoolean,
   Min,
   Max,
+  IsArray,
+  ArrayMaxSize,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 // Import enums directly from Prisma instead of entity file
@@ -78,10 +80,10 @@ export class CreateEventInput {
   @Min(0)
   memberPrice?: number;
 
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  imageUrl?: string;
+  @Field(() => [String], { defaultValue: [] })
+  @IsArray()
+  @ArrayMaxSize(5)
+  images: string[] = [];
 
   @Field(() => [String], { nullable: true })
   @IsOptional()

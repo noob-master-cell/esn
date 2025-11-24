@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import MobileCalendarHeader from "./MobileCalendarHeader";
 import MobileEventsByDate from "./MobileEventsByDate";
 
@@ -164,7 +164,7 @@ const SwipeCalendar: React.FC<SwipeCalendarProps> = ({
     }
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
+  const handleTouchEnd = (_e: React.TouchEvent) => {
     if (!touchState || !touchState.isDragging) {
       setTouchState(null);
       setSwipeOffset(0);

@@ -9,7 +9,8 @@ import { Select } from "../ui/Select";
 import { Textarea } from "../ui/Textarea";
 import { Button } from "../ui/Button";
 import { Badge } from "../ui/Badge";
-import { ImageUpload } from "../ui/ImageUpload";
+import { MultiImageUpload } from "../ui/MultiImageUpload";
+import { useAuth } from "../../hooks/useAuth";
 
 interface EventFormData {
   title: string;
@@ -25,7 +26,7 @@ interface EventFormData {
   maxParticipants: number;
   price: number | null;
   memberPrice: number | null;
-  imageUrl: string;
+  images: string[];
   tags: string[];
   requirements: string;
   additionalInfo: string;
@@ -55,7 +56,7 @@ const defaultFormData: EventFormData = {
   maxParticipants: 50,
   price: null,
   memberPrice: null,
-  imageUrl: "",
+  images: [],
   tags: [],
   requirements: "",
   additionalInfo: "",
@@ -95,8 +96,9 @@ export const EventForm: React.FC<EventFormProps> = ({
     ...defaultFormData,
     ...initialData,
   });
-  const [errors, setErrors] = useState<Partial<EventFormData>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof EventFormData, string>>>({});
   const [tagInput, setTagInput] = useState("");
+  const { getToken } = useAuth();
 
   const [createEvent, { loading: creating }] = useMutation(CREATE_EVENT, {
     onCompleted: (data) => {
@@ -182,7 +184,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<EventFormData> = {};
+    const newErrors: Partial<Record<keyof EventFormData, string>> = {};
 
     if (!formData.title.trim()) newErrors.title = "Title is required";
     if (!formData.description.trim())
@@ -421,21 +423,30 @@ export const EventForm: React.FC<EventFormProps> = ({
           </h3>
 
           <div className="space-y-4">
-            <ImageUpload
-              label="Event Cover Image"
-              value={formData.imageUrl}
-              onChange={(url) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
+            <MultiImageUpload
+              label="Event Images"
+              value={formData.images}
+              onChange={(urls) => setFormData((prev) => ({ ...prev, images: urls }))}
               onUpload={async (file) => {
+                const token = await getToken();
                 const formData = new FormData();
                 formData.append('file', file);
-                const response = await fetch('/api/upload', {
+
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/graphql';
+                const uploadUrl = apiUrl.replace('/graphql', '/upload');
+
+                const response = await fetch(uploadUrl, {
                   method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                  },
                   body: formData,
                 });
                 if (!response.ok) throw new Error('Upload failed');
                 const data = await response.json();
                 return data.url;
               }}
+              maxImages={5}
             />
 
             <div>

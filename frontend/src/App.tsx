@@ -26,6 +26,7 @@ const ConditionalNavbar = () => {
 
 function AppContent() {
   const { isLoading, getAccessTokenSilently } = useAuth0();
+  const location = useLocation();
 
   // Initialize Google Analytics
   useEffect(() => {
@@ -65,7 +66,7 @@ function AppContent() {
       <main className="flex-grow">
         <AppRoutes />
       </main>
-      <Footer />
+      {!location.pathname.startsWith('/admin') && <Footer />}
     </div>
   );
 }

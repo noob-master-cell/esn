@@ -29,15 +29,6 @@ interface MobileEventsByDateProps {
 }
 
 // Simple date formatting
-const formatDateHeader = (date: Date): string => {
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  };
-  return date.toLocaleDateString("en-US", options);
-};
 
 const formatDateShort = (date: Date): string => {
   const today = new Date();
@@ -124,11 +115,10 @@ const MobileEventsByDate: React.FC<MobileEventsByDateProps> = ({
               <div className="flex items-center gap-3">
                 {/* Date Circle */}
                 <div
-                  className={`flex flex-col items-center justify-center w-14 h-14 rounded-full border-2 ${
-                    group.isToday
-                      ? "bg-blue-600 border-blue-600 text-white"
-                      : "bg-white border-gray-200 text-gray-900"
-                  }`}
+                  className={`flex flex-col items-center justify-center w-14 h-14 rounded-full border-2 ${group.isToday
+                    ? "bg-blue-600 border-blue-600 text-white"
+                    : "bg-white border-gray-200 text-gray-900"
+                    }`}
                 >
                   <span className="text-lg font-bold leading-none">
                     {group.date.getDate()}
@@ -143,9 +133,8 @@ const MobileEventsByDate: React.FC<MobileEventsByDateProps> = ({
                 {/* Date Info */}
                 <div>
                   <h2
-                    className={`text-lg font-semibold ${
-                      group.isToday ? "text-blue-600" : "text-gray-900"
-                    }`}
+                    className={`text-lg font-semibold ${group.isToday ? "text-blue-600" : "text-gray-900"
+                      }`}
                   >
                     {formatDateShort(group.date)}
                   </h2>
@@ -164,9 +153,8 @@ const MobileEventsByDate: React.FC<MobileEventsByDateProps> = ({
                 >
                   {isExpanded ? "Show Less" : "Show All"}
                   <svg
-                    className={`w-4 h-4 transform transition-transform ${
-                      isExpanded ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transform transition-transform ${isExpanded ? "rotate-180" : ""
+                      }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -215,7 +203,7 @@ const MobileEventsByDate: React.FC<MobileEventsByDateProps> = ({
       })}
 
       {/* Custom CSS for animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes fadeInUp {
           from {
             opacity: 0;

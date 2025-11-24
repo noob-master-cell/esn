@@ -133,7 +133,7 @@ model Event {
   memberPrice Float?
   
   // Media & Info
-  imageUrl    String?
+  images      String[] @default([])
   tags        String[]
   requirements String?
   additionalInfo String?

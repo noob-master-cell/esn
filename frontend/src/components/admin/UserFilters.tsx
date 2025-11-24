@@ -16,7 +16,7 @@ export const UserFilters: React.FC<UserFiltersProps> = ({
   filters,
   onFilterChange,
 }) => {
-  const handleInputChange = (key: string, value: string | boolean) => {
+  const handleInputChange = (key: string, value: string | boolean | undefined) => {
     onFilterChange({
       ...filters,
       [key]: value === "" ? undefined : value,

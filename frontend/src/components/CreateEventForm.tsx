@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useCreateEvent } from "../hooks/api/useEvents";
-import { useNavigate } from "react-router-dom";
+
 import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
 import { Alert } from "./ui/Alert";
@@ -20,7 +20,7 @@ const eventCategories = [
 const eventTypes = ["FREE", "PAID", "MEMBERS_ONLY"];
 
 export function CreateEventForm() {
-  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -66,7 +66,9 @@ export function CreateEventForm() {
     uploadData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:4000/upload', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/graphql';
+      const uploadUrl = apiUrl.replace('/graphql', '/upload');
+      const response = await fetch(uploadUrl, {
         method: 'POST',
         body: uploadData,
       });

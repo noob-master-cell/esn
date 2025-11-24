@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import NotFound from './components/NotFound';
+
 
 // Public Pages
 import HomePage from './pages/home';

@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useEvent } from "../../hooks/api/useEvents";
 import { useRegistrationStatus } from "../../hooks/api/useRegistration";
@@ -9,13 +9,20 @@ const EventDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const { isSignedIn } = useAuth();
 
+  // Handle edge case where "create" might be passed as ID
+  const isCreateRoute = id === "create";
+
   // Fetch event data
-  const { event, loading, error } = useEvent(id || "");
+  const { event, loading, error } = useEvent(isCreateRoute ? "" : (id || ""));
+
+  if (isCreateRoute) {
+    return <Navigate to="/admin/events/create" replace />;
+  }
 
   // Get registration status using existing hook
   const {
     isRegistered,
-    registration,
+
     isLoading: registrationLoading,
     canRegister,
   } = useRegistrationStatus(id || "");
@@ -41,7 +48,7 @@ const EventDetailsPage: React.FC = () => {
   };
 
   // Handle social sharing
-  const handleShare = (platform: string) => {
+  const handleShare = (_platform: string) => {
     // Analytics tracking could go here
 
   };
@@ -108,7 +115,7 @@ const EventDetailsPage: React.FC = () => {
   };
 
   // Calculate spots left
-  const spotsLeft = event.maxParticipants - event.registrationCount;
+
 
   // Main event details view - only render when event exists
   return (

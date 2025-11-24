@@ -219,7 +219,8 @@ interface RegistrationStatus {
   | "CONFIRMED"
   | "PENDING"
 
-  | "CANCELLED";
+  | "CANCELLED"
+  | "WAITLISTED";
 }
 export const useRegistrationStatus = (eventId: string): RegistrationStatus => {
   const { data, loading, error } = useQuery(GET_MY_REGISTRATIONS, {

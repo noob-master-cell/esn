@@ -88,7 +88,7 @@ export const RegistrationFilters: React.FC<RegistrationFiltersProps> = ({
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">All Events</option>
-            {events.map((event) => (
+            {events.map((event: any) => (
               <option key={event.id} value={event.id}>
                 {event.title} - {new Date(event.startDate).toLocaleDateString()}
               </option>
@@ -164,7 +164,7 @@ export const RegistrationFilters: React.FC<RegistrationFiltersProps> = ({
 
           {filters.eventId && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-              Event: {events.find(e => e.id === filters.eventId)?.title || filters.eventId}
+              Event: {events.find((e: any) => e.id === filters.eventId)?.title || filters.eventId}
               <button
                 onClick={() => handleInputChange("eventId", "")}
                 className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-yellow-200"

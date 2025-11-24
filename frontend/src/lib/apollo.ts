@@ -26,10 +26,6 @@ const authLink = setContext(async (_, { headers }) => {
   try {
     if (getAccessToken) {
       token = (await getAccessToken()) || "";
-      console.log(
-        "🔑 Token obtained from Auth0:",
-        token ? "✅ Success" : "❌ Failed"
-      );
     } else {
       console.warn("⚠️ Token getter not set - user may not be logged in");
     }
@@ -108,7 +104,7 @@ export const apolloClient = new ApolloClient({
     },
     query: {
       errorPolicy: "all",
-      fetchPolicy: "cache-and-network",
+      fetchPolicy: "network-only",
     },
   },
 });
