@@ -1,7 +1,7 @@
 # Stage 1: Dependencies
 FROM node:20-alpine AS dependencies
 WORKDIR /app
-COPY package*.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm && pnpm install --frozen-lockfile
 
 # Stage 2: Build
@@ -24,24 +24,25 @@ RUN apk add --no-cache dumb-init
 RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
 
 # Copy package files
-COPY package*.json pnpm-lock.yaml ./
-RUN npm install -g pnpm
+COPY package.json pnpm-lock.yaml ./
 
-# --- FIX START ---
-# 1. Copy ALL dependencies (dev + prod) so we have the Prisma CLI available
-COPY --from=dependencies --chown=nestjs:nodejs /app/node_modules ./node_modules
+# 1. Install pnpm
+# 2. Install Prisma v6.10.1 globally.
+#    This ensures 'npx prisma' finds this specific version at runtime (start.sh)
+#    instead of downloading the broken v7.0.0.
+RUN npm install -g pnpm prisma@6.10.1
 
-# 2. Copy source files needed for generation
+# Install ONLY production dependencies
+RUN pnpm install --frozen-lockfile --prod
+
+# Copy source files needed for generation and runtime
 COPY --from=build --chown=nestjs:nodejs /app/prisma ./prisma
 COPY --from=build --chown=nestjs:nodejs /app/dist ./dist
 
-# 3. Generate the Prisma Client strictly for the production environment
-# (This ensures it exists and is built for the correct OS/Architecture)
-RUN npx prisma generate
 
-# 4. Remove development dependencies to keep the image small
-RUN pnpm prune --prod
-# --- FIX END ---
+# Generate the Prisma Client explicitly in the production environment
+# using the globally installed v6 CLI.
+RUN prisma generate
 
 # Create uploads directory with proper permissions
 RUN mkdir -p /app/uploads && chown -R nestjs:nodejs /app/uploads
