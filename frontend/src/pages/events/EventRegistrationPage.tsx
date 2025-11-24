@@ -204,7 +204,7 @@ const EventRegistrationPage: React.FC = () => {
   const spotsLeft = event.maxParticipants - event.registrationCount;
   const isEventFull = spotsLeft <= 0;
   const effectivePrice = event.memberPrice || event.price || 0;
-  const isWaitlistRegistration = isEventFull && event.allowWaitlist;
+  const isWaitlistRegistration = false;
   const eventImage =
     event.imageUrl ||
     `https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=400&fit=crop`;
@@ -266,15 +266,7 @@ const EventRegistrationPage: React.FC = () => {
             ? "Payment required to confirm your registration"
             : "Your registration is being processed",
         },
-        WAITLISTED: {
-          bg: "bg-blue-50 border-blue-200",
-          text: "text-blue-800",
-          icon: "⏰",
-          title: "On Waitlist",
-          message: userRegistration.position
-            ? `You're #${userRegistration.position} on the waitlist`
-            : "You'll be notified if a spot becomes available",
-        },
+
       };
 
       const config =
@@ -500,22 +492,12 @@ const EventRegistrationPage: React.FC = () => {
                 ) : (
                   <p className="text-sm text-red-600 mt-2 font-medium">
                     Event is full
-                    {event.allowWaitlist && " - Join waitlist below"}
                   </p>
                 )}
               </div>
             </div>
 
-            {/* Waitlist Notice */}
-            {isWaitlistRegistration && (
-              <div className="mb-8">
-                <Alert
-                  type="info"
-                  title="Join Waitlist"
-                  message="This event is full, but you can join the waitlist. You'll be added to the waitlist and notified if a spot becomes available."
-                />
-              </div>
-            )}
+
 
             {/* Error Display */}
             {registrationError && (

@@ -101,7 +101,5 @@ export class CreateEventInput {
   @IsBoolean()
   isPublic: boolean = true;
 
-  @Field({ defaultValue: true })
-  @IsBoolean()
-  allowWaitlist: boolean = true;
+
 }

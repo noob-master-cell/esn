@@ -9,6 +9,7 @@ import { Auth0Guard } from '../auth/guards/auth0.guard';
 import { OrganizerGuard } from './guards/organizer.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
+import { PaginatedEvents } from './dto/paginated-events.output';
 
 @Resolver(() => Event)
 export class EventsResolver {
@@ -27,7 +28,7 @@ export class EventsResolver {
     return this.eventsService.create(createEventInput, user.id);
   }
 
-  @Query(() => [Event], { name: 'events' })
+  @Query(() => PaginatedEvents, { name: 'events' })
   async findAll(
     @Args('filter', { nullable: true }) filter: EventsFilterInput = {},
     @Args('includePrivate', { nullable: true, defaultValue: false })
@@ -106,6 +107,6 @@ export class EventsResolver {
   ) {
     console.log('🔢 Events Resolver: Get events count query');
     const events = await this.eventsService.findAll(filter);
-    return events.length;
+    return events.total;
   }
 }

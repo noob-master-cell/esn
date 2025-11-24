@@ -123,52 +123,7 @@ const EventDetailsPage: React.FC = () => {
         />
       </div>
 
-      {/* Quick action buttons for mobile */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 lg:hidden">
-        <div className="max-w-sm mx-auto">
-          {isRegistered ? (
-            <div className="space-y-2">
-              <button
-                disabled
-                className="w-full py-4 px-6 bg-green-100 text-green-800 rounded-xl font-semibold text-lg"
-              >
-                ✓ You're registered
-              </button>
-              {registration && (
-                <p className="text-xs text-center text-gray-600">
-                  Status: {registration.status}
-                  {registration.registrationType === "WAITLIST" &&
-                    " (Waitlisted)"}
-                </p>
-              )}
-            </div>
-          ) : spotsLeft > 0 ? (
-            <button
-              onClick={handleRegisterClick}
-              className="w-full py-4 px-6 bg-blue-600 text-white rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors"
-            >
-              Register Now
-            </button>
-          ) : canRegister ? (
-            <button
-              onClick={handleRegisterClick}
-              className="w-full py-4 px-6 bg-orange-600 text-white rounded-xl font-semibold text-lg hover:bg-orange-700 transition-colors"
-            >
-              Join Waitlist
-            </button>
-          ) : (
-            <button
-              disabled
-              className="w-full py-4 px-6 bg-gray-300 text-gray-600 rounded-xl font-semibold text-lg"
-            >
-              Registration Closed
-            </button>
-          )}
-        </div>
-      </div>
 
-      {/* Bottom padding for mobile sticky button */}
-      <div className="h-20 lg:hidden"></div>
     </div>
   );
 };

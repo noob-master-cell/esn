@@ -8,6 +8,7 @@ import {
     VERIFY_ESN_CARD,
     RECENT_EVENTS,
     DELETE_USER_ADMIN,
+    ALL_EVENTS_SIMPLE,
 } from "../../graphql/admin";
 
 export const useAdminStats = () => {
@@ -15,9 +16,35 @@ export const useAdminStats = () => {
     return { stats: data?.adminDashboardStats, loading, error, refetch };
 };
 
-export const useAdminUsers = (variables?: any) => {
+import { useState } from "react";
+
+export const useAdminUsers = (initialFilter?: any) => {
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(20);
+
+    // Extract the filter object if it's wrapped, otherwise use the whole object
+    const filterParams = initialFilter?.filter || initialFilter || {};
+
+    const variables = {
+        filter: {
+            ...filterParams,
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+        },
+    };
+
     const { data, loading, error, refetch } = useQuery(ALL_USERS, { variables });
-    return { users: data?.users, loading, error, refetch };
+
+    return {
+        users: data?.users?.items || [],
+        total: data?.users?.total || 0,
+        page,
+        setPage,
+        pageSize,
+        loading,
+        error,
+        refetch,
+    };
 };
 
 export const useUpdateUserRole = () => {
@@ -29,7 +56,7 @@ export const useAdminRegistrations = (variables?: any) => {
     const { data, loading, error, refetch } = useQuery(ALL_REGISTRATIONS, {
         variables,
     });
-    return { registrations: data?.allRegistrations, loading, error, refetch };
+    return { registrations: data?.registrations, loading, error, refetch };
 };
 
 export const useUpdateRegistrationStatus = () => {
@@ -46,10 +73,15 @@ export const useVerifyEsnCard = () => {
 
 export const useRecentEvents = (variables?: any) => {
     const { data, loading, error, refetch } = useQuery(RECENT_EVENTS, { variables });
-    return { events: data?.recentEvents, loading, error, refetch };
+    return { events: data?.events?.items || [], loading, error, refetch };
 };
 
 export const useDeleteUserAdmin = () => {
     const [deleteUserAdmin, { loading, error }] = useMutation(DELETE_USER_ADMIN);
     return { deleteUserAdmin, loading, error };
+};
+
+export const useAllEventsSimple = () => {
+    const { data, loading, error } = useQuery(ALL_EVENTS_SIMPLE);
+    return { events: data?.events?.items || [], loading, error };
 };

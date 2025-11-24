@@ -96,11 +96,7 @@ export const apolloClient = new ApolloClient({
               return existing ?? 0;
             }
           },
-          waitlistCount: {
-            read(existing) {
-              return existing ?? 0;
-            }
-          }
+
         }
       }
     }

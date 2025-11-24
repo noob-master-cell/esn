@@ -2,11 +2,10 @@
 import React, { useState } from "react";
 import {
   useAdminUsers,
-  useDeactivateUser,
-  useActivateUser,
   useVerifyEsnCard,
 } from "../../hooks/api/useAdmin";
 import { Button } from "../../components/ui/Button";
+import { Pagination } from "../../components/ui/Pagination";
 import { Badge } from "../../components/ui/Badge";
 
 interface UserFilters {
@@ -48,7 +47,7 @@ const UserManagement: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { users, refetch } = useAdminUsers({
+  const { users, total, page, setPage, pageSize, refetch } = useAdminUsers({
     filter: {
       search: filters.search || undefined,
       role: filters.role !== "all" ? filters.role : undefined,
@@ -68,11 +67,16 @@ const UserManagement: React.FC = () => {
     },
   });
 
-  const { deactivateUser } = useDeactivateUser();
-  const { activateUser } = useActivateUser();
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  // Reset page when filters change
+  React.useEffect(() => {
+    setPage(1);
+  }, [filters, setPage]);
+
   const { verifyEsnCard } = useVerifyEsnCard();
-
-
 
   const filteredUsers = users || [];
 
@@ -99,8 +103,6 @@ const UserManagement: React.FC = () => {
       setShowESNCardModal(null);
       refetch();
       setTimeout(() => setSuccessMessage(""), 3000);
-      refetch();
-      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "Failed to verify ESN card"
@@ -109,17 +111,11 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const handleToggleUserStatus = async (userId: string, isActive: boolean) => {
+  const handleToggleUserStatus = async (_userId: string, _isActive: boolean) => {
     try {
-      if (isActive) {
-        await deactivateUser({ variables: { userId } });
-        setSuccessMessage("User deactivated successfully");
-      } else {
-        await activateUser({ variables: { userId } });
-        setSuccessMessage("User activated successfully");
-      }
-      refetch();
-      setTimeout(() => setSuccessMessage(""), 3000);
+      // TODO: Implement user activation/deactivation mutations
+      setErrorMessage("User activation/deactivation is not yet implemented");
+      setTimeout(() => setErrorMessage(""), 5000);
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "Failed to update user status"
@@ -584,6 +580,17 @@ const UserManagement: React.FC = () => {
             </table>
           </div>
         )}
+      </div>
+
+      {/* Pagination */}
+      <div className="mt-4">
+        <Pagination
+          currentPage={page}
+          totalPages={Math.ceil(total / pageSize)}
+          onPageChange={handlePageChange}
+          totalItems={total}
+          itemsPerPage={pageSize}
+        />
       </div>
 
       {/* User Details Modal */}

@@ -9,13 +9,33 @@ import {
     GET_EVENT_FOR_EDIT,
 } from "../../graphql/events";
 
-export const useEvents = (variables?: any) => {
+import { useState } from "react";
+
+export const useEvents = (initialFilter?: any) => {
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(20);
+
+    // Extract the filter object if it's wrapped, otherwise use the whole object
+    const filterParams = initialFilter?.filter || initialFilter || {};
+
+    const variables = {
+        filter: {
+            ...filterParams,
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+        },
+    };
+
     const { data, loading, error, refetch } = useQuery(GET_EVENTS, {
         variables,
     });
 
     return {
-        events: data?.events || [],
+        events: data?.events?.items || [],
+        total: data?.events?.total || 0,
+        page,
+        setPage,
+        pageSize,
         loading,
         error,
         refetch,
@@ -50,9 +70,7 @@ export const useEventForEdit = (id: string) => {
 };
 
 export const useCreateEvent = () => {
-    const [createEvent, { loading, error, data }] = useMutation(CREATE_EVENT, {
-        refetchQueries: [{ query: GET_EVENTS }],
-    });
+    const [createEvent, { loading, error, data }] = useMutation(CREATE_EVENT);
 
     return {
         createEvent,
@@ -74,9 +92,7 @@ export const useUpdateEvent = () => {
 };
 
 export const useDeleteEvent = () => {
-    const [deleteEvent, { loading, error }] = useMutation(DELETE_EVENT, {
-        refetchQueries: [{ query: GET_EVENTS }],
-    });
+    const [deleteEvent, { loading, error }] = useMutation(DELETE_EVENT);
 
     return {
         deleteEvent,

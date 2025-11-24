@@ -9,15 +9,20 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UserRole } from '@prisma/client';
 
+import { UsersFilterInput } from './dto/users-filter.input';
+import { PaginatedUsers } from './dto/paginated-users.output';
+
 @Resolver(() => User)
 export class UsersResolver {
   constructor(private usersService: UsersService) { }
 
-  @Query(() => [User])
+  @Query(() => PaginatedUsers)
   @UseGuards(Auth0Guard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  async users() {
-    return this.usersService.findAll();
+  async users(
+    @Args('filter', { nullable: true }) filter: UsersFilterInput = {},
+  ) {
+    return this.usersService.findAll(filter);
   }
 
   @Query(() => User, { nullable: true })

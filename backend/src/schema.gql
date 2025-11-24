@@ -38,18 +38,23 @@ enum UserRole {
   ADMIN
 }
 
+type PaginatedUsers {
+  items: [User!]!
+  total: Int!
+}
+
 type Event {
   id: ID!
   title: String!
   description: String!
   shortDescription: String
-  category: EventCategory!
-  type: EventType!
-  status: EventStatus!
+  category: EventCategory
+  type: EventType
+  status: EventStatus
   startDate: DateTime!
-  endDate: DateTime!
+  endDate: DateTime
   registrationDeadline: DateTime
-  location: String!
+  location: String
   address: String
   maxParticipants: Int!
   price: Float
@@ -59,13 +64,11 @@ type Event {
   requirements: String
   additionalInfo: String
   isPublic: Boolean!
-  allowWaitlist: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   organizer: User!
   organizerId: String!
   registrationCount: Int!
-  waitlistCount: Int!
   isRegistered: Boolean
   canRegister: Boolean
 }
@@ -103,6 +106,11 @@ enum EventStatus {
   CANCELLED
 }
 
+type PaginatedEvents {
+  items: [Event!]!
+  total: Int!
+}
+
 type Registration {
   id: ID!
   createdAt: DateTime!
@@ -113,7 +121,6 @@ type Registration {
   eventId: String!
   status: RegistrationStatus!
   registrationType: RegistrationType!
-  position: Int
   paymentRequired: Boolean!
   paymentStatus: PaymentStatus!
   amountDue: Float!
@@ -130,7 +137,6 @@ type Registration {
 enum RegistrationStatus {
   PENDING
   CONFIRMED
-  WAITLISTED
   CANCELLED
   ATTENDED
   NO_SHOW
@@ -139,7 +145,6 @@ enum RegistrationStatus {
 """Registration type options"""
 enum RegistrationType {
   REGULAR
-  WAITLIST
   VIP
   ORGANIZER
 }
@@ -168,10 +173,10 @@ type Query {
   me: User!
   hello: String!
   healthCheck: String!
-  users: [User!]!
+  users(filter: UsersFilterInput): PaginatedUsers!
   user(id: String!): User
   myProfile: User!
-  events(filter: EventsFilterInput, includePrivate: Boolean = false): [Event!]!
+  events(filter: EventsFilterInput, includePrivate: Boolean = false): PaginatedEvents!
   myEvents: [Event!]!
   event(id: ID!): Event!
   eventsCount(filter: EventsFilterInput): Int!
@@ -181,8 +186,17 @@ type Query {
   registration(id: ID!): Registration!
   registrationsCount(filter: RegistrationFilterInput): Int!
   eventCapacityInfo(eventId: ID!): Int!
-  waitlistRegistrations(eventId: ID!): [Registration!]!
   adminStats: AdminStats!
+}
+
+input UsersFilterInput {
+  search: String
+  role: UserRole
+  isActive: Boolean
+  esnCardVerified: Boolean
+  university: String
+  skip: Int = 0
+  take: Int = 20
 }
 
 input EventsFilterInput {
@@ -229,7 +243,6 @@ type Mutation {
   updateRegistration(updateRegistrationInput: UpdateRegistrationInput!): Registration!
   cancelRegistration(id: ID!): Registration!
   markAttendance(registrationId: ID!, attended: Boolean!): Boolean!
-  promoteFromWaitlist(registrationId: ID!): Registration!
 }
 
 input UpdateUserInput {
@@ -267,7 +280,6 @@ input CreateEventInput {
   requirements: String
   additionalInfo: String
   isPublic: Boolean! = true
-  allowWaitlist: Boolean! = true
 }
 
 input UpdateEventInput {
@@ -289,7 +301,6 @@ input UpdateEventInput {
   requirements: String
   additionalInfo: String
   isPublic: Boolean = true
-  allowWaitlist: Boolean = true
   id: ID!
 }
 
@@ -297,7 +308,7 @@ input CreateRegistrationInput {
   eventId: ID!
 
   """
-  The type of registration (e.g., REGULAR, WAITLIST). If not provided, it will be determined by the service.
+  The type of registration (e.g., REGULAR). If not provided, it will be determined by the service.
   """
   registrationType: RegistrationType
   specialRequests: String
@@ -310,7 +321,7 @@ input UpdateRegistrationInput {
   eventId: ID
 
   """
-  The type of registration (e.g., REGULAR, WAITLIST). If not provided, it will be determined by the service.
+  The type of registration (e.g., REGULAR). If not provided, it will be determined by the service.
   """
   registrationType: RegistrationType
   specialRequests: String

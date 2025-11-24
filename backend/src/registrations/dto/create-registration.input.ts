@@ -19,7 +19,7 @@ export class CreateRegistrationInput {
   @Field(() => RegistrationType, {
     nullable: true,
     description:
-      'The type of registration (e.g., REGULAR, WAITLIST). If not provided, it will be determined by the service.',
+      'The type of registration (e.g., REGULAR). If not provided, it will be determined by the service.',
   })
   @IsOptional()
   @IsEnum(RegistrationType)

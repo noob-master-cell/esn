@@ -19,7 +19,7 @@ import { UserRole, EventStatus } from '@prisma/client';
 
 @Injectable()
 export class RegistrationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(
     createRegistrationInput: CreateRegistrationInput,
@@ -40,7 +40,7 @@ export class RegistrationsService {
           in: [
             RegistrationStatus.CONFIRMED,
             RegistrationStatus.PENDING,
-            RegistrationStatus.WAITLISTED,
+
           ],
         },
       },
@@ -66,10 +66,7 @@ export class RegistrationsService {
           throw new ConflictException(
             `You have a pending registration for "${existingRegistration.event.title}". Please complete your registration or contact support.`,
           );
-        case RegistrationStatus.WAITLISTED:
-          throw new ConflictException(
-            `You are already on the waitlist for "${existingRegistration.event.title}". You'll be notified if a spot becomes available.`,
-          );
+
         default:
           throw new ConflictException(
             `You already have an active registration for "${existingRegistration.event.title}".`,
@@ -115,13 +112,7 @@ export class RegistrationsService {
     let status = RegistrationStatus.PENDING;
 
     if (isEventFull) {
-      if (!event.allowWaitlist) {
-        throw new BadRequestException(
-          'Event is full and waitlist is not allowed',
-        );
-      }
-      registrationType = RegistrationType.WAITLIST;
-      status = RegistrationStatus.WAITLISTED;
+      throw new BadRequestException('Event is full');
     }
 
     // Calculate pricing
@@ -143,15 +134,6 @@ export class RegistrationsService {
 
     // Calculate position for waitlist
     let position: number | null = null;
-    if (registrationType === RegistrationType.WAITLIST) {
-      const waitlistCount = await this.prisma.registration.count({
-        where: {
-          eventId: createRegistrationInput.eventId,
-          status: RegistrationStatus.WAITLISTED,
-        },
-      });
-      position = waitlistCount + 1;
-    }
 
     try {
       // Create the registration with enhanced error handling
@@ -407,10 +389,7 @@ export class RegistrationsService {
       },
     });
 
-    // If this was a confirmed registration, try to promote someone from waitlist
-    if (registration.status === RegistrationStatus.CONFIRMED) {
-      await this.promoteFromWaitlist(registration.eventId);
-    }
+
 
     console.log(
       '✅ Registration Service: Registration cancelled:',
@@ -461,61 +440,7 @@ export class RegistrationsService {
     });
   }
 
-  // Helper method to promote someone from waitlist when a spot opens up
-  private async promoteFromWaitlist(eventId: string) {
-    console.log(
-      '🔄 Registration Service: Promoting from waitlist for event:',
-      eventId,
-    );
 
-    const nextInWaitlist = await this.prisma.registration.findFirst({
-      where: {
-        eventId,
-        status: RegistrationStatus.WAITLISTED,
-        registrationType: RegistrationType.WAITLIST,
-      },
-      orderBy: { position: 'asc' },
-    });
-
-    if (nextInWaitlist) {
-      await this.prisma.registration.update({
-        where: { id: nextInWaitlist.id },
-        data: {
-          status: RegistrationStatus.CONFIRMED,
-          registrationType: RegistrationType.REGULAR,
-          position: null,
-          confirmedAt: new Date(),
-        },
-      });
-
-      // Update positions for remaining waitlist
-      await this.updateWaitlistPositions(eventId);
-
-      console.log(
-        '✅ Registration Service: Promoted user from waitlist:',
-        nextInWaitlist.userId,
-      );
-    }
-  }
-
-  // Helper method to update waitlist positions
-  private async updateWaitlistPositions(eventId: string) {
-    const waitlistRegistrations = await this.prisma.registration.findMany({
-      where: {
-        eventId,
-        status: RegistrationStatus.WAITLISTED,
-        registrationType: RegistrationType.WAITLIST,
-      },
-      orderBy: { registeredAt: 'asc' },
-    });
-
-    for (let i = 0; i < waitlistRegistrations.length; i++) {
-      await this.prisma.registration.update({
-        where: { id: waitlistRegistrations[i].id },
-        data: { position: i + 1 },
-      });
-    }
-  }
 
   // Update the transformRegistration method
   private transformRegistration(registration: any) {
@@ -547,26 +472,23 @@ export class RegistrationsService {
         reg.status === RegistrationStatus.PENDING,
     );
 
-    // Count waitlisted registrations
-    const waitlistedRegistrations = activeRegistrations.filter(
-      (reg: any) => reg.status === RegistrationStatus.WAITLISTED,
-    );
+
 
     const registrationCount = confirmedRegistrations.length;
-    const waitlistCount = waitlistedRegistrations.length;
+
 
     // For registration context, we know this user is now registered
     const isRegistered = true;
     const canRegister = false; // User just registered, so they can't register again
 
     console.log(
-      `📊 Transform Event for Registration ${event.title}: registrationCount=${registrationCount}, waitlistCount=${waitlistCount}`,
+      `📊 Transform Event for Registration ${event.title}: registrationCount=${registrationCount}`,
     );
 
     return {
       ...event,
       registrationCount,
-      waitlistCount,
+
       isRegistered,
       canRegister,
     };

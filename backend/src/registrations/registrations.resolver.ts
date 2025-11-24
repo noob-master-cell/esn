@@ -180,48 +180,7 @@ export class RegistrationsResolver {
     return true;
   }
 
-  @Query(() => [Registration], { name: 'waitlistRegistrations' })
-  @UseGuards(Auth0Guard, RolesGuard)
-  @Roles(UserRole.ADMIN)
-  async findWaitlistRegistrations(
-    @Args('eventId', { type: () => ID }) eventId: string,
-    @CurrentUser() user: User,
-  ) {
-    console.log(
-      '⏳ Registration Resolver: Find waitlist registrations for event:',
-      eventId,
-    );
 
-    const filter = {
-      eventId,
-      status: RegistrationStatus.WAITLISTED, // Fix: Use enum instead of string
-      orderBy: 'position',
-      orderDirection: 'asc' as const,
-    };
 
-    return this.registrationsService.findAll(filter, user.id, user.role);
-  }
 
-  @Mutation(() => Registration)
-  @UseGuards(Auth0Guard, RolesGuard)
-  @Roles(UserRole.ADMIN)
-  async promoteFromWaitlist(
-    @Args('registrationId', { type: () => ID }) registrationId: string,
-    @CurrentUser() user: User,
-  ) {
-    console.log(
-      '🔄 Registration Resolver: Promote from waitlist:',
-      registrationId,
-    );
-
-    return this.registrationsService.update(
-      registrationId,
-      {
-        id: registrationId,
-        status: RegistrationStatus.CONFIRMED, // Fix: Use enum instead of string
-      },
-      user.id,
-      user.role,
-    );
-  }
 }

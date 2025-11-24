@@ -7,6 +7,7 @@ import {
 } from "../../hooks/api/useEvents";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
+import { Pagination } from "../../components/ui/Pagination";
 import { Alert } from "../../components/ui/Alert";
 
 interface EventFilters {
@@ -48,16 +49,24 @@ const EventManagement: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { events, loading, error, refetch } = useEvents({
+  const { events, total, page, setPage, pageSize, loading, error, refetch } = useEvents({
     filter: {
       search: filters.search || undefined,
       status: filters.status !== "all" ? filters.status : undefined,
       category: filters.category !== "all" ? filters.category : undefined,
-      take: 50,
       orderBy: "createdAt",
       orderDirection: "desc",
     },
   });
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  // Reset page when filters change
+  React.useEffect(() => {
+    setPage(1);
+  }, [filters, setPage]);
 
   const { deleteEvent, loading: deleting } = useDeleteEvent();
   const { publishEvent, loading: publishing } = usePublishEvent();
@@ -669,6 +678,17 @@ const EventManagement: React.FC = () => {
             </table>
           </div>
         )}
+      </div>
+
+      {/* Pagination */}
+      <div className="mt-4">
+        <Pagination
+          currentPage={page}
+          totalPages={Math.ceil(total / pageSize)}
+          onPageChange={handlePageChange}
+          totalItems={total}
+          itemsPerPage={pageSize}
+        />
       </div>
 
       {/* Delete Confirmation Modal */}

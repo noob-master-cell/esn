@@ -1,5 +1,7 @@
 // frontend/src/components/admin/RegistrationFilters.tsx
 import React from "react";
+import { useAllEventsSimple } from "../../hooks/api/useAdmin";
+import { Icon } from "../common/Icon";
 
 interface RegistrationFiltersProps {
   filters: {
@@ -17,6 +19,7 @@ export const RegistrationFilters: React.FC<RegistrationFiltersProps> = ({
   filters,
   onFilterChange,
 }) => {
+  const { events } = useAllEventsSimple();
   const handleInputChange = (key: string, value: string) => {
     onFilterChange({
       ...filters,
@@ -46,19 +49,9 @@ export const RegistrationFilters: React.FC<RegistrationFiltersProps> = ({
               onChange={(e) => handleInputChange("search", e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
-            <svg
-              className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
+            <div className="absolute left-3 top-2.5 text-gray-400">
+              <Icon name="search" size="sm" />
+            </div>
           </div>
         </div>
 
@@ -102,18 +95,23 @@ export const RegistrationFilters: React.FC<RegistrationFiltersProps> = ({
           </select>
         </div>
 
-        {/* Event Filter */}
+        {/* Event Filter - Dropdown instead of text input */}
         <div className="min-w-48">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Event ID
+            Filter by Event
           </label>
-          <input
-            type="text"
-            placeholder="Filter by event ID"
+          <select
             value={filters.eventId || ""}
             onChange={(e) => handleInputChange("eventId", e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+          >
+            <option value="">All Events</option>
+            {events.map((event) => (
+              <option key={event.id} value={event.id}>
+                {event.title} - {new Date(event.startDate).toLocaleDateString()}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Date From */}
@@ -194,7 +192,7 @@ export const RegistrationFilters: React.FC<RegistrationFiltersProps> = ({
           )}
           {filters.eventId && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-              Event: {filters.eventId}
+              Event: {events.find(e => e.id === filters.eventId)?.title || filters.eventId}
               <button
                 onClick={() => handleInputChange("eventId", "")}
                 className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-yellow-200"

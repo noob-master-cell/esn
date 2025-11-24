@@ -8,7 +8,7 @@ export const REGISTER_FOR_EVENT = gql`
       id
       status
       registrationType
-      position
+
       paymentRequired
       paymentStatus
       amountDue
@@ -40,7 +40,7 @@ export const REGISTER_FOR_EVENT = gql`
         memberPrice
         maxParticipants
         registrationCount
-        waitlistCount
+
         isRegistered
         canRegister
         organizer {
@@ -59,7 +59,7 @@ export const GET_MY_REGISTRATIONS = gql`
       id
       status
       registrationType
-      position
+
       paymentRequired
       paymentStatus
       amountDue
@@ -85,7 +85,7 @@ export const GET_MY_REGISTRATIONS = gql`
         memberPrice
         maxParticipants
         registrationCount
-        waitlistCount
+
         isRegistered
         canRegister
         organizer {
@@ -111,7 +111,7 @@ export const UPDATE_REGISTRATION = gql`
       event {
         id
         registrationCount
-        waitlistCount
+
         isRegistered
         canRegister
       }
@@ -130,7 +130,7 @@ export const CANCEL_REGISTRATION = gql`
       event {
         id
         registrationCount
-        waitlistCount
+
         isRegistered
         canRegister
       }
@@ -167,7 +167,7 @@ export const GET_REGISTRATION_DETAILS = gql`
       id
       status
       registrationType
-      position
+
       paymentRequired
       paymentStatus
       amountDue
@@ -192,7 +192,7 @@ export const GET_REGISTRATION_DETAILS = gql`
         location
         maxParticipants
         registrationCount
-        waitlistCount
+
         organizer {
           id
           firstName

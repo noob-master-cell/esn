@@ -4,6 +4,10 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { Footer } from "./components/layout/Footer";
 import { Navbar } from "./components/layout/Navbar";
 import { ScrollToTop } from "./components/ScrollToTop";
+import { setTokenGetter } from "./lib/apollo";
+import { useEffect } from "react";
+import { initGA } from "./utils/analytics";
+import { usePageTracking } from "./hooks/usePageTracking";
 
 import "./App.css";
 import "./styles/App.css";
@@ -21,7 +25,23 @@ const ConditionalNavbar = () => {
 };
 
 function AppContent() {
-  const { isLoading } = useAuth0();
+  const { isLoading, getAccessTokenSilently } = useAuth0();
+
+  // Initialize Google Analytics
+  useEffect(() => {
+    const measurementId = import.meta.env.VITE_GA4_MEASUREMENT_ID;
+    if (measurementId) {
+      initGA(measurementId);
+    }
+  }, []);
+
+  // Set up Apollo token getter
+  useEffect(() => {
+    setTokenGetter(() => getAccessTokenSilently());
+  }, [getAccessTokenSilently]);
+
+  // Track page views automatically
+  usePageTracking();
 
   if (isLoading) {
     return (

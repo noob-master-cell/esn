@@ -4,6 +4,9 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-store';
 import { join } from 'path';
 
 import { PrismaModule } from '.././prisma/prisma.module';
@@ -12,6 +15,7 @@ import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
 import { RegistrationsModule } from './registrations/registrations.module';
 import { AdminModule } from './admin/admin.module';
+import { CalendarModule } from './calendar/calendar.module';
 import { UploadController } from './common/upload.controller';
 import { HealthController } from './common/health.controller';
 
@@ -21,16 +25,30 @@ import { HealthController } from './common/health.controller';
       isGlobal: true,
     }),
     // Rate Limiting: 100 requests per minute per IP (applies to REST endpoints only)
-    ThrottlerModule.forRoot([{
-      ttl: 60000, // 60 seconds
-      limit: 100, // 100 requests
-      skipIf: () => false, // Can be configured per-route with @SkipThrottle()
-    }]),
+    // Rate Limiting: 100 requests per minute per IP (applies to REST endpoints only)
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 100,
+        },
+      ],
+      storage: new ThrottlerStorageRedisService(
+        process.env.REDIS_URL || 'redis://localhost:6379',
+      ),
+    }),
+    // Caching
+    CacheModule.register({
+      isGlobal: true,
+      store: redisStore as any,
+      url: process.env.REDIS_URL || 'redis://localhost:6379',
+      ttl: 60, // Default cache TTL: 60 seconds
+    }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      playground: true,
-      introspection: true,
+      playground: process.env.NODE_ENV !== 'production',
+      introspection: process.env.NODE_ENV !== 'production',
       context: ({ req }) => ({ req }),
     }),
     PrismaModule,
@@ -39,6 +57,7 @@ import { HealthController } from './common/health.controller';
     EventsModule,
     RegistrationsModule,
     AdminModule,
+    CalendarModule,
   ],
   controllers: [UploadController, HealthController],
   // Note: ThrottlerGuard not applied globally to avoid GraphQL conflicts

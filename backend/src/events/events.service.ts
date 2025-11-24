@@ -1,15 +1,10 @@
-// backend/src/events/events.service.ts
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateEventInput } from './dto/create-event.input';
 import { UpdateEventInput } from './dto/update-event.input';
 import { EventsFilterInput } from './dto/events-filter.input';
 import { EventStatus, UserRole, RegistrationStatus } from '@prisma/client';
+import { PaginatedEvents } from './dto/paginated-events.output';
 
 @Injectable()
 export class EventsService {
@@ -55,7 +50,7 @@ export class EventsService {
     return this.transformEvent(event);
   }
 
-  async findAll(filter: EventsFilterInput = {}, userId?: string) {
+  async findAll(filter: EventsFilterInput = {}, userId?: string): Promise<PaginatedEvents> {
     console.log('📋 Events Service: Finding events with filter:', filter);
 
     const where: any = {};
@@ -101,26 +96,32 @@ export class EventsService {
     const orderBy: any = {};
     orderBy[filter.orderBy || 'startDate'] = filter.orderDirection || 'asc';
 
-    const events = await this.prisma.event.findMany({
-      where,
-      include: {
-        organizer: true,
-        registrations: {
-          where: {
-            status: {
-              not: RegistrationStatus.CANCELLED,
+    const [items, total] = await Promise.all([
+      this.prisma.event.findMany({
+        where,
+        include: {
+          organizer: true,
+          registrations: {
+            where: {
+              status: {
+                not: RegistrationStatus.CANCELLED,
+              },
             },
+            include: { user: true },
           },
-          include: { user: true },
         },
-      },
-      orderBy,
-      skip: filter.skip || 0,
-      take: filter.take || 20,
-    });
+        orderBy,
+        skip: filter.skip || 0,
+        take: filter.take || 20,
+      }),
+      this.prisma.event.count({ where }),
+    ]);
 
-    console.log(`✅ Events Service: Found ${events.length} events`);
-    return events.map((event) => this.transformEvent(event, userId));
+    console.log(`✅ Events Service: Found ${items.length} events out of ${total}`);
+    return {
+      items: items.map((event) => this.transformEvent(event, userId)),
+      total,
+    };
   }
 
   async findOne(id: string, userId?: string) {
@@ -332,13 +333,10 @@ export class EventsService {
         reg.status === RegistrationStatus.PENDING,
     );
 
-    // Count waitlisted registrations
-    const waitlistedRegistrations = activeRegistrations.filter(
-      (reg: any) => reg.status === RegistrationStatus.WAITLISTED,
-    );
+
 
     const registrationCount = confirmedRegistrations.length;
-    const waitlistCount = waitlistedRegistrations.length;
+
 
     // Check if current user is registered
     const isRegistered = userId
@@ -350,13 +348,13 @@ export class EventsService {
       !isRegistered && registrationCount < event.maxParticipants;
 
     console.log(
-      `📊 Transform Event ${event.title}: registrationCount=${registrationCount}, waitlistCount=${waitlistCount}`,
+      `📊 Transform Event ${event.title}: registrationCount=${registrationCount}`,
     );
 
     return {
       ...event,
       registrationCount,
-      waitlistCount,
+
       isRegistered,
       canRegister,
     };

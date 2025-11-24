@@ -11,8 +11,7 @@ interface EventRegistrationButtonProps {
     status: string;
     maxParticipants: number;
     registrationCount: number;
-    waitlistCount?: number;
-    allowWaitlist: boolean;
+
     price?: number;
     memberPrice?: number;
     type: string;
@@ -53,7 +52,6 @@ export const EventRegistrationButton: React.FC<
   // Calculate event status
   const spotsLeft = event.maxParticipants - event.registrationCount;
   const isEventFull = spotsLeft <= 0;
-  const canJoinWaitlist = isEventFull && event.allowWaitlist && canRegister;
   const canRegisterForSpot = !isEventFull && canRegister;
 
   // Check if registration deadline has passed
@@ -68,7 +66,7 @@ export const EventRegistrationButton: React.FC<
       return;
     }
 
-    if (!canRegisterForSpot && !canJoinWaitlist) {
+    if (!canRegisterForSpot) {
       alert("Registration is not available for this event.");
       return;
     }
@@ -175,11 +173,7 @@ export const EventRegistrationButton: React.FC<
           ) : (
             <p className="text-sm text-red-600 mt-2 text-center font-medium">
               Event is full
-              {event.waitlistCount && event.waitlistCount > 0 && (
-                <span className="block text-blue-600">
-                  {event.waitlistCount} on waitlist
-                </span>
-              )}
+
             </p>
           )}
         </div>
@@ -227,7 +221,7 @@ export const EventRegistrationButton: React.FC<
       {/* Header */}
       <div className="text-center mb-4">
         <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          {canJoinWaitlist ? "Join Waitlist" : "Register for Event"}
+          {canRegisterForSpot ? "Register for Event" : "Event Full"}
         </h3>
         {getPrice()}
       </div>
@@ -259,11 +253,7 @@ export const EventRegistrationButton: React.FC<
         ) : (
           <p className="text-sm text-red-600 mt-2 text-center font-medium">
             Event is full
-            {event.waitlistCount && event.waitlistCount > 0 && (
-              <span className="block text-blue-600">
-                {event.waitlistCount} on waitlist
-              </span>
-            )}
+
           </p>
         )}
       </div>
@@ -295,15 +285,12 @@ export const EventRegistrationButton: React.FC<
 
       {/* Action Buttons */}
       <div className="space-y-3">
-        {canRegisterForSpot || canJoinWaitlist ? (
+        {canRegisterForSpot ? (
           <>
             <button
               onClick={handleQuickRegister}
               disabled={registering}
-              className={`w-full font-medium py-3 px-4 rounded-lg transition-colors ${canJoinWaitlist
-                ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
-                : "bg-green-600 text-white hover:bg-green-700"
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`w-full font-medium py-3 px-4 rounded-lg transition-colors bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {registering ? (
                 <div className="flex items-center justify-center">
@@ -327,10 +314,10 @@ export const EventRegistrationButton: React.FC<
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  {canJoinWaitlist ? "Joining Waitlist..." : "Registering..."}
+                  {"Registering..."}
                 </div>
               ) : (
-                <>{canJoinWaitlist ? "Join Waitlist" : "Register Now"}</>
+                <>{"Register Now"}</>
               )}
             </button>
 
@@ -344,7 +331,7 @@ export const EventRegistrationButton: React.FC<
           </>
         ) : (
           <div className="text-center">
-            {isEventFull && !event.allowWaitlist ? (
+            {isEventFull ? (
               <span className="text-red-600 font-medium">Event Full</span>
             ) : (
               <span className="text-gray-600">Registration not available</span>

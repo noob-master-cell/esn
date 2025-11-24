@@ -3,29 +3,32 @@ import { gql } from "@apollo/client";
 export const GET_EVENTS = gql`
   query GetEvents($filter: EventsFilterInput) {
     events(filter: $filter) {
-      id
-      title
-      shortDescription
-      category
-      type
-      status
-      startDate
-      endDate
-      location
-      maxParticipants
-      price
-      memberPrice
-      imageUrl
-      tags
-      registrationCount
-      waitlistCount
-      isRegistered
-      canRegister
-      organizer {
+      items {
         id
-        firstName
-        lastName
+        title
+        shortDescription
+        category
+        type
+        status
+        startDate
+        endDate
+        location
+        maxParticipants
+        price
+        memberPrice
+        imageUrl
+        tags
+        registrationCount
+
+        isRegistered
+        canRegister
+        organizer {
+          id
+          firstName
+          lastName
+        }
       }
+      total
     }
   }
 `;
@@ -53,9 +56,9 @@ export const GET_EVENT = gql`
       requirements
       additionalInfo
       isPublic
-      allowWaitlist
+
       registrationCount
-      waitlistCount
+
       isRegistered
       canRegister
       createdAt
@@ -73,15 +76,18 @@ export const GET_EVENT = gql`
 export const GET_EVENT_FOR_EDIT = GET_EVENT;
 
 export const GET_ADMIN_EVENTS = gql`
-  query GetAdminEvents {
-    events {
-      id
-      title
-      startDate
-      location
-      maxParticipants
-      registrationCount
-      status
+  query GetAdminEvents($filter: EventsFilterInput) {
+    events(filter: $filter) {
+      items {
+        id
+        title
+        startDate
+        location
+        maxParticipants
+        registrationCount
+        status
+      }
+      total
     }
   }
 `;
@@ -97,7 +103,7 @@ export const CREATE_EVENT = gql`
       location
       maxParticipants
       registrationCount
-      waitlistCount
+
       organizer {
         id
         firstName
@@ -118,7 +124,7 @@ export const UPDATE_EVENT = gql`
       location
       maxParticipants
       registrationCount
-      waitlistCount
+
       organizer {
         id
         firstName
@@ -140,7 +146,7 @@ export const PUBLISH_EVENT = gql`
       id
       status
       registrationCount
-      waitlistCount
+
     }
   }
 `;
@@ -161,7 +167,7 @@ export const REGISTER_FOR_EVENT = gql`
         id
         title
         registrationCount
-        waitlistCount
+
       }
     }
   }
@@ -177,7 +183,7 @@ export const CANCEL_REGISTRATION = gql`
       event {
         id
         registrationCount
-        waitlistCount
+
       }
     }
   }

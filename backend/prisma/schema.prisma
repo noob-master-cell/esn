@@ -140,7 +140,7 @@ model Event {
   
   // Settings
   isPublic     Boolean @default(true)
-  allowWaitlist Boolean @default(true)
+
   
   // Relations - Only ADMIN can create events
   organizer    User     @relation("EventCreator", fields: [organizerId], references: [id])
@@ -193,6 +193,7 @@ model Registration {
   payments Payment[]
 
   @@unique([userId, eventId])
+  @@index([eventId, status])
   @@map("registrations")
 }
 
@@ -304,7 +305,7 @@ enum EventType {
 enum RegistrationStatus {
   PENDING
   CONFIRMED
-  WAITLISTED
+
   CANCELLED
   ATTENDED
   NO_SHOW
@@ -312,7 +313,7 @@ enum RegistrationStatus {
 
 enum RegistrationType {
   REGULAR
-  WAITLIST
+
   VIP
   ORGANIZER
 }

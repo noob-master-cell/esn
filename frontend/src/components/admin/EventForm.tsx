@@ -30,7 +30,7 @@ interface EventFormData {
   requirements: string;
   additionalInfo: string;
   isPublic: boolean;
-  allowWaitlist: boolean;
+
 }
 
 interface EventFormProps {
@@ -60,7 +60,7 @@ const defaultFormData: EventFormData = {
   requirements: "",
   additionalInfo: "",
   isPublic: true,
-  allowWaitlist: true,
+
 };
 
 const CATEGORY_OPTIONS = [
@@ -541,29 +541,7 @@ export const EventForm: React.FC<EventFormProps> = ({
               </div>
             </div>
 
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="allowWaitlist"
-                  name="allowWaitlist"
-                  type="checkbox"
-                  checked={formData.allowWaitlist}
-                  onChange={handleCheckboxChange}
-                  className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                />
-              </div>
-              <div className="ml-3 text-sm">
-                <label
-                  htmlFor="allowWaitlist"
-                  className="font-medium text-gray-700"
-                >
-                  Allow Waitlist
-                </label>
-                <p className="text-gray-500">
-                  Automatically add users to a waitlist when the event is full.
-                </p>
-              </div>
-            </div>
+
           </div>
         </div>
       </Card>

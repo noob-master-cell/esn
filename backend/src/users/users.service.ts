@@ -1,18 +1,55 @@
 import { Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { PrismaService } from './../../prisma/prisma.service';
+import { UsersFilterInput } from './dto/users-filter.input';
+import { PaginatedUsers } from './dto/paginated-users.output';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) { }
 
-  async findAll(): Promise<User[]> {
-    const prismaUsers = await this.prisma.user.findMany({
-      where: { isActive: true },
-      orderBy: { createdAt: 'desc' },
-    });
+  async findAll(filter: UsersFilterInput = {}): Promise<PaginatedUsers> {
+    const where: Prisma.UserWhereInput = {};
 
-    return prismaUsers.map((user) => this.transformPrismaUser(user));
+    if (filter.search) {
+      where.OR = [
+        { email: { contains: filter.search, mode: 'insensitive' } },
+        { firstName: { contains: filter.search, mode: 'insensitive' } },
+        { lastName: { contains: filter.search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (filter.role) {
+      where.role = filter.role;
+    }
+
+    if (filter.isActive !== undefined) {
+      where.isActive = filter.isActive;
+    }
+
+    if (filter.esnCardVerified !== undefined) {
+      where.esnCardVerified = filter.esnCardVerified;
+    }
+
+    if (filter.university) {
+      where.university = { contains: filter.university, mode: 'insensitive' };
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        skip: filter.skip || 0,
+        take: filter.take || 20,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      items: items.map((user) => this.transformPrismaUser(user)),
+      total,
+    };
   }
 
   async findOne(id: string): Promise<User | null> {

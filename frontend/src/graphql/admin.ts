@@ -14,46 +14,65 @@ export const ADMIN_DASHBOARD_STATS = gql`
   }
 `;
 
-export const RECENT_EVENTS = gql`
-  query RecentEvents($limit: Int) {
-    events(filter: { take: $limit }) {
-      id
-      title
-      location
-      startDate
-      endDate
-      status
-      maxParticipants
-      registrationCount
-      imageUrl
-      category
-      type
-      price
-      memberPrice
-      organizer {
+export const ALL_EVENTS_SIMPLE = gql`
+  query AllEventsSimple {
+    events(filter: { take: 200 }) {
+      items {
         id
-        firstName
-        lastName
+        title
+        startDate
+        location
       }
     }
   }
 `;
 
+export const RECENT_EVENTS = gql`
+  query RecentEvents($limit: Int) {
+    events(filter: { take: $limit }) {
+      items {
+        id
+        title
+        location
+        startDate
+        endDate
+        status
+        maxParticipants
+        registrationCount
+        imageUrl
+        category
+        type
+        price
+        memberPrice
+        organizer {
+          id
+          firstName
+          lastName
+        }
+      }
+      total
+    }
+  }
+`;
+
 export const ALL_USERS = gql`
-  query AllUsers {
-    users {
-      id
-      email
-      firstName
-      lastName
-      avatar
-      role
-      isActive
-      esnCardVerified
-      university
-      chapter
-      createdAt
-      updatedAt
+  query AllUsers($filter: UsersFilterInput) {
+    users(filter: $filter) {
+      items {
+        id
+        email
+        firstName
+        lastName
+        avatar
+        role
+        isActive
+        esnCardVerified
+        university
+        chapter
+        createdAt
+        updatedAt
+      }
+      total
     }
   }
 `;

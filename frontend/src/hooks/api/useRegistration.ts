@@ -30,7 +30,7 @@ interface RegistrationState {
   }) => Promise<void>;
   error?: any;
   canRegister: boolean;
-  canJoinWaitlist: boolean;
+
 }
 
 export const useRegistration = ({
@@ -107,7 +107,7 @@ export const useRegistration = ({
                   event: {
                     ...existingData.event,
                     registrationCount: newRegistration.event.registrationCount,
-                    waitlistCount: newRegistration.event.waitlistCount,
+
                     isRegistered: true,
                     canRegister: false,
                   },
@@ -135,7 +135,7 @@ export const useRegistration = ({
                 ? {
                   ...e,
                   registrationCount: newRegistration.event.registrationCount,
-                  waitlistCount: newRegistration.event.waitlistCount,
+
                   isRegistered: true,
                   canRegister: false,
                 }
@@ -184,7 +184,7 @@ export const useRegistration = ({
           variables: {
             createRegistrationInput: {
               eventId,
-              registrationType: "REGULAR", // Backend will determine if it should be waitlist
+              registrationType: "REGULAR",
               ...options,
             },
           },
@@ -204,7 +204,7 @@ export const useRegistration = ({
     register,
     error: registrationsError || mutationError,
     canRegister: !isRegistered,
-    canJoinWaitlist: !isRegistered, // Backend will handle waitlist logic
+
   };
 };
 
@@ -218,7 +218,7 @@ interface RegistrationStatus {
   | "NONE"
   | "CONFIRMED"
   | "PENDING"
-  | "WAITLISTED"
+
   | "CANCELLED";
 }
 export const useRegistrationStatus = (eventId: string): RegistrationStatus => {
@@ -263,13 +263,7 @@ export const getRegistrationStatusInfo = (status: string) => {
       title: "Registration Pending",
       color: "yellow",
     },
-    WAITLISTED: {
-      bg: "bg-blue-50 border-blue-200",
-      text: "text-blue-800",
-      icon: "⏰",
-      title: "On Waitlist",
-      color: "blue",
-    },
+
     CANCELLED: {
       bg: "bg-red-50 border-red-200",
       text: "text-red-800",

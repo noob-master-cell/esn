@@ -1,5 +1,7 @@
 // frontend/src/components/admin/RegistrationsTable.tsx
 import React from "react";
+import { Icon } from "../common/Icon";
+import { EmptyState } from "../common/EmptyState";
 
 interface Registration {
   id: string;
@@ -32,6 +34,9 @@ interface RegistrationsTableProps {
   selectedRegistrations: string[];
   onSelectionChange: (selected: string[]) => void;
   onUpdateStatus: (registrationId: string, status: string) => void;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+  onSort?: (field: string) => void;
 }
 
 export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
@@ -41,6 +46,9 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
   selectedRegistrations,
   onSelectionChange,
   onUpdateStatus,
+  sortBy = 'registeredAt',
+  sortDirection = 'desc',
+  onSort,
 }) => {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -73,7 +81,7 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
 
     return (
       <span
-        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${config.bg} ${config.text}`}
+        className={`inline - flex px - 2 py - 1 text - xs font - semibold rounded - full ${config.bg} ${config.text} `}
       >
         {config.label}
       </span>
@@ -107,7 +115,7 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
 
     return (
       <span
-        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${config.bg} ${config.text}`}
+        className={`inline - flex px - 2 py - 1 text - xs font - semibold rounded - full ${config.bg} ${config.text} `}
       >
         {config.label}
       </span>
@@ -131,7 +139,7 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
 
     return (
       <span
-        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${config.bg} ${config.text}`}
+        className={`inline - flex px - 2 py - 1 text - xs font - medium rounded - full ${config.bg} ${config.text} `}
       >
         {config.label}
       </span>
@@ -193,26 +201,12 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
 
   if (registrations.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-        <div className="py-12">
-          <svg
-            className="w-12 h-12 mx-auto text-gray-400 mb-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-            />
-          </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No registrations found
-          </h3>
-          <p className="text-gray-500">Try adjusting your filters.</p>
-        </div>
+      <div className="bg-white rounded-lg shadow-sm">
+        <EmptyState
+          icon="calendar"
+          title="No registrations found"
+          description="Try adjusting your filters or search criteria"
+        />
       </div>
     );
   }
@@ -234,26 +228,66 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                User
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => onSort?.('user')}
+              >
+                <div className="flex items-center gap-1">
+                  User
+                  {sortBy === 'user' && (
+                    <Icon name={sortDirection === 'asc' ? 'chevron-up' : 'chevron-down'} size="xs" />
+                  )}
+                </div>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Event
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => onSort?.('event')}
+              >
+                <div className="flex items-center gap-1">
+                  Event
+                  {sortBy === 'event' && (
+                    <Icon name={sortDirection === 'asc' ? 'chevron-up' : 'chevron-down'} size="xs" />
+                  )}
+                </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Type
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => onSort?.('status')}
+              >
+                <div className="flex items-center gap-1">
+                  Status
+                  {sortBy === 'status' && (
+                    <Icon name={sortDirection === 'asc' ? 'chevron-up' : 'chevron-down'} size="xs" />
+                  )}
+                </div>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Payment
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => onSort?.('paymentStatus')}
+              >
+                <div className="flex items-center gap-1">
+                  Payment
+                  {sortBy === 'paymentStatus' && (
+                    <Icon name={sortDirection === 'asc' ? 'chevron-up' : 'chevron-down'} size="xs" />
+                  )}
+                </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Amount
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Registered
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => onSort?.('registeredAt')}
+              >
+                <div className="flex items-center gap-1">
+                  Registered
+                  {sortBy === 'registeredAt' && (
+                    <Icon name={sortDirection === 'asc' ? 'chevron-up' : 'chevron-down'} size="xs" />
+                  )}
+                </div>
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
@@ -371,15 +405,15 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
                     {["PENDING", "CONFIRMED", "WAITLISTED"].includes(
                       registration.status
                     ) && (
-                      <button
-                        onClick={() =>
-                          onUpdateStatus(registration.id, "CANCELLED")
-                        }
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Cancel
-                      </button>
-                    )}
+                        <button
+                          onClick={() =>
+                            onUpdateStatus(registration.id, "CANCELLED")
+                          }
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Cancel
+                        </button>
+                      )}
                   </div>
                 </td>
               </tr>

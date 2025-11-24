@@ -13,7 +13,7 @@ import { Event } from '../../events/entities/event.entity';
 export enum RegistrationStatus {
   PENDING = 'PENDING',
   CONFIRMED = 'CONFIRMED',
-  WAITLISTED = 'WAITLISTED',
+
   CANCELLED = 'CANCELLED',
   ATTENDED = 'ATTENDED',
   NO_SHOW = 'NO_SHOW',
@@ -21,7 +21,7 @@ export enum RegistrationStatus {
 
 export enum RegistrationType {
   REGULAR = 'REGULAR',
-  WAITLIST = 'WAITLIST',
+
   VIP = 'VIP',
   ORGANIZER = 'ORGANIZER',
 }
@@ -82,8 +82,7 @@ export class Registration {
   @Field(() => RegistrationType)
   registrationType: RegistrationType;
 
-  @Field(() => Int, { nullable: true })
-  position?: number; // Position in waitlist if applicable
+
 
   // Payment Information
   @Field()

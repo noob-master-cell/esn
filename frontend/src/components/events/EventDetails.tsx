@@ -213,8 +213,8 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                   key={index}
                   onClick={() => setImageGalleryIndex(index)}
                   className={`w-2 h-2 rounded-full transition-all ${index === imageGalleryIndex
-                      ? "bg-white"
-                      : "bg-white bg-opacity-50"
+                    ? "bg-white"
+                    : "bg-white bg-opacity-50"
                     }`}
                 />
               ))}
@@ -400,10 +400,10 @@ const EventDetails: React.FC<EventDetailsProps> = ({
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all duration-500 ${spotsPercentage > 80
-                    ? "bg-red-500"
-                    : spotsPercentage > 50
-                      ? "bg-yellow-500"
-                      : "bg-green-500"
+                  ? "bg-red-500"
+                  : spotsPercentage > 50
+                    ? "bg-yellow-500"
+                    : "bg-green-500"
                   }`}
                 style={{
                   width: `${(event.registrationCount / event.maxParticipants) * 100
@@ -426,8 +426,8 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
               >
                 <span className="mr-2">{tab.icon}</span>
@@ -555,12 +555,8 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                   )}`;
                   window.open(url, '_blank');
                 }}
-                className="mt-4 w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="mt-4 w-full py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
               >
-                Open in Maps
-              </button>
-
-              <button className="w-full py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors">
                 Get Directions
               </button>
             </div>

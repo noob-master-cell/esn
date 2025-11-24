@@ -41,26 +41,26 @@ export class Event {
   @Field({ nullable: true })
   shortDescription?: string;
 
-  @Field(() => EventCategory)
-  category: EventCategory;
+  @Field(() => EventCategory, { nullable: true })
+  category?: EventCategory;
 
-  @Field(() => EventType)
-  type: EventType;
+  @Field(() => EventType, { nullable: true })
+  type?: EventType;
 
-  @Field(() => EventStatus)
-  status: EventStatus;
+  @Field(() => EventStatus, { nullable: true })
+  status?: EventStatus;
 
   @Field()
   startDate: Date;
 
-  @Field()
-  endDate: Date;
+  @Field({ nullable: true })
+  endDate?: Date;
 
   @Field({ nullable: true })
   registrationDeadline?: Date;
 
-  @Field()
-  location: string;
+  @Field({ nullable: true })
+  location?: string;
 
   @Field({ nullable: true })
   address?: string;
@@ -89,8 +89,7 @@ export class Event {
   @Field()
   isPublic: boolean;
 
-  @Field()
-  allowWaitlist: boolean;
+
 
   @Field()
   createdAt: Date;
@@ -109,8 +108,7 @@ export class Event {
   @Field(() => Int)
   registrationCount: number;
 
-  @Field(() => Int)
-  waitlistCount: number;
+
 
   @Field(() => Boolean, { nullable: true })
   isRegistered?: boolean; // For current user
