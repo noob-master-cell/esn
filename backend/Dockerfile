@@ -1,29 +1,16 @@
 # Stage 1: Dependencies
 FROM node:20-alpine AS dependencies
 WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-COPY pnpm-lock.yaml ./
-
-# Install dependencies
+COPY package*.json pnpm-lock.yaml ./
 RUN npm install -g pnpm && pnpm install --frozen-lockfile
 
 # Stage 2: Build
 FROM node:20-alpine AS build
 WORKDIR /app
-
-# Copy dependencies from previous stage
 COPY --from=dependencies /app/node_modules ./node_modules
-
-# Copy source code
 COPY . .
-
-# Copy Prisma schema and generate client
-COPY prisma ./prisma
+# Generate client for build (needed for type checking/compilation)
 RUN npx prisma generate
-
-# Build the application
 RUN npm run build
 
 # Stage 3: Production
@@ -37,16 +24,24 @@ RUN apk add --no-cache dumb-init
 RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
 
 # Copy package files
-COPY package*.json ./
-COPY pnpm-lock.yaml ./
+COPY package*.json pnpm-lock.yaml ./
+RUN npm install -g pnpm
 
-# Install production dependencies only
-RUN npm install -g pnpm && pnpm install --frozen-lockfile --prod
+# --- FIX START ---
+# 1. Copy ALL dependencies (dev + prod) so we have the Prisma CLI available
+COPY --from=dependencies --chown=nestjs:nodejs /app/node_modules ./node_modules
 
-# Copy built application from build stage
-COPY --from=build --chown=nestjs:nodejs /app/dist ./dist
-COPY --from=build --chown=nestjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+# 2. Copy source files needed for generation
 COPY --from=build --chown=nestjs:nodejs /app/prisma ./prisma
+COPY --from=build --chown=nestjs:nodejs /app/dist ./dist
+
+# 3. Generate the Prisma Client strictly for the production environment
+# (This ensures it exists and is built for the correct OS/Architecture)
+RUN npx prisma generate
+
+# 4. Remove development dependencies to keep the image small
+RUN pnpm prune --prod
+# --- FIX END ---
 
 # Create uploads directory with proper permissions
 RUN mkdir -p /app/uploads && chown -R nestjs:nodejs /app/uploads
@@ -65,8 +60,5 @@ EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s \
   CMD node -e "require('http').get('http://localhost:4000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
-
-# Start the application
 CMD ["./start.sh"]
