@@ -154,7 +154,7 @@ const MobileEventCard: React.FC<MobileEventCardProps> = ({
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    console.log("🎯 Mobile event card clicked:", event.title);
+
     navigate(`/events/${event.id}`);
   };
 

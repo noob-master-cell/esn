@@ -27,10 +27,7 @@ export class RegistrationsResolver {
     createRegistrationInput: CreateRegistrationInput,
     @CurrentUser() user: User,
   ) {
-    console.log(
-      '🎫 Registration Resolver: Register for event mutation called by:',
-      user.email,
-    );
+
     return this.registrationsService.create(createRegistrationInput, user.id);
   }
 
@@ -41,20 +38,14 @@ export class RegistrationsResolver {
     @Args('filter', { nullable: true }) filter: RegistrationFilterInput = {},
     @CurrentUser() user: User,
   ) {
-    console.log(
-      '📋 Registration Resolver: Find all registrations query by:',
-      user.email,
-    );
+
     return this.registrationsService.findAll(filter, user.id, user.role);
   }
 
   @Query(() => [Registration], { name: 'myRegistrations' })
   @UseGuards(Auth0Guard)
   async findMyRegistrations(@CurrentUser() user: User) {
-    console.log(
-      '👤 Registration Resolver: Find my registrations query for:',
-      user.email,
-    );
+
     return this.registrationsService.getMyRegistrations(user.id);
   }
 
@@ -65,10 +56,7 @@ export class RegistrationsResolver {
     @Args('filter', { nullable: true }) filter: RegistrationFilterInput = {},
     @CurrentUser() user: User,
   ) {
-    console.log(
-      '🎪 Registration Resolver: Find event registrations query for event:',
-      eventId,
-    );
+
 
     // Add eventId to filter
     const eventFilter = { ...filter, eventId };
@@ -82,7 +70,7 @@ export class RegistrationsResolver {
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() user: User,
   ) {
-    console.log('🔍 Registration Resolver: Find one registration query:', id);
+
     return this.registrationsService.findOne(id, user.id, user.role);
   }
 
@@ -93,10 +81,7 @@ export class RegistrationsResolver {
     updateRegistrationInput: UpdateRegistrationInput,
     @CurrentUser() user: User,
   ) {
-    console.log(
-      '🔄 Registration Resolver: Update registration mutation called by:',
-      user.email,
-    );
+
     return this.registrationsService.update(
       updateRegistrationInput.id,
       updateRegistrationInput,
@@ -111,10 +96,7 @@ export class RegistrationsResolver {
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() user: User,
   ) {
-    console.log(
-      '❌ Registration Resolver: Cancel registration mutation called by:',
-      user.email,
-    );
+
     return this.registrationsService.cancel(id, user.id, user.role);
   }
 
@@ -125,7 +107,7 @@ export class RegistrationsResolver {
     @Args('filter', { nullable: true }) filter: RegistrationFilterInput = {},
     @CurrentUser() user: User,
   ) {
-    console.log('🔢 Registration Resolver: Get registrations count query');
+
     const registrations = await this.registrationsService.findAll(
       filter,
       user.id,
@@ -138,10 +120,7 @@ export class RegistrationsResolver {
   async getEventCapacityInfo(
     @Args('eventId', { type: () => ID }) eventId: string,
   ) {
-    console.log(
-      '📊 Registration Resolver: Get event capacity info for:',
-      eventId,
-    );
+
 
     const filter = { eventId, status: RegistrationStatus.CONFIRMED }; // Fix: Use enum instead of string
     const confirmedRegistrations =
@@ -161,10 +140,7 @@ export class RegistrationsResolver {
     @Args('attended', { type: () => Boolean }) attended: boolean,
     @CurrentUser() user: User,
   ) {
-    console.log(
-      '✅ Registration Resolver: Mark attendance for registration:',
-      registrationId,
-    );
+
 
     const status = attended
       ? RegistrationStatus.ATTENDED

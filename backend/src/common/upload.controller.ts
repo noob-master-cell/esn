@@ -77,7 +77,7 @@ export class UploadController {
                     const extension = extname(file.originalname).toLowerCase();
                     const filename = `${randomName}${extension}`;
 
-                    console.log(`📁 Uploading file: ${file.originalname} -> ${filename}`);
+
                     return cb(null, filename);
                 },
             }),
@@ -93,7 +93,7 @@ export class UploadController {
             throw new BadRequestException('No file uploaded');
         }
 
-        console.log(`✅ File uploaded successfully: ${file.filename}`);
+
 
         // Return relative URL (not hardcoded localhost)
         return {

@@ -11,7 +11,7 @@ export class EventsService {
   constructor(private prisma: PrismaService) { }
 
   async create(createEventInput: CreateEventInput, organizerId: string) {
-    console.log('🎪 Events Service: Creating new event');
+
 
     // Validate dates
     if (createEventInput.endDate <= createEventInput.startDate) {
@@ -46,12 +46,12 @@ export class EventsService {
       },
     });
 
-    console.log('✅ Events Service: Event created:', event.title);
+
     return this.transformEvent(event);
   }
 
   async findAll(filter: EventsFilterInput = {}, userId?: string): Promise<PaginatedEvents> {
-    console.log('📋 Events Service: Finding events with filter:', filter);
+
 
     const where: any = {};
 
@@ -117,7 +117,7 @@ export class EventsService {
       this.prisma.event.count({ where }),
     ]);
 
-    console.log(`✅ Events Service: Found ${items.length} events out of ${total}`);
+
     return {
       items: items.map((event) => this.transformEvent(event, userId)),
       total,
@@ -125,7 +125,7 @@ export class EventsService {
   }
 
   async findOne(id: string, userId?: string) {
-    console.log('🔍 Events Service: Finding event:', id);
+
 
     const event = await this.prisma.event.findUnique({
       where: { id },
@@ -155,7 +155,7 @@ export class EventsService {
       }
     }
 
-    console.log('✅ Events Service: Event found:', event.title);
+
     return this.transformEvent(event, userId);
   }
 
@@ -165,7 +165,7 @@ export class EventsService {
     userId: string,
     userRole: UserRole,
   ) {
-    console.log('🔄 Events Service: Updating event:', id);
+
 
     const event = await this.findOne(id, userId);
 
@@ -200,12 +200,12 @@ export class EventsService {
       },
     });
 
-    console.log('✅ Events Service: Event updated:', updatedEvent.title);
+
     return this.transformEvent(updatedEvent);
   }
 
   async remove(id: string, userId: string, userRole: UserRole) {
-    console.log('🗑️ Events Service: Deleting event:', id);
+
 
     const eventData = await this.prisma.event.findUnique({
       where: { id },
@@ -239,26 +239,24 @@ export class EventsService {
 
     // For admins, allow deletion but cascade delete registrations
     if (userRole === UserRole.ADMIN && eventData.registrations.length > 0) {
-      console.log(
-        `⚠️ Admin deleting event with ${eventData.registrations.length} active registrations. Cascade deleting...`,
-      );
+
       // Delete all registrations for this event first
       await this.prisma.registration.deleteMany({
         where: { eventId: id },
       });
-      console.log('✅ All registrations deleted');
+
     }
 
     await this.prisma.event.delete({
       where: { id },
     });
 
-    console.log('✅ Events Service: Event deleted');
+
     return true;
   }
 
   async publish(id: string, userId: string, userRole: UserRole) {
-    console.log('📢 Events Service: Publishing event:', id);
+
 
     const event = await this.findOne(id, userId);
 
@@ -287,12 +285,12 @@ export class EventsService {
       },
     });
 
-    console.log('✅ Events Service: Event published:', publishedEvent.title);
+
     return this.transformEvent(publishedEvent);
   }
 
   async getMyEvents(userId: string) {
-    console.log('👤 Events Service: Getting user events:', userId);
+
 
     const events = await this.prisma.event.findMany({
       where: { organizerId: userId },
@@ -310,7 +308,7 @@ export class EventsService {
       orderBy: { createdAt: 'desc' },
     });
 
-    console.log(`✅ Events Service: Found ${events.length} user events`);
+
     return events.map((event) => this.transformEvent(event));
   }
 
@@ -347,9 +345,7 @@ export class EventsService {
     const canRegister =
       !isRegistered && registrationCount < event.maxParticipants;
 
-    console.log(
-      `📊 Transform Event ${event.title}: registrationCount=${registrationCount}`,
-    );
+
 
     return {
       ...event,

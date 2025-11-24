@@ -32,7 +32,7 @@ export class Auth0Guard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         try {
-            console.log('🔍 Auth0 Guard: Starting validation');
+
 
             // Get the request object (works for both HTTP and GraphQL)
             const ctx = GqlExecutionContext.create(context);
@@ -40,25 +40,25 @@ export class Auth0Guard implements CanActivate {
 
             // Extract token from Authorization header
             const authHeader = req.headers?.authorization;
-            console.log('🔍 Auth0 Guard: Auth header present:', !!authHeader);
+
 
             if (!authHeader) {
-                console.log('❌ Auth0 Guard: No authorization header');
+
                 throw new UnauthorizedException('No authorization header');
             }
 
             const token = authHeader.replace('Bearer ', '');
-            console.log('🔍 Auth0 Guard: Token extracted, length:', token.length);
+
 
             if (!token) {
-                console.log('❌ Auth0 Guard: No token in header');
+
                 throw new UnauthorizedException('No token provided');
             }
 
             // Verify and decode the JWT token
-            console.log('🔍 Auth0 Guard: Verifying with Auth0...');
+
             const decoded = await this.verifyToken(token);
-            console.log('✅ Auth0 Guard: Token verified, user ID:', decoded.sub);
+
 
             // Extract user information from Auth0 token
             const auth0UserId = decoded.sub; // Usually in format "auth0|xxxxx"
@@ -69,16 +69,14 @@ export class Auth0Guard implements CanActivate {
 
             const role = decoded[`${audience}/role`] || 'USER';
 
-            console.log('🔍 Auth0 Guard: Decoded token:', JSON.stringify(decoded, null, 2));
-            console.log('🔍 Auth0 Guard: Extracted email:', email);
-            console.log('🔍 Auth0 Guard: Extracted role:', role);
+
 
             // Sync user to database
-            console.log('🔄 Auth0 Guard: Syncing user to database...');
+
             const dbUser = await this.syncUserToDatabase(auth0UserId, email, role, token);
 
             if (!dbUser || !dbUser.isActive) {
-                console.log('❌ Auth0 Guard: User not found or inactive');
+
                 throw new UnauthorizedException('User not found or inactive');
             }
 
@@ -86,10 +84,10 @@ export class Auth0Guard implements CanActivate {
             const user = UserTransformer.fromPrisma(dbUser);
             req.user = user;
 
-            console.log('✅ Auth0 Guard: Authentication successful:', user.email);
+
             return true;
         } catch (error) {
-            console.log('❌ Auth0 Guard failed:', error.message);
+
             throw new UnauthorizedException(
                 `Authentication failed: ${error.message}`,
             );
@@ -106,7 +104,7 @@ export class Auth0Guard implements CanActivate {
                 return reject(new Error('Invalid token structure'));
             }
 
-            console.log('🔍 Auth0 Guard: Token decoded, kid:', decodedToken.header.kid);
+
 
             // Get the signing key from Auth0
             this.jwksClient.getSigningKey(decodedToken.header.kid, (err, key) => {
@@ -158,11 +156,11 @@ export class Auth0Guard implements CanActivate {
 
         // 3. If still not found, and we don't have an email, we MUST fetch it from Auth0
         if (!user && !email) {
-            console.log('⚠️ Email missing in token. Fetching from Auth0 /userinfo...');
+
             try {
                 const userInfo = await this.getUserInfo(token);
                 email = userInfo.email;
-                console.log('✅ Fetched email from Auth0:', email);
+
             } catch (error) {
                 console.error('❌ Failed to fetch user info from Auth0:', error.message);
                 throw new UnauthorizedException('Could not retrieve email from Auth0');
@@ -175,7 +173,7 @@ export class Auth0Guard implements CanActivate {
 
         if (!user) {
             // Create new user, but handle possible duplicate email
-            console.log('📝 Creating new user from Auth0:', email);
+
             try {
                 user = await this.prismaService.user.create({
                     data: {
@@ -202,7 +200,7 @@ export class Auth0Guard implements CanActivate {
             // User exists and has Auth0 ID
             // Check if role needs to be updated
             if (user.role !== role) {
-                console.log(`🔄 Updating user role from ${user.role} to ${role}`);
+
                 user = await this.prismaService.user.update({
                     where: { id: user.id },
                     data: { role: role as any },

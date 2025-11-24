@@ -37,17 +37,14 @@ export class UsersResolver {
     @Args('updateUserInput') updateUserInput: UpdateUserInput,
     @CurrentUser() user: User,
   ) {
-    console.log(
-      '🔄 Users Resolver: Update profile mutation called by:',
-      user.email,
-    );
+
     return this.usersService.updateProfile(user.id, updateUserInput);
   }
 
   @Query(() => User)
   @UseGuards(Auth0Guard)
   async myProfile(@CurrentUser() user: User) {
-    console.log('👤 Users Resolver: Get my profile query for:', user.email);
+
     return this.usersService.findOne(user.id);
   }
   @Mutation(() => User)
@@ -63,7 +60,7 @@ export class UsersResolver {
   @Mutation(() => Boolean)
   @UseGuards(Auth0Guard)
   async deleteUser(@CurrentUser() user: User) {
-    console.log('🗑️ Users Resolver: Delete user mutation called by:', user.email);
+
     return this.usersService.deleteUser(user.id);
   }
 

@@ -25,12 +25,7 @@ export class RegistrationsService {
     createRegistrationInput: CreateRegistrationInput,
     userId: string,
   ) {
-    console.log(
-      '🎫 Registration Service: Creating registration for user:',
-      userId,
-      'event:',
-      createRegistrationInput.eventId,
-    );
+
 
     const existingRegistration = await this.prisma.registration.findFirst({
       where: {
@@ -178,9 +173,7 @@ export class RegistrationsService {
         },
       });
 
-      console.log(
-        `✅ Registration created successfully: ${registration.id} for user ${userId} on event ${createRegistrationInput.eventId}`,
-      );
+
 
       return registration;
     } catch (error) {
@@ -209,10 +202,7 @@ export class RegistrationsService {
     requestingUserId?: string,
     userRole?: UserRole,
   ) {
-    console.log(
-      '📋 Registration Service: Finding registrations with filter:',
-      filter,
-    );
+
 
     const where: any = {};
 
@@ -252,16 +242,14 @@ export class RegistrationsService {
       take: filter.take || 20,
     });
 
-    console.log(
-      `✅ Registration Service: Found ${registrations.length} registrations`,
-    );
+
     return registrations.map((registration) =>
       this.transformRegistration(registration),
     );
   }
 
   async findOne(id: string, requestingUserId?: string, userRole?: UserRole) {
-    console.log('🔍 Registration Service: Finding registration:', id);
+
 
     const registration = await this.prisma.registration.findUnique({
       where: { id },
@@ -284,10 +272,7 @@ export class RegistrationsService {
       throw new ForbiddenException('You can only view your own registrations');
     }
 
-    console.log(
-      '✅ Registration Service: Registration found:',
-      registration.id,
-    );
+
     return this.transformRegistration(registration);
   }
 
@@ -297,7 +282,7 @@ export class RegistrationsService {
     requestingUserId: string,
     userRole: UserRole,
   ) {
-    console.log('🔄 Registration Service: Updating registration:', id);
+
 
     const registration = await this.findOne(id, requestingUserId, userRole);
 
@@ -353,15 +338,12 @@ export class RegistrationsService {
       },
     });
 
-    console.log(
-      '✅ Registration Service: Registration updated:',
-      updatedRegistration.id,
-    );
+
     return this.transformRegistration(updatedRegistration);
   }
 
   async cancel(id: string, requestingUserId: string, userRole: UserRole) {
-    console.log('❌ Registration Service: Cancelling registration:', id);
+
 
     const registration = await this.findOne(id, requestingUserId, userRole);
 
@@ -391,15 +373,12 @@ export class RegistrationsService {
 
 
 
-    console.log(
-      '✅ Registration Service: Registration cancelled:',
-      cancelledRegistration.id,
-    );
+
     return this.transformRegistration(cancelledRegistration);
   }
 
   async getMyRegistrations(userId: string) {
-    console.log('👤 Registration Service: Getting user registrations:', userId);
+
 
     const registrations = await this.prisma.registration.findMany({
       where: {
@@ -427,15 +406,11 @@ export class RegistrationsService {
       orderBy: { registeredAt: 'desc' },
     });
 
-    console.log(
-      `✅ Registration Service: Found ${registrations.length} user registrations`,
-    );
+
 
     return registrations.map((registration) => {
       const transformedReg = this.transformRegistration(registration);
-      console.log(
-        `🔍 Transformed registration for event: ${transformedReg.event?.title}, registrationCount: ${transformedReg.event?.registrationCount}`,
-      );
+
       return transformedReg;
     });
   }
@@ -481,9 +456,7 @@ export class RegistrationsService {
     const isRegistered = true;
     const canRegister = false; // User just registered, so they can't register again
 
-    console.log(
-      `📊 Transform Event for Registration ${event.title}: registrationCount=${registrationCount}`,
-    );
+
 
     return {
       ...event,

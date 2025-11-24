@@ -51,6 +51,10 @@ COPY --from=build --chown=nestjs:nodejs /app/prisma ./prisma
 # Create uploads directory with proper permissions
 RUN mkdir -p /app/uploads && chown -R nestjs:nodejs /app/uploads
 
+# Copy start script
+COPY --chown=nestjs:nodejs start.sh ./
+RUN chmod +x start.sh
+
 # Switch to non-root user
 USER nestjs
 
@@ -65,4 +69,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=30s \
 ENTRYPOINT ["dumb-init", "--"]
 
 # Start the application
-CMD ["node", "dist/main"]
+CMD ["./start.sh"]

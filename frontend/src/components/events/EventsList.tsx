@@ -10,7 +10,7 @@ const ClickableEventCard: React.FC<{ event: any }> = ({ event }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    console.log("🎯 Event card clicked:", event.title);
+
     navigate(`/events/${event.id}`);
   };
 
@@ -133,8 +133,8 @@ export const EventsList: React.FC = () => {
               <button
                 onClick={() => setViewType("grid")}
                 className={`p-2 rounded-md transition-colors ${viewType === "grid"
-                    ? "bg-white shadow-sm text-gray-900"
-                    : "text-gray-500 hover:text-gray-700"
+                  ? "bg-white shadow-sm text-gray-900"
+                  : "text-gray-500 hover:text-gray-700"
                   }`}
                 title="Grid view"
               >
@@ -155,8 +155,8 @@ export const EventsList: React.FC = () => {
               <button
                 onClick={() => setViewType("list")}
                 className={`p-2 rounded-md transition-colors ${viewType === "list"
-                    ? "bg-white shadow-sm text-gray-900"
-                    : "text-gray-500 hover:text-gray-700"
+                  ? "bg-white shadow-sm text-gray-900"
+                  : "text-gray-500 hover:text-gray-700"
                   }`}
                 title="List view"
               >

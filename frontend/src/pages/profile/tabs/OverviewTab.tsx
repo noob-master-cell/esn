@@ -92,7 +92,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                 },
             });
 
-            console.log("Profile updated successfully!");
+
             setIsEditing(false);
             refetchProfile(); // Refetch profile data to update the displayed information
         } catch (error) {

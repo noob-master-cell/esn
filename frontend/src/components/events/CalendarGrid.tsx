@@ -111,7 +111,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, events }) => {
       navigate(`/events/${dayEvents[0].id}`);
     } else if (dayEvents.length > 1) {
       // Could navigate to daily view with this date
-      console.log(`Clicked day with ${dayEvents.length} events:`, day);
+
     }
   };
 
@@ -141,21 +141,19 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, events }) => {
           return (
             <div
               key={index}
-              className={`min-h-[120px] p-2 border-r border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                !isCurrentMonth ? "bg-gray-50 text-gray-400" : ""
-              }`}
+              className={`min-h-[120px] p-2 border-r border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${!isCurrentMonth ? "bg-gray-50 text-gray-400" : ""
+                }`}
               onClick={() => handleDayClick(day)}
             >
               {/* Day number */}
               <div className="flex justify-between items-start mb-2">
                 <span
-                  className={`text-sm font-medium ${
-                    isDayToday
+                  className={`text-sm font-medium ${isDayToday
                       ? "bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center"
                       : isCurrentMonth
-                      ? "text-gray-900"
-                      : "text-gray-400"
-                  }`}
+                        ? "text-gray-900"
+                        : "text-gray-400"
+                    }`}
                 >
                   {day.getDate()}
                 </span>

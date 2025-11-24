@@ -21,10 +21,7 @@ export class EventsResolver {
     @Args('createEventInput') createEventInput: CreateEventInput,
     @CurrentUser() user: User,
   ) {
-    console.log(
-      '🎪 Events Resolver: Create event mutation called by:',
-      user.email,
-    );
+
     return this.eventsService.create(createEventInput, user.id);
   }
 
@@ -34,7 +31,7 @@ export class EventsResolver {
     @Args('includePrivate', { nullable: true, defaultValue: false })
     includePrivate: boolean = false,
   ) {
-    console.log('📋 Events Resolver: Find all events query');
+
 
     // For public access, don't pass userId
     const userId = includePrivate ? undefined : undefined;
@@ -44,7 +41,7 @@ export class EventsResolver {
   @Query(() => [Event], { name: 'myEvents' })
   @UseGuards(Auth0Guard)
   async findMyEvents(@CurrentUser() user: User) {
-    console.log('👤 Events Resolver: Find my events query for:', user.email);
+
     return this.eventsService.getMyEvents(user.id);
   }
 
@@ -53,7 +50,7 @@ export class EventsResolver {
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() user?: User,
   ) {
-    console.log('🔍 Events Resolver: Find one event query:', id);
+
     return this.eventsService.findOne(id, user?.id);
   }
 
@@ -63,10 +60,7 @@ export class EventsResolver {
     @Args('updateEventInput') updateEventInput: UpdateEventInput,
     @CurrentUser() user: User,
   ) {
-    console.log(
-      '🔄 Events Resolver: Update event mutation called by:',
-      user.email,
-    );
+
     return this.eventsService.update(
       updateEventInput.id,
       updateEventInput,
@@ -81,10 +75,7 @@ export class EventsResolver {
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() user: User,
   ) {
-    console.log(
-      '🗑️ Events Resolver: Remove event mutation called by:',
-      user.email,
-    );
+
     return this.eventsService.remove(id, user.id, user.role);
   }
 
@@ -94,10 +85,7 @@ export class EventsResolver {
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() user: User,
   ) {
-    console.log(
-      '📢 Events Resolver: Publish event mutation called by:',
-      user.email,
-    );
+
     return this.eventsService.publish(id, user.id, user.role);
   }
 
@@ -105,7 +93,7 @@ export class EventsResolver {
   async getEventsCount(
     @Args('filter', { nullable: true }) filter: EventsFilterInput = {},
   ) {
-    console.log('🔢 Events Resolver: Get events count query');
+
     const events = await this.eventsService.findAll(filter);
     return events.total;
   }

@@ -151,7 +151,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    console.log("🎯 Event card clicked:", event.title);
+
     navigate(`/events/${event.id}`);
   };
 

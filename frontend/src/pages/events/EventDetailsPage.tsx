@@ -32,7 +32,7 @@ const EventDetailsPage: React.FC = () => {
     // Check if already registered
     if (isRegistered) {
       // Could show a toast or alert
-      console.log("User is already registered for this event");
+
       return;
     }
 
@@ -43,7 +43,7 @@ const EventDetailsPage: React.FC = () => {
   // Handle social sharing
   const handleShare = (platform: string) => {
     // Analytics tracking could go here
-    console.log(`Shared event ${id} via ${platform}`);
+
   };
 
   // Loading state
