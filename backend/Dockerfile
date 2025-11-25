@@ -1,6 +1,8 @@
 # Stage 1: Dependencies
 FROM node:20-alpine AS dependencies
 WORKDIR /app
+# Cache bust - increment this to force dependency layer rebuild
+ARG CACHE_BUST=1
 COPY package.json pnpm-lock.yaml ./
 RUN npm install -g pnpm && pnpm install --frozen-lockfile
 
