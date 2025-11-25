@@ -118,6 +118,7 @@ export const ALL_REGISTRATIONS = gql`
         startDate
         location
         images
+        endDate
         confirmedCount
         pendingCount
         cancelledCount

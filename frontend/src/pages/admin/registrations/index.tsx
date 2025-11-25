@@ -37,6 +37,7 @@ interface Registration {
     id: string;
     title: string;
     startDate: string;
+    endDate: string;
     location: string;
     images?: string[];
     confirmedCount?: number;
