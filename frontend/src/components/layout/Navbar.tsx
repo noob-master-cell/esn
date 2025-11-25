@@ -206,6 +206,20 @@ export const Navbar: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* Mobile Feedback Button */}
+            <div className="flex md:hidden items-center">
+              <Link
+                to="/feedback"
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${isTransparent
+                  ? "bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-cyan-600"
+                  }`}
+              >
+                <ChatBubbleLeftRightIcon className="w-4 h-4" />
+                <span className="text-xs font-medium">Feedback</span>
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
