@@ -51,9 +51,16 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
         process.env.NODE_ENV === 'production'
           ? true
           : join(process.cwd(), 'src/schema.gql'),
-      playground:
+      playground: false,
+      plugins: [
         process.env.NODE_ENV !== 'production' ||
-        process.env.ENABLE_PLAYGROUND === 'true',
+          process.env.ENABLE_PLAYGROUND === 'true'
+          ? require('@apollo/server/plugin/landingPage/default').ApolloServerPluginLandingPageLocalDefault()
+          : require('@apollo/server/plugin/landingPage/default').ApolloServerPluginLandingPageProductionDefault(),
+      ],
+      csrfPrevention:
+        process.env.NODE_ENV === 'production' &&
+        process.env.ENABLE_PLAYGROUND !== 'true',
       introspection:
         process.env.NODE_ENV !== 'production' ||
         process.env.ENABLE_PLAYGROUND === 'true',
