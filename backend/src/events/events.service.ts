@@ -138,8 +138,8 @@ export class EventsService {
       total,
     };
 
-    // Cache for 60 seconds (60000 ms)
-    await this.cacheManager.set(cacheKey, result, 60000);
+    // Cache for 5 minutes (300000 ms)
+    await this.cacheManager.set(cacheKey, result, 300000);
 
     return result;
   }

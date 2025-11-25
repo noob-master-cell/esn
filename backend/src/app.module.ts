@@ -1,5 +1,6 @@
 // backend/src/app.module.ts
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
 import { ConfigModule } from '@nestjs/config';
@@ -19,7 +20,9 @@ import { CalendarModule } from './calendar/calendar.module';
 import { UploadController } from './common/upload.controller';
 import { HealthController } from './common/health.controller';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+
 import { FeedbackModule } from './feedback/feedback.module';
+import { GqlThrottlerGuard } from './common/guards/gql-throttler.guard';
 
 @Module({
   imports: [
@@ -76,6 +79,12 @@ import { FeedbackModule } from './feedback/feedback.module';
     CalendarModule,
     CloudinaryModule,
     FeedbackModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: GqlThrottlerGuard,
+    },
   ],
   controllers: [UploadController, HealthController],
   // Note: ThrottlerGuard not applied globally to avoid GraphQL conflicts
