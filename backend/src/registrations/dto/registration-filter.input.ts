@@ -66,6 +66,11 @@ export class RegistrationFilterInput {
   @Min(1)
   take?: number;
 
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
   @Field({ nullable: true, defaultValue: 'registeredAt' })
   @IsOptional()
   @IsString()

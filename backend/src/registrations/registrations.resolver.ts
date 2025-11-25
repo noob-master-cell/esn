@@ -132,28 +132,20 @@ export class RegistrationsResolver {
     };
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Registration)
   @UseGuards(Auth0Guard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.ORGANIZER)
   async markAttendance(
     @Args('registrationId', { type: () => ID }) registrationId: string,
     @Args('attended', { type: () => Boolean }) attended: boolean,
     @CurrentUser() user: User,
   ) {
-
-
-    const status = attended
-      ? RegistrationStatus.ATTENDED
-      : RegistrationStatus.NO_SHOW; // Fix: Use enum values
-
-    await this.registrationsService.update(
+    return this.registrationsService.markAttendance(
       registrationId,
-      { id: registrationId, status },
+      attended,
       user.id,
       user.role,
     );
-
-    return true;
   }
 
 

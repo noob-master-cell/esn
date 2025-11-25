@@ -25,6 +25,7 @@ const EventCreatePage = lazy(() => import('./pages/admin/events/EventCreatePage'
 const EventEditPage = lazy(() => import('./pages/admin/events/EventEditPage'));
 const AdminSettingsPage = lazy(() => import('./pages/admin/settings/index'));
 
+const AdminAttendancePage = lazy(() => import('./pages/admin/events/attendance').then(module => ({ default: module.AdminAttendancePage })));
 
 export const AppRoutes: React.FC = () => (
     <Routes>
@@ -109,6 +110,16 @@ export const AppRoutes: React.FC = () => (
             }
         />
         <Route
+            path="/admin/events/:eventId/attendance"
+            element={
+                <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN", "ORGANIZER"]}>
+                    <Suspense fallback={<div>Loading...</div>}>
+                        <AdminAttendancePage />
+                    </Suspense>
+                </ProtectedRoute>
+            }
+        />
+        <Route
             path="/admin/users"
             element={
                 <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN"]}>
@@ -161,5 +172,5 @@ export const AppRoutes: React.FC = () => (
                 </div>
             }
         />
-    </Routes>
+    </Routes >
 );

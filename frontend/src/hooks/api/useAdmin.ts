@@ -4,13 +4,19 @@ import {
     ALL_USERS,
     UPDATE_USER_ROLE,
     ALL_REGISTRATIONS,
-    UPDATE_REGISTRATION_STATUS,
+    UPDATE_REGISTRATION,
     VERIFY_ESN_CARD,
     RECENT_EVENTS,
     DELETE_USER_ADMIN,
     ALL_EVENTS_SIMPLE,
     REGISTRATION_STATS,
+    MARK_ATTENDANCE,
 } from "../../graphql/admin";
+
+export const useMarkAttendance = () => {
+    const [markAttendance, { loading, error }] = useMutation(MARK_ATTENDANCE);
+    return { markAttendance, loading, error };
+};
 
 export const useRegistrationStats = () => {
     const { data, loading, error, refetch } = useQuery(REGISTRATION_STATS);
@@ -65,11 +71,9 @@ export const useAdminRegistrations = (variables?: any) => {
     return { registrations: data?.registrations, loading, error, refetch };
 };
 
-export const useUpdateRegistrationStatus = () => {
-    const [updateRegistrationStatus, { loading, error }] = useMutation(
-        UPDATE_REGISTRATION_STATUS
-    );
-    return { updateRegistrationStatus, loading, error };
+export const useUpdateRegistration = () => {
+    const [updateRegistration, { loading, error }] = useMutation(UPDATE_REGISTRATION);
+    return { updateRegistration, loading, error };
 };
 
 export const useVerifyEsnCard = () => {

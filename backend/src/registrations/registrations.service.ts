@@ -206,6 +206,17 @@ export class RegistrationsService {
     if (filter.eventId) where.eventId = filter.eventId;
     if (filter.userId) where.userId = filter.userId;
 
+    // Search functionality
+    if (filter.search) {
+      where.user = {
+        OR: [
+          { firstName: { contains: filter.search, mode: 'insensitive' } },
+          { lastName: { contains: filter.search, mode: 'insensitive' } },
+          { email: { contains: filter.search, mode: 'insensitive' } },
+        ],
+      };
+    }
+
     // Date range filters
     if (filter.registeredAfter || filter.registeredBefore) {
       where.registeredAt = {};
@@ -318,6 +329,10 @@ export class RegistrationsService {
         ) {
           updateData.cancelledAt = new Date();
         }
+      }
+
+      if (updateRegistrationInput.paymentStatus) {
+        updateData.paymentStatus = updateRegistrationInput.paymentStatus;
       }
     }
 
@@ -436,7 +451,9 @@ export class RegistrationsService {
     const confirmedRegistrations = activeRegistrations.filter(
       (reg: any) =>
         reg.status === RegistrationStatus.CONFIRMED ||
-        reg.status === RegistrationStatus.PENDING,
+        reg.status === RegistrationStatus.PENDING ||
+        reg.status === RegistrationStatus.ATTENDED ||
+        reg.status === RegistrationStatus.NO_SHOW,
     );
 
 
@@ -457,5 +474,57 @@ export class RegistrationsService {
       isRegistered,
       canRegister,
     };
+  }
+
+  async markAttendance(
+    registrationId: string,
+    attended: boolean,
+    userId: string,
+    userRole: UserRole,
+  ) {
+    const registration = await this.prisma.registration.findUnique({
+      where: { id: registrationId },
+      include: { event: true },
+    });
+
+    if (!registration) {
+      throw new NotFoundException('Registration not found');
+    }
+
+    const eventEndDate = new Date(registration.event.endDate);
+    const now = new Date();
+    const threeDaysAfterEnd = new Date(eventEndDate.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+    // Time constraint logic
+    if (userRole !== UserRole.ADMIN) {
+      // Non-admins can only mark attendance before the event ends
+      if (now > eventEndDate) {
+        throw new ForbiddenException(
+          'Attendance can only be marked before the event ends.',
+        );
+      }
+    } else {
+      // Admins can mark attendance up to 3 days after the event ends
+      if (now > threeDaysAfterEnd) {
+        throw new ForbiddenException(
+          'Attendance marking period (3 days after event) has expired.',
+        );
+      }
+    }
+
+    const status = attended
+      ? RegistrationStatus.ATTENDED
+      : RegistrationStatus.NO_SHOW;
+
+    const updatedRegistration = await this.prisma.registration.update({
+      where: { id: registrationId },
+      data: { status },
+      include: {
+        user: true,
+        event: true,
+      },
+    });
+
+    return this.transformRegistration(updatedRegistration);
   }
 }

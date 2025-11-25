@@ -114,6 +114,9 @@ export const ALL_REGISTRATIONS = gql`
         startDate
         location
         images
+        confirmedCount
+        pendingCount
+        cancelledCount
       }
     }
   }
@@ -130,14 +133,12 @@ export const UPDATE_USER_ROLE = gql`
 
 
 
-export const UPDATE_REGISTRATION_STATUS = gql`
-  mutation UpdateRegistrationStatus(
-    $registrationId: ID!
-    $status: RegistrationStatus!
-  ) {
-    updateRegistrationStatus(registrationId: $registrationId, status: $status) {
+export const UPDATE_REGISTRATION = gql`
+  mutation UpdateRegistration($input: UpdateRegistrationInput!) {
+    updateRegistration(updateRegistrationInput: $input) {
       id
       status
+      paymentStatus
     }
   }
 `;
@@ -168,5 +169,14 @@ export const VERIFY_ESN_CARD = gql`
 export const DELETE_USER_ADMIN = gql`
   mutation AdminDeleteUser($userId: String!) {
     adminDeleteUser(userId: $userId)
+  }
+`;
+
+export const MARK_ATTENDANCE = gql`
+  mutation MarkAttendance($registrationId: ID!, $attended: Boolean!) {
+    markAttendance(registrationId: $registrationId, attended: $attended) {
+      id
+      status
+    }
   }
 `;

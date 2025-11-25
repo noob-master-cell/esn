@@ -69,6 +69,9 @@ type Event {
   organizer: User!
   organizerId: String!
   registrationCount: Int!
+  confirmedCount: Int
+  pendingCount: Int
+  cancelledCount: Int
   isRegistered: Boolean
   canRegister: Boolean
 }
@@ -234,6 +237,7 @@ input RegistrationFilterInput {
   registeredBefore: DateTime
   skip: Int = 0
   take: Int = 20
+  search: String
   orderBy: String = "registeredAt"
   orderDirection: String = "desc"
 }
@@ -251,7 +255,7 @@ type Mutation {
   registerForEvent(createRegistrationInput: CreateRegistrationInput!): Registration!
   updateRegistration(updateRegistrationInput: UpdateRegistrationInput!): Registration!
   cancelRegistration(id: ID!): Registration!
-  markAttendance(registrationId: ID!, attended: Boolean!): Boolean!
+  markAttendance(registrationId: ID!, attended: Boolean!): Registration!
 }
 
 input UpdateUserInput {
@@ -341,4 +345,5 @@ input UpdateRegistrationInput {
   emergencyEmail: String
   id: ID!
   status: RegistrationStatus
+  paymentStatus: PaymentStatus
 }

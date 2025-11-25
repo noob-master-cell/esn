@@ -72,7 +72,11 @@ export class AdminService {
     async getRegistrationStats() {
         const total = await this.prisma.registration.count();
         const confirmed = await this.prisma.registration.count({
-            where: { status: 'CONFIRMED' },
+            where: {
+                status: {
+                    in: ['CONFIRMED', 'ATTENDED', 'NO_SHOW']
+                }
+            },
         });
         const pending = await this.prisma.registration.count({
             where: { status: 'PENDING' },

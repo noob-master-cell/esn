@@ -1,8 +1,7 @@
-// frontend/src/pages/admin/AdminRegistrationsPage.tsx
 import React, { useState } from "react";
 import {
   useAdminRegistrations,
-  useUpdateRegistrationStatus,
+  useUpdateRegistration,
   useRegistrationStats,
 } from "../../../hooks/api/useAdmin";
 import { AdminLayout } from "../../../components/admin/AdminLayout";
@@ -40,6 +39,9 @@ interface Registration {
     startDate: string;
     location: string;
     images?: string[];
+    confirmedCount?: number;
+    pendingCount?: number;
+    cancelledCount?: number;
   };
 }
 
@@ -64,7 +66,7 @@ export const AdminRegistrationsPage: React.FC = () => {
     },
   });
 
-  const { updateRegistrationStatus } = useUpdateRegistrationStatus();
+  const { updateRegistration } = useUpdateRegistration();
 
   // Group registrations by event
   const groupedRegistrations = React.useMemo(() => {
@@ -86,8 +88,13 @@ export const AdminRegistrationsPage: React.FC = () => {
 
   const handleUpdateStatus = async (registrationId: string, status: string) => {
     try {
-      await updateRegistrationStatus({
-        variables: { registrationId, status },
+      await updateRegistration({
+        variables: {
+          input: {
+            id: registrationId,
+            status,
+          },
+        },
       });
       refetch();
     } catch (err) {
@@ -101,8 +108,13 @@ export const AdminRegistrationsPage: React.FC = () => {
     switch (action) {
       case "confirm":
         for (const registrationId of selectedRegistrations) {
-          await updateRegistrationStatus({
-            variables: { registrationId, status: "CONFIRMED" },
+          await updateRegistration({
+            variables: {
+              input: {
+                id: registrationId,
+                status: "CONFIRMED",
+              },
+            },
           });
         }
         refetch();
@@ -115,8 +127,13 @@ export const AdminRegistrationsPage: React.FC = () => {
           )
         ) {
           for (const registrationId of selectedRegistrations) {
-            await updateRegistrationStatus({
-              variables: { registrationId, status: "CANCELLED" },
+            await updateRegistration({
+              variables: {
+                input: {
+                  id: registrationId,
+                  status: "CANCELLED",
+                },
+              },
             });
           }
           refetch();
@@ -294,8 +311,9 @@ export const AdminRegistrationsPage: React.FC = () => {
           <div className="space-y-6">
             {Object.entries(groupedRegistrations).map(([eventId, eventRegs]) => {
               const event = eventRegs[0]?.event;
-              const confirmedCount = eventRegs.filter(r => r.status === 'CONFIRMED').length;
-              const pendingCount = eventRegs.filter(r => r.status === 'PENDING').length;
+              const confirmedCount = event?.confirmedCount || 0;
+              const pendingCount = event?.pendingCount || 0;
+              const totalCount = (event?.confirmedCount || 0) + (event?.pendingCount || 0) + (event?.cancelledCount || 0);
 
               return (
                 <div key={eventId} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md">
@@ -341,8 +359,19 @@ export const AdminRegistrationsPage: React.FC = () => {
                       <div className="w-px h-8 bg-gray-200 hidden sm:block"></div>
                       <div className="text-right">
                         <div className="text-xs text-gray-500 uppercase font-semibold">Total</div>
-                        <div className="text-lg font-bold text-gray-900">{eventRegs.length}</div>
+                        <div className="text-lg font-bold text-gray-900">{totalCount}</div>
                       </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={`/admin/events/${eventId}/attendance`}
+                        className="px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 transition-colors flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        Attendance
+                      </a>
                     </div>
                   </div>
 

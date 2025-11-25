@@ -324,11 +324,13 @@ export class EventsService {
       (reg: any) => reg.status !== RegistrationStatus.CANCELLED,
     );
 
-    // Count confirmed/pending registrations (these take up event spots)
+    // Count confirmed/pending registrations
     const confirmedRegistrations = activeRegistrations.filter(
       (reg: any) =>
         reg.status === RegistrationStatus.CONFIRMED ||
-        reg.status === RegistrationStatus.PENDING,
+        reg.status === RegistrationStatus.PENDING ||
+        reg.status === RegistrationStatus.ATTENDED ||
+        reg.status === RegistrationStatus.NO_SHOW,
     );
 
 
@@ -354,5 +356,16 @@ export class EventsService {
       isRegistered,
       canRegister,
     };
+  }
+
+
+  async countRegistrations(eventId: string, status: RegistrationStatus | RegistrationStatus[]) {
+    const statusFilter = Array.isArray(status) ? { in: status } : status;
+    return this.prisma.registration.count({
+      where: {
+        eventId,
+        status: statusFilter,
+      },
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ID, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Int, ResolveField, Parent } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { Event } from './entities/event.entity';
@@ -10,6 +10,7 @@ import { OrganizerGuard } from './guards/organizer.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { PaginatedEvents } from './dto/paginated-events.output';
+import { EventStatus, RegistrationStatus } from '@prisma/client';
 
 @Resolver(() => Event)
 export class EventsResolver {
@@ -21,7 +22,6 @@ export class EventsResolver {
     @Args('createEventInput') createEventInput: CreateEventInput,
     @CurrentUser() user: User,
   ) {
-
     return this.eventsService.create(createEventInput, user.id);
   }
 
@@ -31,8 +31,6 @@ export class EventsResolver {
     @Args('includePrivate', { nullable: true, defaultValue: false })
     includePrivate: boolean = false,
   ) {
-
-
     // For public access, don't pass userId
     const userId = includePrivate ? undefined : undefined;
     return this.eventsService.findAll(filter, userId);
@@ -50,7 +48,6 @@ export class EventsResolver {
   @Query(() => [Event], { name: 'myEvents' })
   @UseGuards(Auth0Guard)
   async findMyEvents(@CurrentUser() user: User) {
-
     return this.eventsService.getMyEvents(user.id);
   }
 
@@ -59,7 +56,6 @@ export class EventsResolver {
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() user?: User,
   ) {
-
     return this.eventsService.findOne(id, user?.id);
   }
 
@@ -69,7 +65,6 @@ export class EventsResolver {
     @Args('updateEventInput') updateEventInput: UpdateEventInput,
     @CurrentUser() user: User,
   ) {
-
     return this.eventsService.update(
       updateEventInput.id,
       updateEventInput,
@@ -84,7 +79,6 @@ export class EventsResolver {
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() user: User,
   ) {
-
     return this.eventsService.remove(id, user.id, user.role);
   }
 
@@ -94,7 +88,6 @@ export class EventsResolver {
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() user: User,
   ) {
-
     return this.eventsService.publish(id, user.id, user.role);
   }
 
@@ -102,8 +95,26 @@ export class EventsResolver {
   async getEventsCount(
     @Args('filter', { nullable: true }) filter: EventsFilterInput = {},
   ) {
-
     const events = await this.eventsService.findAll(filter);
     return events.total;
+  }
+
+  @ResolveField(() => Int)
+  async confirmedCount(@Parent() event: Event) {
+    return this.eventsService.countRegistrations(event.id, [
+      RegistrationStatus.CONFIRMED,
+      RegistrationStatus.ATTENDED,
+      RegistrationStatus.NO_SHOW,
+    ]);
+  }
+
+  @ResolveField(() => Int)
+  async pendingCount(@Parent() event: Event) {
+    return this.eventsService.countRegistrations(event.id, 'PENDING');
+  }
+
+  @ResolveField(() => Int)
+  async cancelledCount(@Parent() event: Event) {
+    return this.eventsService.countRegistrations(event.id, 'CANCELLED');
   }
 }

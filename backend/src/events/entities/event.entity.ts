@@ -108,6 +108,15 @@ export class Event {
   @Field(() => Int)
   registrationCount: number;
 
+  @Field(() => Int, { nullable: true })
+  confirmedCount?: number;
+
+  @Field(() => Int, { nullable: true })
+  pendingCount?: number;
+
+  @Field(() => Int, { nullable: true })
+  cancelledCount?: number;
+
 
 
   @Field(() => Boolean, { nullable: true })

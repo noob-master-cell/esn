@@ -2,7 +2,7 @@
 import { InputType, Field, ID, PartialType } from '@nestjs/graphql';
 import { IsString, IsEnum, IsOptional } from 'class-validator';
 import { CreateRegistrationInput } from './create-registration.input';
-import { RegistrationStatus } from '../entities/registration.entity';
+import { RegistrationStatus, PaymentStatus } from '../entities/registration.entity';
 
 @InputType()
 export class UpdateRegistrationInput extends PartialType(CreateRegistrationInput) {
@@ -14,4 +14,9 @@ export class UpdateRegistrationInput extends PartialType(CreateRegistrationInput
   @IsOptional()
   @IsEnum(RegistrationStatus)
   status?: RegistrationStatus;
+
+  @Field(() => PaymentStatus, { nullable: true })
+  @IsOptional()
+  @IsEnum(PaymentStatus)
+  paymentStatus?: PaymentStatus;
 }
