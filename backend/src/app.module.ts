@@ -51,8 +51,12 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
         process.env.NODE_ENV === 'production'
           ? true
           : join(process.cwd(), 'src/schema.gql'),
-      playground: process.env.NODE_ENV !== 'production',
-      introspection: process.env.NODE_ENV !== 'production',
+      playground:
+        process.env.NODE_ENV !== 'production' ||
+        process.env.ENABLE_PLAYGROUND === 'true',
+      introspection:
+        process.env.NODE_ENV !== 'production' ||
+        process.env.ENABLE_PLAYGROUND === 'true',
       context: ({ req }) => ({ req }),
     }),
     PrismaModule,
