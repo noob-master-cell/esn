@@ -276,12 +276,25 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                     )}
                   </div>
 
+                  {/* Status Badge */}
+                  {event.status !== 'PUBLISHED' && event.status !== 'REGISTRATION_OPEN' && (
+                    <div className={`
+                      mb-4 p-3 rounded-xl text-center font-bold text-sm
+                      ${event.status === 'REGISTRATION_CLOSED' ? 'bg-red-50 text-red-700' : ''}
+                      ${event.status === 'CANCELLED' ? 'bg-red-100 text-red-800' : ''}
+                      ${event.status === 'COMPLETED' ? 'bg-gray-100 text-gray-600' : ''}
+                      ${event.status === 'DRAFT' ? 'bg-yellow-50 text-yellow-700' : ''}
+                    `}>
+                      {event.status.replace(/_/g, ' ')}
+                    </div>
+                  )}
+
                   {event.isRegistered ? (
                     <button disabled className="w-full py-4 bg-green-50 text-green-700 font-bold rounded-xl border border-green-100 flex items-center justify-center gap-2">
                       <CheckCircleIcon className="w-5 h-5" />
                       You're Going!
                     </button>
-                  ) : spotsLeft > 0 ? (
+                  ) : (event.status === 'PUBLISHED' || event.status === 'REGISTRATION_OPEN') && spotsLeft > 0 ? (
                     <button
                       onClick={onRegister}
                       className="w-full py-4 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition-all transform active:scale-[0.98] shadow-lg shadow-gray-900/20"
@@ -290,7 +303,10 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                     </button>
                   ) : (
                     <button disabled className="w-full py-4 bg-gray-100 text-gray-400 font-bold rounded-xl cursor-not-allowed">
-                      Sold Out
+                      {event.status === 'REGISTRATION_CLOSED' ? 'Registration Closed' :
+                        event.status === 'CANCELLED' ? 'Event Cancelled' :
+                          event.status === 'COMPLETED' ? 'Event Ended' :
+                            spotsLeft <= 0 ? 'Sold Out' : 'Unavailable'}
                     </button>
                   )}
 

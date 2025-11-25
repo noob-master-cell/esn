@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Inject, OnModuleInit } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
@@ -10,12 +10,59 @@ import { PaginatedEvents } from './dto/paginated-events.output';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
-export class EventsService {
+export class EventsService implements OnModuleInit {
   constructor(
     private prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private cloudinaryService: CloudinaryService,
   ) { }
+
+  onModuleInit() {
+    // Check for completed events every hour
+    setInterval(() => {
+      this.checkEventStatus();
+    }, 3600000); // 1 hour
+
+    // Run immediately on startup
+    this.checkEventStatus();
+  }
+
+  async checkEventStatus() {
+    try {
+      const now = new Date();
+
+      // Find events that have ended but are not marked as COMPLETED or CANCELLED
+      const eventsToComplete = await this.prisma.event.findMany({
+        where: {
+          endDate: { lt: now },
+          status: {
+            notIn: [EventStatus.COMPLETED, EventStatus.CANCELLED],
+          },
+        },
+        select: { id: true, title: true },
+      });
+
+      if (eventsToComplete.length > 0) {
+        console.log(`Found ${eventsToComplete.length} events to mark as COMPLETED`);
+
+        await this.prisma.event.updateMany({
+          where: {
+            id: { in: eventsToComplete.map(e => e.id) },
+          },
+          data: {
+            status: EventStatus.COMPLETED,
+          },
+        });
+
+        // Invalidate cache
+        await this.cacheManager.del(`events_all_*`).catch(() => { });
+
+        console.log(`Marked ${eventsToComplete.length} events as COMPLETED`);
+      }
+    } catch (error) {
+      console.error('Error checking event status:', error);
+    }
+  }
 
   async create(createEventInput: CreateEventInput, organizerId: string) {
 
@@ -41,23 +88,47 @@ export class EventsService {
         organizerId,
       },
       include: {
-        organizer: true,
+        organizer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatar: true,
+          },
+        },
         registrations: {
           where: {
             status: {
               not: RegistrationStatus.CANCELLED,
             },
           },
-          include: { user: true },
+          take: 100,
+          select: {
+            id: true,
+            status: true,
+            userId: true,
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+              },
+            },
+          },
         },
       },
     });
+
+    // Invalidate events cache
+    await this.cacheManager.del(`events_all_*`).catch(() => { });
 
 
     return this.transformEvent(event);
   }
 
-  async findAll(filter: EventsFilterInput = {}, userId?: string): Promise<PaginatedEvents> {
+  async findAll(filter: EventsFilterInput = {}, userId?: string, userRole?: UserRole): Promise<PaginatedEvents> {
     // Cache key based on filter and user (to handle personalized fields like isRegistered)
     const cacheKey = `events_all_${JSON.stringify(filter)}_${userId || 'public'}`;
 
@@ -102,9 +173,12 @@ export class EventsService {
       };
     }
 
-    // Only show published events to regular users
-    if (!userId) {
-      where.status = EventStatus.PUBLISHED;
+    // Only show published/active events to regular users (not drafts or cancelled)
+    // Unless the user is an ADMIN
+    if (userRole !== UserRole.ADMIN) {
+      where.status = {
+        notIn: [EventStatus.DRAFT, EventStatus.CANCELLED],
+      };
       where.isPublic = true;
     }
 
@@ -115,19 +189,40 @@ export class EventsService {
       this.prisma.event.findMany({
         where,
         include: {
-          organizer: true,
+          organizer: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              avatar: true,
+            },
+          },
           registrations: {
             where: {
               status: {
                 not: RegistrationStatus.CANCELLED,
               },
             },
-            include: { user: true },
+            take: 100, // Limit registrations per event
+            select: {
+              id: true,
+              status: true,
+              userId: true,
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  avatar: true,
+                },
+              },
+            },
           },
         },
         orderBy,
         skip: filter.skip || 0,
-        take: filter.take || 20,
+        take: Math.min(filter.take || 20, 100), // Cap at 100 records max
       }),
       this.prisma.event.count({ where }),
     ]);
@@ -150,14 +245,35 @@ export class EventsService {
     const event = await this.prisma.event.findUnique({
       where: { id },
       include: {
-        organizer: true,
+        organizer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatar: true,
+          },
+        },
         registrations: {
           where: {
             status: {
               not: RegistrationStatus.CANCELLED,
             },
           },
-          include: { user: true },
+          take: 100,
+          select: {
+            id: true,
+            status: true,
+            userId: true,
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+              },
+            },
+          },
         },
       },
     });
@@ -167,7 +283,8 @@ export class EventsService {
     }
 
     // Check if user can view this event
-    if (!event.isPublic && event.status !== EventStatus.PUBLISHED) {
+    const isDraftOrCancelled = event.status === EventStatus.DRAFT || event.status === EventStatus.CANCELLED;
+    if (!event.isPublic || isDraftOrCancelled) {
       if (!userId || event.organizerId !== userId) {
         throw new ForbiddenException(
           'You do not have permission to view this event',
@@ -208,17 +325,41 @@ export class EventsService {
       where: { id },
       data: updateData,
       include: {
-        organizer: true,
+        organizer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatar: true,
+          },
+        },
         registrations: {
           where: {
             status: {
               not: RegistrationStatus.CANCELLED,
             },
           },
-          include: { user: true },
+          take: 100,
+          select: {
+            id: true,
+            status: true,
+            userId: true,
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+              },
+            },
+          },
         },
       },
     });
+
+    // Invalidate events cache
+    await this.cacheManager.del(`events_all_*`).catch(() => { });
 
     // Cloudinary Cleanup: Delete images that were removed
     if (updateData.images) {
@@ -301,6 +442,8 @@ export class EventsService {
       where: { id },
     });
 
+    // Invalidate events cache
+    await this.cacheManager.del(`events_all_*`).catch(() => { });
 
     return true;
   }
@@ -399,10 +542,28 @@ export class EventsService {
     const canRegister =
       !isRegistered && registrationCount < event.maxParticipants;
 
+    // Compute derived status
+    let status = event.status;
+    if (event.status === EventStatus.PUBLISHED) {
+      const now = new Date();
+      const startDate = new Date(event.startDate);
+      const endDate = new Date(event.endDate);
+      const registrationDeadline = event.registrationDeadline ? new Date(event.registrationDeadline) : startDate;
 
+      if (now > endDate) {
+        status = EventStatus.COMPLETED;
+      } else if (now > startDate) {
+        status = EventStatus.ONGOING;
+      } else if (registrationCount >= event.maxParticipants || now > registrationDeadline) {
+        status = EventStatus.REGISTRATION_CLOSED;
+      } else {
+        status = EventStatus.REGISTRATION_OPEN;
+      }
+    }
 
     return {
       ...event,
+      status,
       registrationCount,
 
       isRegistered,
@@ -411,6 +572,27 @@ export class EventsService {
     };
   }
 
+
+  public computeEventStatus(event: any, registrationCount: number): string {
+    if (event.status !== EventStatus.PUBLISHED) {
+      return event.status;
+    }
+
+    const now = new Date();
+    const startDate = new Date(event.startDate);
+    const endDate = new Date(event.endDate);
+    const registrationDeadline = event.registrationDeadline ? new Date(event.registrationDeadline) : startDate;
+
+    if (now > endDate) {
+      return EventStatus.COMPLETED;
+    } else if (now > startDate) {
+      return EventStatus.ONGOING;
+    } else if (registrationCount >= event.maxParticipants || now > registrationDeadline) {
+      return EventStatus.REGISTRATION_CLOSED;
+    } else {
+      return EventStatus.REGISTRATION_OPEN;
+    }
+  }
 
   async countRegistrations(eventId: string, status: RegistrationStatus | RegistrationStatus[]) {
     const statusFilter = Array.isArray(status) ? { in: status } : status;

@@ -35,7 +35,8 @@ export class RegistrationsService {
           in: [
             RegistrationStatus.CONFIRMED,
             RegistrationStatus.PENDING,
-
+            RegistrationStatus.CANCELLED, // Include CANCELLED to handle re-registration
+            RegistrationStatus.WAITLIST,
           ],
         },
       },
@@ -47,25 +48,33 @@ export class RegistrationsService {
     });
 
     if (existingRegistration) {
-      console.warn(
-        `⚠️ User ${userId} already has registration ${existingRegistration.id} for event ${createRegistrationInput.eventId} with status ${existingRegistration.status}`,
-      );
+      // If cancelled, we can potentially re-register
+      if (existingRegistration.status === RegistrationStatus.CANCELLED) {
+        // Fall through to validation checks, then update instead of create
+      } else {
+        console.warn(
+          `⚠️ User ${userId} already has registration ${existingRegistration.id} for event ${createRegistrationInput.eventId} with status ${existingRegistration.status}`,
+        );
 
-      // Return more specific error messages based on status
-      switch (existingRegistration.status) {
-        case RegistrationStatus.CONFIRMED:
-          throw new ConflictException(
-            `You are already confirmed for "${existingRegistration.event.title}". Check your registrations for details.`,
-          );
-        case RegistrationStatus.PENDING:
-          throw new ConflictException(
-            `You have a pending registration for "${existingRegistration.event.title}". Please complete your registration or contact support.`,
-          );
-
-        default:
-          throw new ConflictException(
-            `You already have an active registration for "${existingRegistration.event.title}".`,
-          );
+        // Return more specific error messages based on status
+        switch (existingRegistration.status) {
+          case RegistrationStatus.CONFIRMED:
+            throw new ConflictException(
+              `You are already confirmed for "${existingRegistration.event.title}". Check your registrations for details.`,
+            );
+          case RegistrationStatus.PENDING:
+            throw new ConflictException(
+              `You have a pending registration for "${existingRegistration.event.title}". Please complete your registration or contact support.`,
+            );
+          case RegistrationStatus.WAITLIST:
+            throw new ConflictException(
+              `You are already on the waitlist for "${existingRegistration.event.title}".`,
+            );
+          default:
+            throw new ConflictException(
+              `You already have an active registration for "${existingRegistration.event.title}".`,
+            );
+        }
       }
     }
 
@@ -81,9 +90,13 @@ export class RegistrationsService {
       throw new NotFoundException('Event not found');
     }
 
-    // Check if event is published and registration is open
+    // Check if event is published
+    // Note: We don't check for REGISTRATION_OPEN because that is now a computed status
+    // We rely on the date and capacity checks below
     if (event.status !== EventStatus.PUBLISHED) {
-      throw new BadRequestException('Event is not open for registration');
+      throw new BadRequestException(
+        `Event is not open for registration (Status: ${event.status})`,
+      );
     }
 
     // Check registration deadline
@@ -138,6 +151,49 @@ export class RegistrationsService {
     let position: number | null = null;
 
     try {
+      // Check if we are re-registering (updating a cancelled registration)
+      if (existingRegistration && existingRegistration.status === RegistrationStatus.CANCELLED) {
+        console.log(`Re-registering user ${userId} for event ${createRegistrationInput.eventId}. New status: ${status}`);
+        const updatedRegistration = await this.prisma.registration.update({
+          where: { id: existingRegistration.id },
+          data: {
+            status,
+            registrationType,
+            position,
+            paymentRequired,
+            paymentStatus: paymentRequired
+              ? PaymentStatus.PENDING
+              : PaymentStatus.COMPLETED,
+            amountDue,
+            currency: 'EUR',
+            specialRequests: createRegistrationInput.specialRequests,
+            emergencyContact: createRegistrationInput.emergencyContact,
+            dietary: createRegistrationInput.dietary,
+            registeredAt: new Date(), // Reset registration date
+            cancelledAt: null, // Clear cancellation date
+            confirmedAt: status === RegistrationStatus.CONFIRMED ? new Date() : null,
+          },
+          include: {
+            event: {
+              include: {
+                organizer: true,
+                registrations: {
+                  where: {
+                    status: {
+                      not: RegistrationStatus.CANCELLED,
+                    },
+                  },
+                },
+              },
+            },
+            user: true,
+          },
+        });
+        console.log(`Re-registration successful. Updated status: ${updatedRegistration.status}`);
+
+        return this.transformRegistration(updatedRegistration);
+      }
+
       // Create the registration with enhanced error handling
       const registration = await this.prisma.registration.create({
         data: {
@@ -173,6 +229,20 @@ export class RegistrationsService {
           user: true,
         },
       });
+
+      // Check if event is now full and close registration if needed
+      const newConfirmedCount = await this.prisma.registration.count({
+        where: {
+          eventId: createRegistrationInput.eventId,
+          status: {
+            in: [RegistrationStatus.CONFIRMED, RegistrationStatus.PENDING],
+          },
+        },
+      });
+
+      if (newConfirmedCount >= event.maxParticipants) {
+        console.log(`🔒 Event ${createRegistrationInput.eventId} reached capacity.`);
+      }
 
       return this.transformRegistration(registration);
     } catch (error) {
@@ -323,7 +393,9 @@ export class RegistrationsService {
       }
     } else {
       // Admins and organizers can update status and all fields
-      Object.assign(updateData, updateRegistrationInput);
+      // Exclude fields that shouldn't be updated directly or don't exist in Prisma model
+      const { id, joinWaitlist, ...validUpdateData } = updateRegistrationInput as any;
+      Object.assign(updateData, validUpdateData);
 
       // Handle status changes
       if (updateRegistrationInput.status) {

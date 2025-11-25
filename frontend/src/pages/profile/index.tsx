@@ -18,6 +18,7 @@ const ProfilePage: React.FC = () => {
 
   // State
   const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'settings'>('overview');
+  const [activeEventFilter, setActiveEventFilter] = useState<'all' | 'upcoming' | 'past' | 'cancelled'>('all');
   const [isChangingPhoto, setIsChangingPhoto] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
@@ -34,7 +35,7 @@ const ProfilePage: React.FC = () => {
   } = useProfileData(isSignedIn);
 
   // Actions
-  const { updateUserProfile, cancelRegistration, deleteUser } = useProfileActions();
+  const { updateUserProfile, cancelRegistration, createRegistration, deleteUser } = useProfileActions();
 
   // Handlers
   const handlePhotoUpload = async (url: string | null) => {
@@ -197,6 +198,7 @@ const ProfilePage: React.FC = () => {
                 refetchRegistrations={refetchRegistrations}
                 refetchProfile={refetchProfile}
                 setActiveTab={setActiveTab}
+                setEventFilter={setActiveEventFilter}
                 handleExportData={handleExportData}
                 getCalendarLink={getCalendarLink}
               />
@@ -207,9 +209,12 @@ const ProfilePage: React.FC = () => {
                 allRegistrations={allRegistrations || []}
                 registrationsLoading={registrationsLoading}
                 cancelRegistration={cancelRegistration}
+                createRegistration={createRegistration}
                 refetchRegistrations={refetchRegistrations}
                 setUpdateSuccess={setUpdateSuccess}
                 setUpdateError={setUpdateError}
+                filter={activeEventFilter}
+                onFilterChange={setActiveEventFilter}
               />
             )}
 

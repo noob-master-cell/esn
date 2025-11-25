@@ -38,6 +38,8 @@ export interface Registration {
         id: string;
         title: string;
         startDate: string;
+        endDate: string;
+        status: string;
         location: string;
         images: string[];
     };

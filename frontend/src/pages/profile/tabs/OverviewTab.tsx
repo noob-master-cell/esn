@@ -15,6 +15,7 @@ interface OverviewTabProps {
     refetchRegistrations: () => void;
     refetchProfile: () => void;
     setActiveTab: (tab: 'overview' | 'events' | 'settings') => void;
+    setEventFilter: (filter: 'all' | 'upcoming' | 'past' | 'cancelled') => void;
     handleExportData: () => void;
     getCalendarLink: () => string;
 }
@@ -27,6 +28,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     refetchRegistrations,
     refetchProfile,
     setActiveTab,
+    setEventFilter,
     handleExportData,
     getCalendarLink,
 }) => {
@@ -433,6 +435,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                                     className="w-full mt-4 py-6 border-dashed border-2 border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
                                     onClick={() => {
                                         window.scrollTo(0, 0);
+                                        setEventFilter('all');
                                         setActiveTab("events");
                                     }}
                                 >
@@ -449,7 +452,10 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                 {/* Stats Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
                     <div
-                        onClick={() => setActiveTab("events")}
+                        onClick={() => {
+                            setEventFilter('past');
+                            setActiveTab("events");
+                        }}
                         className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-purple-200 transition-all relative overflow-hidden group cursor-pointer"
                     >
                         <div className="flex items-center justify-between mb-4">
@@ -475,7 +481,10 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
                     </div>
 
                     <div
-                        onClick={() => setActiveTab("events")}
+                        onClick={() => {
+                            setEventFilter('upcoming');
+                            setActiveTab("events");
+                        }}
                         className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-200 transition-all relative overflow-hidden group cursor-pointer"
                     >
                         <div className="flex items-center justify-between mb-4">

@@ -121,9 +121,7 @@ export const UPDATE_REGISTRATION = gql`
 
 export const CANCEL_REGISTRATION = gql`
   mutation CancelRegistration($registrationId: ID!) {
-    updateRegistration(
-      updateRegistrationInput: { id: $registrationId, status: CANCELLED }
-    ) {
+    cancelRegistration(id: $registrationId) {
       id
       status
       cancelledAt

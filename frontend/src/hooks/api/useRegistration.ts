@@ -293,7 +293,7 @@ export const useCancelRegistration = () => {
     return cancelRegistrationMutation({
       variables: { registrationId },
       update: (cache, { data }) => {
-        if (data?.updateRegistration) {
+        if (data?.cancelRegistration) {
           // Update GET_MY_REGISTRATIONS cache
           const existingRegistrations = cache.readQuery<any>({
             query: GET_MY_REGISTRATIONS,
@@ -333,4 +333,20 @@ export const useMyRegistrations = (options?: QueryHookOptions) => {
     error,
     refetch,
   };
+};
+
+export const useCreateRegistration = () => {
+  const [createRegistrationMutation, { loading, error }] = useMutation(
+    REGISTER_FOR_EVENT,
+    {
+      refetchQueries: [{ query: GET_MY_REGISTRATIONS }],
+      awaitRefetchQueries: true,
+    }
+  );
+
+  const createRegistration = async (options: any) => {
+    return createRegistrationMutation(options);
+  };
+
+  return { createRegistration, loading, error };
 };

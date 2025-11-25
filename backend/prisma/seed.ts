@@ -7,210 +7,388 @@ import {
   RegistrationStatus,
   RegistrationType,
   PaymentStatus,
+  PaymentMethod,
+  FeedbackType,
 } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding database with sample data...');
+  console.log('🌱 Seeding database with comprehensive mock data...');
 
-  // 1. Create Static Users (Admin & Organizer)
-  const adminUser = await prisma.user.upsert({
-    where: { email: 'dheerajkarwasra28@gmail.com' },
-    update: {},
-    create: {
-      clerkId: 'user_2z4OnZdiUxYBhJ4nSxKpT8Qs90n',
+  // Clear existing data (optional - comment out if you want to keep existing data)
+  console.log('🗑️  Clearing existing data...');
+  await prisma.feedback.deleteMany();
+  await prisma.payment.deleteMany();
+  await prisma.review.deleteMany();
+  await prisma.registration.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.notificationSettings.deleteMany();
+  await prisma.userPreferences.deleteMany();
+  await prisma.user.deleteMany();
+  console.log('✅ Existing data cleared');
+
+  // 1. Create Admin User
+  const adminUser = await prisma.user.create({
+    data: {
+      auth0Id: 'auth0|admin123',
       email: 'dheerajkarwasra28@gmail.com',
       firstName: 'Dheeraj',
       lastName: 'Karwasra',
       role: UserRole.ADMIN,
       emailVerified: true,
-      esnCardNumber: 'ESN001',
+      esnCardNumber: 'ESN-ADMIN-001',
       esnCardVerified: true,
+      esnCardExpiry: new Date('2026-12-31'),
       university: 'ESN International',
       chapter: 'ESN Kaiserslautern',
       nationality: 'India',
+      bio: 'ESN Platform Administrator and Developer',
+      avatar: 'https://i.pravatar.cc/150?img=1',
+      phone: '+49 151 23456789',
+      telegram: '@dheerajk',
+      instagram: '@dheeraj.esn',
+      emergencyContactName: 'Emergency Contact',
+      emergencyContactPhone: '+49 151 98765432',
+      preferences: {
+        create: {
+          emailEvents: true,
+          emailReminders: true,
+          emailNewsletter: true,
+          emailPromotions: false,
+          language: 'en',
+          timezone: 'Europe/Berlin',
+        },
+      },
+      notifications: {
+        create: {
+          pushEvents: true,
+          pushReminders: true,
+          pushUpdates: true,
+          smsReminders: false,
+          smsUpdates: false,
+        },
+      },
     },
   });
 
-  const organizerUser = await prisma.user.upsert({
-    where: { email: 'organizer@esn.org' },
-    update: {},
-    create: {
-      clerkId: 'clerk_organizer_id_placeholder',
-      email: 'organizer@esn.org',
+  // 2. Create Organizer Users
+  const organizerUsers = [];
+  const organizerData = [
+    {
+      email: 'sarah.martinez@esn.org',
       firstName: 'Sarah',
       lastName: 'Martinez',
-      role: UserRole.ADMIN,
-      emailVerified: true,
-      esnCardNumber: 'ESN002',
-      esnCardVerified: true,
-      university: 'University of Kaiserslautern',
-      chapter: 'ESN Kaiserslautern',
       nationality: 'Spain',
+      avatar: 'https://i.pravatar.cc/150?img=5',
     },
-  });
+    {
+      email: 'lucas.mueller@esn.org',
+      firstName: 'Lucas',
+      lastName: 'Müller',
+      nationality: 'Germany',
+      avatar: 'https://i.pravatar.cc/150?img=12',
+    },
+    {
+      email: 'emma.rossi@esn.org',
+      firstName: 'Emma',
+      lastName: 'Rossi',
+      nationality: 'Italy',
+      avatar: 'https://i.pravatar.cc/150?img=9',
+    },
+  ];
 
-  console.log('👤 Created static users');
+  for (let i = 0; i < organizerData.length; i++) {
+    const org = organizerData[i];
+    const organizer = await prisma.user.create({
+      data: {
+        auth0Id: `auth0|organizer${i + 1}`,
+        email: org.email,
+        firstName: org.firstName,
+        lastName: org.lastName,
+        role: UserRole.ADMIN,
+        emailVerified: true,
+        esnCardNumber: `ESN-ORG-${String(i + 1).padStart(3, '0')}`,
+        esnCardVerified: true,
+        esnCardExpiry: faker.date.future({ years: 2 }),
+        university: 'University of Kaiserslautern',
+        chapter: 'ESN Kaiserslautern',
+        nationality: org.nationality,
+        bio: `ESN Event Organizer passionate about international student exchange`,
+        avatar: org.avatar,
+        phone: faker.phone.number(),
+        telegram: `@${org.firstName.toLowerCase()}`,
+        instagram: `@esn_${org.firstName.toLowerCase()}`,
+      },
+    });
+    organizerUsers.push(organizer);
+  }
 
-  // 2. Generate 1000 Random Users
-  console.log('👥 Generating 1000 random users...');
-  const userPromises = [];
+  console.log('👤 Created admin and organizer users');
+
+  // 3. Generate Regular Users
+  console.log('👥 Generating 200 regular users...');
+  const TOTAL_USERS = 200;
+  const BATCH_SIZE = 50;
+
   const universities = [
-    'University of Kaiserslautern',
+    'RPTU Kaiserslautern-Landau',
     'Hochschule Kaiserslautern',
     'University of Mannheim',
     'Heidelberg University',
     'KIT Karlsruhe',
+    'TU Munich',
+    'University of Stuttgart',
+    'University of Freiburg',
   ];
+
   const chapters = [
     'ESN Kaiserslautern',
     'ESN Mannheim',
     'ESN Heidelberg',
     'ESN Karlsruhe',
+    'ESN Munich',
+    'ESN Stuttgart',
   ];
 
-  // Create users in batches to avoid overwhelming the connection
-  const BATCH_SIZE = 50;
-  const TOTAL_USERS = 1000;
+  const nationalities = [
+    'France', 'Italy', 'Spain', 'Poland', 'Turkey', 'India',
+    'China', 'Mexico', 'Brazil', 'USA', 'UK', 'Portugal',
+  ];
+
+  const userPromises = [];
+  const createdUserIds = [];
 
   for (let i = 0; i < TOTAL_USERS; i++) {
     const firstName = faker.person.firstName();
     const lastName = faker.person.lastName();
+    const hasEsnCard = faker.datatype.boolean(0.4); // 40% have ESN cards
 
     userPromises.push(
       prisma.user.create({
         data: {
+          auth0Id: `auth0|user${String(i + 1).padStart(4, '0')}`,
           email: faker.internet.email({ firstName, lastName }),
           firstName,
           lastName,
           role: UserRole.USER,
-          emailVerified: faker.datatype.boolean(0.8), // 80% verified
-          esnCardNumber: faker.datatype.boolean(0.3) ? `ESN${faker.string.numeric(6)}` : null,
-          esnCardVerified: faker.datatype.boolean(0.2),
+          emailVerified: faker.datatype.boolean(0.85),
+          esnCardNumber: hasEsnCard ? `ESN-${faker.string.numeric(4)}-${faker.string.numeric(4)}-${faker.string.numeric(4)}` : null,
+          esnCardVerified: hasEsnCard ? faker.datatype.boolean(0.6) : false,
+          esnCardExpiry: hasEsnCard ? faker.date.future({ years: 2 }) : null,
           university: faker.helpers.arrayElement(universities),
           chapter: faker.helpers.arrayElement(chapters),
-          nationality: faker.location.country(),
-          bio: faker.person.bio(),
-          avatar: faker.image.avatar(),
-          phone: faker.phone.number(),
-          instagram: faker.internet.username(),
-          createdAt: faker.date.past({ years: 1 }),
+          nationality: faker.helpers.arrayElement(nationalities),
+          bio: faker.datatype.boolean(0.3) ? faker.person.bio() : null,
+          avatar: `https://i.pravatar.cc/150?img=${faker.number.int({ min: 1, max: 70 })}`,
+          phone: faker.datatype.boolean(0.5) ? faker.phone.number() : null,
+          telegram: faker.datatype.boolean(0.4) ? `@${faker.internet.username()}` : null,
+          instagram: faker.datatype.boolean(0.5) ? `@${faker.internet.username()}` : null,
+          emergencyContactName: faker.datatype.boolean(0.3) ? faker.person.fullName() : null,
+          emergencyContactPhone: faker.datatype.boolean(0.3) ? faker.phone.number() : null,
+          createdAt: faker.date.past({ years: 2 }),
         },
+      }).then(user => {
+        createdUserIds.push(user.id);
+        return user;
       })
     );
 
     if (userPromises.length >= BATCH_SIZE) {
       await Promise.all(userPromises);
       userPromises.length = 0;
-      process.stdout.write(`.`);
+      process.stdout.write('.');
     }
   }
-  // Process remaining users
+
   if (userPromises.length > 0) {
     await Promise.all(userPromises);
   }
-  console.log('\n✅ Generated 1000 users');
+  console.log(`\n✅ Generated ${TOTAL_USERS} regular users`);
 
-  // 3. Generate 100 Random Events
-  console.log('🎪 Generating 100 random events...');
+  // 4. Generate Events
+  console.log('🎪 Generating 50 diverse events...');
+  const allOrganizerIds = [adminUser.id, ...organizerUsers.map(u => u.id)];
   const eventPromises = [];
-  const eventCategories = Object.values(EventCategory);
-  const eventTypes = Object.values(EventType);
 
-  // Get all user IDs to assign as organizers randomly (mostly admin/organizer but some others)
-  const allUsers = await prisma.user.findMany({ select: { id: true } });
-  const organizerIds = [adminUser.id, organizerUser.id];
+  const eventTemplates = [
+    { title: 'International Night: Cultural Exchange Evening', category: EventCategory.CULTURAL, type: EventType.FREE },
+    { title: 'Pub Crawl Kaiserslautern', category: EventCategory.PARTY, type: EventType.PAID },
+    { title: 'Hiking Trip to Palatinate Forest', category: EventCategory.TRAVEL, type: EventType.PAID },
+    { title: 'Language Exchange Meetup', category: EventCategory.SOCIAL, type: EventType.FREE },
+    { title: 'ESN Workshop: Study Abroad Tips', category: EventCategory.EDUCATIONAL, type: EventType.FREE },
+    { title: 'Football Tournament', category: EventCategory.SPORTS, type: EventType.FREE },
+    { title: 'Beach Volleyball Competition', category: EventCategory.SPORTS, type: EventType.FREE },
+    { title: 'Weekend Trip to Paris', category: EventCategory.TRAVEL, type: EventType.PAID },
+    { title: 'Game Night: Board Games & Pizza', category: EventCategory.SOCIAL, type: EventType.PAID },
+    { title: 'Volunteer Day: City Cleanup', category: EventCategory.VOLUNTEER, type: EventType.FREE },
+  ];
 
-  for (let i = 0; i < 100; i++) {
-    const startDate = faker.date.future({ years: 1 });
+  for (let i = 0; i < 50; i++) {
+    const template = faker.helpers.arrayElement(eventTemplates);
+    const isPaid = template.type === EventType.PAID;
+    const startDate = faker.date.between({
+      from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Start from 1 week ago
+      to: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000), // Next 6 months
+    });
+
     const endDate = new Date(startDate);
-    endDate.setHours(startDate.getHours() + faker.number.int({ min: 2, max: 8 }));
+    endDate.setHours(startDate.getHours() + faker.number.int({ min: 2, max: 48 }));
 
     const registrationDeadline = new Date(startDate);
-    registrationDeadline.setDate(startDate.getDate() - faker.number.int({ min: 1, max: 14 }));
+    // Set deadline to 2 hours before start, to ensure most upcoming events are open
+    registrationDeadline.setHours(startDate.getHours() - 2);
 
-    const isPaid = faker.datatype.boolean();
-    const price = isPaid ? parseFloat(faker.commerce.price({ min: 5, max: 50 })) : 0;
-    const memberPrice = isPaid ? price * 0.8 : 0;
+    const maxParticipants = faker.number.int({ min: 15, max: 150 });
+    const price = isPaid ? faker.number.float({ min: 5, max: 80, fractionDigits: 2 }) : 0;
+    const memberPrice = isPaid ? price * 0.7 : 0;
+
+    // Determine status - mostly PUBLISHED, some DRAFT
+    // We no longer assign REGISTRATION_OPEN/CLOSED etc directly as these are computed
+    const status = faker.helpers.weightedArrayElement([
+      { weight: 0.9, value: EventStatus.PUBLISHED },
+      { weight: 0.1, value: EventStatus.DRAFT },
+    ]);
 
     eventPromises.push(
       prisma.event.create({
         data: {
-          title: faker.company.catchPhrase(),
-          description: faker.lorem.paragraphs(2),
+          title: `${template.title} ${i > 9 ? '#' + i : ''}`,
+          description: faker.lorem.paragraphs(3),
           shortDescription: faker.lorem.sentence(),
+          category: template.category,
+          type: template.type,
+          status,
           startDate,
           endDate,
           registrationDeadline,
-          location: faker.location.city(),
+          location: faker.helpers.arrayElement([
+            'ESN Office Kaiserslautern',
+            'City Center',
+            'University Campus',
+            'Train Station',
+            'Central Park',
+          ]),
           address: faker.location.streetAddress(),
-          maxParticipants: faker.number.int({ min: 10, max: 200 }),
+          maxParticipants,
           price,
           memberPrice,
-          organizerId: faker.helpers.arrayElement(organizerIds), // Mostly assign to main organizers
-          category: faker.helpers.arrayElement(eventCategories),
-          type: isPaid ? EventType.PAID : EventType.FREE,
-          status: faker.helpers.arrayElement([EventStatus.PUBLISHED, EventStatus.REGISTRATION_OPEN, EventStatus.COMPLETED]),
-          tags: [faker.word.sample(), faker.word.sample(), faker.word.sample()],
-          images: [faker.image.urlLoremFlickr({ category: 'party,event' })],
+          images: [
+            `https://picsum.photos/seed/event${i}/800/600`,
+            `https://picsum.photos/seed/event${i}b/800/600`,
+          ],
+          tags: faker.helpers.arrayElements(
+            ['fun', 'culture', 'sport', 'travel', 'food', 'party', 'networking', 'education'],
+            faker.number.int({ min: 2, max: 5 })
+          ),
+          requirements: isPaid ? 'ESN card holders get discount' : null,
+          additionalInfo: faker.datatype.boolean(0.5) ? faker.lorem.sentence() : null,
           isPublic: true,
+          organizerId: faker.helpers.arrayElement(allOrganizerIds),
         },
       })
     );
   }
 
-  const createdEvents = await Promise.all(eventPromises); // We need the events for registrations
-  console.log('✅ Generated 100 events');
+  const createdEvents = await Promise.all(eventPromises);
+  console.log('✅ Generated 50 events');
 
-  // 4. Generate Random Registrations
-  console.log('🎫 Generating random registrations...');
+  // 5. Generate Registrations
+  console.log('🎫 Generating registrations...');
+  const allUserIds = [adminUser.id, ...organizerUsers.map(u => u.id), ...createdUserIds];
   const registrationPromises = [];
 
   for (const event of createdEvents) {
-    // Register random number of users to each event (0 to maxParticipants)
-    const numRegistrations = faker.number.int({ min: 0, max: Math.min(event.maxParticipants, 50) });
-    const shuffledUsers = faker.helpers.shuffle(allUsers).slice(0, numRegistrations);
+    // Only create registrations for events that are not completed
+    if (event.status === EventStatus.COMPLETED || event.status === EventStatus.CANCELLED) {
+      continue;
+    }
 
-    for (const user of shuffledUsers) {
+    const numRegistrations = faker.number.int({
+      min: Math.floor(event.maxParticipants * 0.2),
+      max: Math.min(event.maxParticipants, allUserIds.length)
+    });
+
+    const selectedUsers = faker.helpers.shuffle(allUserIds).slice(0, numRegistrations);
+
+    for (const userId of selectedUsers) {
       registrationPromises.push(
         prisma.registration.create({
           data: {
-            userId: user.id,
+            userId,
             eventId: event.id,
-            status: faker.helpers.arrayElement([RegistrationStatus.CONFIRMED, RegistrationStatus.PENDING]),
-            registrationType: RegistrationType.REGULAR,
+            status: faker.helpers.arrayElement([
+              RegistrationStatus.CONFIRMED,
+              RegistrationStatus.CONFIRMED,
+              RegistrationStatus.CONFIRMED,
+              RegistrationStatus.PENDING,
+            ]),
+            registrationType: faker.helpers.arrayElement([
+              RegistrationType.REGULAR,
+              RegistrationType.REGULAR,
+              RegistrationType.REGULAR,
+              RegistrationType.VIP,
+            ]),
             paymentRequired: event.type === EventType.PAID,
             paymentStatus: event.type === EventType.PAID
-              ? faker.helpers.arrayElement([PaymentStatus.COMPLETED, PaymentStatus.PENDING])
+              ? faker.helpers.arrayElement([PaymentStatus.COMPLETED, PaymentStatus.COMPLETED, PaymentStatus.PENDING])
               : PaymentStatus.COMPLETED,
             amountDue: event.type === EventType.PAID ? (event.price || 0) : 0,
-            registeredAt: faker.date.recent({ days: 30 }),
+            specialRequests: faker.datatype.boolean(0.2) ? faker.lorem.sentence() : null,
+            dietary: faker.datatype.boolean(0.3) ? faker.helpers.arrayElement(['Vegetarian', 'Vegan', 'Gluten-free', 'None']) : null,
+            registeredAt: faker.date.between({ from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), to: new Date() }),
+            confirmedAt: faker.datatype.boolean(0.8) ? new Date() : null,
           },
         })
       );
-    }
 
-    if (registrationPromises.length >= BATCH_SIZE) {
-      await Promise.all(registrationPromises);
-      registrationPromises.length = 0;
-      process.stdout.write(`.`);
+      if (registrationPromises.length >= BATCH_SIZE) {
+        await Promise.all(registrationPromises);
+        registrationPromises.length = 0;
+        process.stdout.write('.');
+      }
     }
   }
 
   if (registrationPromises.length > 0) {
     await Promise.all(registrationPromises);
   }
+  console.log('\n✅ Generated registrations');
 
-  console.log('\n✅ Database seeded successfully!');
-  console.log(`   - ${TOTAL_USERS + 2} Users`);
-  console.log(`   - ${createdEvents.length} Events`);
+  // 6. Generate Feedback
+  console.log('💬 Generating feedback...');
+  const feedbackPromises = [];
+  const sampleUsers = faker.helpers.shuffle(allUserIds).slice(0, 30);
+
+  for (const userId of sampleUsers) {
+    feedbackPromises.push(
+      prisma.feedback.create({
+        data: {
+          userId,
+          type: faker.helpers.arrayElement([FeedbackType.FEEDBACK, FeedbackType.IMPROVEMENT, FeedbackType.BUG]),
+          message: faker.lorem.paragraph(),
+          createdAt: faker.date.recent({ days: 60 }),
+        },
+      })
+    );
+  }
+
+  await Promise.all(feedbackPromises);
+  console.log('✅ Generated feedback');
+
+  // Summary
+  console.log('\n🎉 Database seeded successfully!');
+  console.log(`   👤 ${allUserIds.length} Total Users (1 Admin, ${organizerUsers.length} Organizers, ${TOTAL_USERS} Regular)`);
+  console.log(`   🎪 ${createdEvents.length} Events`);
+  console.log(`   🎫 ${registrationPromises.length + (await prisma.registration.count())} Registrations`);
+  console.log(`   💬 ${feedbackPromises.length} Feedback entries`);
+  console.log('\n✨ Ready to test the application!');
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error('❌ Seeding failed:', e);
     process.exit(1);
   })
   .finally(async () => {

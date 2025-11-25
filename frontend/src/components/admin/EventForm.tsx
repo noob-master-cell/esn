@@ -31,7 +31,7 @@ interface EventFormData {
   requirements: string;
   additionalInfo: string;
   isPublic: boolean;
-  status: "DRAFT" | "PUBLISHED";
+  status: "DRAFT" | "PUBLISHED" | "CANCELLED";
 }
 
 interface EventFormProps {
@@ -223,6 +223,8 @@ export const EventForm: React.FC<EventFormProps> = ({
       tags: formData.tags,
       price: formData.type === "FREE" ? null : formData.price,
       memberPrice: formData.type === "FREE" ? null : formData.memberPrice,
+      registrationDeadline: formData.registrationDeadline || null,
+      images: formData.images || [],
       ...(mode === "edit" && eventId ? { id: eventId } : {}),
     };
 
@@ -301,8 +303,9 @@ export const EventForm: React.FC<EventFormProps> = ({
               options={[
                 { value: "DRAFT", label: "Draft" },
                 { value: "PUBLISHED", label: "Published" },
+                { value: "CANCELLED", label: "Cancelled" },
               ]}
-              helperText="Published events are visible to everyone."
+              helperText="Control visibility and registration availability."
             />
           </div>
 
@@ -395,7 +398,7 @@ export const EventForm: React.FC<EventFormProps> = ({
               type="number"
               label="Max Participants *"
               name="maxParticipants"
-              value={formData.maxParticipants}
+              value={formData.maxParticipants ?? ""}
               onChange={handleInputChange}
               min={1}
               error={errors.maxParticipants}
@@ -407,7 +410,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                   type="number"
                   label="Regular Price (€) *"
                   name="price"
-                  value={formData.price || ""}
+                  value={formData.price ?? ""}
                   onChange={handleInputChange}
                   min={0}
                   step="0.01"
@@ -418,7 +421,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                   type="number"
                   label="ESN Member Price (€)"
                   name="memberPrice"
-                  value={formData.memberPrice || ""}
+                  value={formData.memberPrice ?? ""}
                   onChange={handleInputChange}
                   min={0}
                   step="0.01"

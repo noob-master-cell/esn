@@ -310,10 +310,6 @@ const EventManagement: React.FC = () => {
               <option value="all">All Statuses</option>
               <option value="DRAFT">Draft</option>
               <option value="PUBLISHED">Published</option>
-              <option value="REGISTRATION_OPEN">Registration Open</option>
-              <option value="REGISTRATION_CLOSED">Registration Closed</option>
-              <option value="ONGOING">Ongoing</option>
-              <option value="COMPLETED">Completed</option>
               <option value="CANCELLED">Cancelled</option>
             </select>
           </div>

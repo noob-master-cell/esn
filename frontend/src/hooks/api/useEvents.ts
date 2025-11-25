@@ -79,7 +79,7 @@ export const useEvent = (id: string) => {
     const { data, loading, error, refetch } = useQuery(GET_EVENT, {
         variables: { id },
         skip: !id,
-        pollInterval: 5000, // Poll every 5 seconds for real-time updates
+        pollInterval: 30000, // Poll every 30 seconds (reduced from 5s)
     });
 
     return {

@@ -86,12 +86,15 @@ export const EventEditPage: React.FC = () => {
     maxParticipants: event.maxParticipants,
     price: event.price,
     memberPrice: event.memberPrice,
-    imageUrl: event.imageUrl || "",
+    images: event.images || [],
     tags: event.tags || [],
     requirements: event.requirements || "",
     additionalInfo: event.additionalInfo || "",
     isPublic: event.isPublic,
     allowWaitlist: event.allowWaitlist,
+    status: (["REGISTRATION_OPEN", "REGISTRATION_CLOSED", "ONGOING", "COMPLETED"].includes(event.status)
+      ? "PUBLISHED"
+      : event.status) as "DRAFT" | "PUBLISHED" | "CANCELLED",
   };
 
   return (

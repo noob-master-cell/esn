@@ -4,7 +4,7 @@ import { useQuery, gql } from "@apollo/client";
 
 const GET_UPCOMING_EVENTS = gql`
   query GetUpcomingEvents {
-    events(filter: { status: PUBLISHED }) {
+    events(filter: { take: 20, orderBy: "startDate", orderDirection: "asc" }) {
       items {
         id
         title

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../../components/ui/Button";
 import { StatusBadge } from "../components/shared/StatusBadge";
@@ -8,29 +8,45 @@ interface EventsTabProps {
     allRegistrations: Registration[];
     registrationsLoading: boolean;
     cancelRegistration: (id: string) => Promise<any>;
+    createRegistration: (options: any) => Promise<any>;
     refetchRegistrations: () => void;
     setUpdateSuccess: (value: boolean) => void;
     setUpdateError: (value: string) => void;
+    filter: 'all' | 'upcoming' | 'past' | 'cancelled';
+    onFilterChange: (filter: 'all' | 'upcoming' | 'past' | 'cancelled') => void;
 }
 
 export const EventsTab: React.FC<EventsTabProps> = ({
     allRegistrations,
     registrationsLoading,
     cancelRegistration,
+    createRegistration,
     refetchRegistrations,
     setUpdateSuccess,
     setUpdateError,
+    filter,
+    onFilterChange,
 }) => {
     const navigate = useNavigate();
-    const [eventFilter, setEventFilter] = useState<'all' | 'upcoming' | 'past' | 'cancelled'>('all');
+    // Removed local state eventFilter
 
     const getFilteredRegistrations = () => {
         const now = new Date();
-        switch (eventFilter) {
+        switch (filter) {
             case 'upcoming':
-                return allRegistrations.filter((r: Registration) => new Date(r.event.startDate) > now && r.status !== 'CANCELLED');
+                return allRegistrations.filter((r: Registration) => {
+                    const endDate = new Date(r.event.endDate);
+                    const isCompleted = r.event.status === 'COMPLETED' || r.event.status === 'CANCELLED';
+                    const isRegistrationCancelled = r.status === 'CANCELLED';
+                    return endDate > now && !isCompleted && !isRegistrationCancelled;
+                });
             case 'past':
-                return allRegistrations.filter((r: Registration) => new Date(r.event.startDate) <= now || r.status === 'ATTENDED');
+                return allRegistrations.filter((r: Registration) => {
+                    const endDate = new Date(r.event.endDate);
+                    const isCompleted = r.event.status === 'COMPLETED';
+                    const isAttended = r.status === 'ATTENDED';
+                    return endDate <= now || isCompleted || isAttended;
+                });
             case 'cancelled':
                 return allRegistrations.filter((r: Registration) => r.status === 'CANCELLED');
             default:
@@ -54,21 +70,42 @@ export const EventsTab: React.FC<EventsTabProps> = ({
         }
     };
 
+    const handleReRegister = async (eventId: string) => {
+        if (window.confirm("Do you want to re-register for this event?")) {
+            try {
+                await createRegistration({
+                    variables: {
+                        createRegistrationInput: {
+                            eventId,
+                            registrationType: 'REGULAR', // Default
+                        }
+                    }
+                });
+                setUpdateSuccess(true);
+                setTimeout(() => setUpdateSuccess(false), 3000);
+                refetchRegistrations();
+            } catch (error) {
+                console.error('Re-register error:', error);
+                setUpdateError('Failed to re-register. The event might be full or closed.');
+            }
+        }
+    };
+
     return (
         <div className="space-y-8">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
                 <h2 className="text-2xl font-bold text-gray-900">My Events</h2>
                 <div className="flex bg-gray-100/80 p-1.5 rounded-xl backdrop-blur-sm">
-                    {(['all', 'upcoming', 'past', 'cancelled'] as const).map((filter) => (
+                    {(['all', 'upcoming', 'past', 'cancelled'] as const).map((f) => (
                         <button
-                            key={filter}
-                            onClick={() => setEventFilter(filter)}
-                            className={`px-5 py-2.5 rounded-lg text-sm font-medium capitalize transition-all duration-200 ${eventFilter === filter
+                            key={f}
+                            onClick={() => onFilterChange(f)}
+                            className={`px-5 py-2.5 rounded-lg text-sm font-medium capitalize transition-all duration-200 ${filter === f
                                 ? "bg-white text-blue-600 shadow-sm ring-1 ring-black/5"
                                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
                                 }`}
                         >
-                            {filter}
+                            {f}
                         </button>
                     ))}
                 </div>
@@ -85,7 +122,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
                     <div className="text-6xl mb-6 opacity-50 grayscale">🎫</div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">No Events Found</h3>
                     <p className="text-gray-500 mb-8 max-w-md mx-auto">
-                        {eventFilter === 'all' ? "You haven't registered for any events yet. Explore our upcoming events and join the fun!" : `You don't have any ${eventFilter} events.`}
+                        {filter === 'all' ? "You haven't registered for any events yet. Explore our upcoming events and join the fun!" : `You don't have any ${filter} events.`}
                     </p>
                     <Button onClick={() => navigate("/events")} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl shadow-lg shadow-blue-600/20">
                         Browse Events
@@ -97,6 +134,7 @@ export const EventsTab: React.FC<EventsTabProps> = ({
                         const isUpcoming = new Date(registration.event.startDate) > new Date();
                         const canCancel = isUpcoming && registration.status !== 'CANCELLED';
                         const eventDate = new Date(registration.event.startDate);
+                        const isCompleted = registration.event.status === 'COMPLETED';
 
                         return (
                             <div
@@ -164,6 +202,16 @@ export const EventsTab: React.FC<EventsTabProps> = ({
                                                     onClick={() => handleCancelRegistration(registration.id)}
                                                 >
                                                     Cancel Registration
+                                                </Button>
+                                            )}
+                                            {registration.status === 'CANCELLED' && isUpcoming && !isCompleted && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="text-green-600 border-green-100 hover:bg-green-50 hover:border-green-200 rounded-lg transition-colors ml-auto"
+                                                    onClick={() => handleReRegister(registration.event.id)}
+                                                >
+                                                    Re-register
                                                 </Button>
                                             )}
                                         </div>

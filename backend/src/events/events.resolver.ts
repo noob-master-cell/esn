@@ -33,7 +33,9 @@ export class EventsResolver {
   ) {
     // For public access, don't pass userId
     const userId = includePrivate ? undefined : undefined;
-    return this.eventsService.findAll(filter, userId);
+    // Public query always treats user as guest/regular for filtering purposes (unless we want to support admin seeing drafts on homepage?)
+    // For now, let's keep homepage strictly public/published only.
+    return this.eventsService.findAll(filter, userId, undefined);
   }
 
   @Query(() => PaginatedEvents, { name: 'adminEvents' })
@@ -42,7 +44,7 @@ export class EventsResolver {
     @Args('filter', { nullable: true }) filter: EventsFilterInput = {},
     @CurrentUser() user: User,
   ) {
-    return this.eventsService.findAll(filter, user.id);
+    return this.eventsService.findAll(filter, user.id, user.role);
   }
 
   @Query(() => [Event], { name: 'myEvents' })
@@ -116,5 +118,13 @@ export class EventsResolver {
   @ResolveField(() => Int)
   async cancelledCount(@Parent() event: Event) {
     return this.eventsService.countRegistrations(event.id, 'CANCELLED');
+  }
+
+  @ResolveField(() => EventStatus)
+  async status(@Parent() event: Event) {
+    // If registrationCount is missing (e.g. raw Prisma object), default to 0
+    // Ideally, the service should always provide it, but this is a fallback
+    const count = event.registrationCount || 0;
+    return this.eventsService.computeEventStatus(event, count);
   }
 }
