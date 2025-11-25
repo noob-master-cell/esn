@@ -57,6 +57,7 @@ model User {
   registrations Registration[]
   payments      Payment[]
   reviews       Review[]
+  feedbacks     Feedback[]
   createdEvents Event[] @relation("EventCreator")
 
   @@map("users")
@@ -338,4 +339,31 @@ enum PaymentMethod {
   CASH
   BANK_TRANSFER
   FREE
+}
+
+// ================================
+// FEEDBACK SYSTEM
+// ================================
+
+model Feedback {
+  id        String       @id @default(cuid())
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  // Content
+  message   String
+  type      FeedbackType @default(FEEDBACK)
+
+  // Relations
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("feedbacks")
+  @@index([createdAt])
+}
+
+enum FeedbackType {
+  BUG
+  FEEDBACK
+  IMPROVEMENT
 }

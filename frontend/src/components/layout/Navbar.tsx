@@ -9,6 +9,7 @@ import {
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
   ShieldCheckIcon,
+  ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/outline";
 
 export const Navbar: React.FC = () => {
@@ -37,6 +38,7 @@ export const Navbar: React.FC = () => {
   const navItems = [
     { name: "Home", path: "/", icon: HomeIcon },
     { name: "Events", path: "/events", icon: CalendarIcon },
+    { name: "Feedback", path: "/feedback", icon: ChatBubbleLeftRightIcon },
   ];
 
   const isActivePath = (path: string) => {

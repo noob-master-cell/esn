@@ -93,7 +93,7 @@ export const Footer: React.FC = () => {
             </FooterColumn>
 
             <FooterColumn title="Legal">
-              <FooterLink href="/privacy-policy">Privacy Policy</FooterLink>
+              <FooterLink href="/privacy">Privacy Policy</FooterLink>
               <FooterLink href="#">Terms of Service</FooterLink>
               <FooterLink href="#">Cookie Policy</FooterLink>
               <FooterLink href="#">Contact Us</FooterLink>

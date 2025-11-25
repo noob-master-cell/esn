@@ -185,6 +185,20 @@ type RegistrationStats {
   cancelled: Int!
 }
 
+type Feedback {
+  id: ID!
+  message: String!
+  type: FeedbackType!
+  createdAt: DateTime!
+  user: User!
+}
+
+enum FeedbackType {
+  BUG
+  FEEDBACK
+  IMPROVEMENT
+}
+
 type Query {
   me: User!
   hello: String!
@@ -205,6 +219,7 @@ type Query {
   eventCapacityInfo(eventId: ID!): Int!
   adminStats: AdminStats!
   registrationStats: RegistrationStats!
+  feedbacks: [Feedback!]!
 }
 
 input UsersFilterInput {
@@ -262,6 +277,7 @@ type Mutation {
   updateRegistration(updateRegistrationInput: UpdateRegistrationInput!): Registration!
   cancelRegistration(id: ID!): Registration!
   markAttendance(registrationId: ID!, attended: Boolean!): Registration!
+  createFeedback(message: String!, type: FeedbackType!): Feedback!
 }
 
 input UpdateUserInput {
