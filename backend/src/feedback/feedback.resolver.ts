@@ -44,6 +44,26 @@ export class FeedbackResolver {
         return this.feedbackService.create(user.id, message, type);
     }
 
+    @Mutation(() => Feedback)
+    @UseGuards(Auth0Guard)
+    async updateFeedback(
+        @Args('id') id: string,
+        @Args('message') message: string,
+        @Args('type', { type: () => FeedbackType }) type: FeedbackType,
+        @CurrentUser() user: User,
+    ) {
+        return this.feedbackService.update(id, user.id, message, type);
+    }
+
+    @Mutation(() => Feedback)
+    @UseGuards(Auth0Guard)
+    async deleteFeedback(
+        @Args('id') id: string,
+        @CurrentUser() user: User,
+    ) {
+        return this.feedbackService.delete(id, user.id, user.role);
+    }
+
     @Query(() => [Feedback], { name: 'feedbacks' })
     async findAll() {
         return this.feedbackService.findAll();

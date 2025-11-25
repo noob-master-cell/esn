@@ -1,11 +1,13 @@
 import { useQuery, useMutation } from "@apollo/client";
-import { GET_FEEDBACKS, CREATE_FEEDBACK } from "../../graphql/feedback";
+import { GET_FEEDBACKS, CREATE_FEEDBACK, UPDATE_FEEDBACK, DELETE_FEEDBACK } from "../../graphql/feedback";
 
-export enum FeedbackType {
-    BUG = "BUG",
-    FEEDBACK = "FEEDBACK",
-    IMPROVEMENT = "IMPROVEMENT",
-}
+export const FeedbackType = {
+    BUG: "BUG",
+    FEEDBACK: "FEEDBACK",
+    IMPROVEMENT: "IMPROVEMENT",
+} as const;
+
+export type FeedbackType = typeof FeedbackType[keyof typeof FeedbackType];
 
 export interface Feedback {
     id: string;
@@ -14,6 +16,7 @@ export interface Feedback {
     createdAt: string;
     user: {
         id: string;
+        auth0Id?: string;
         firstName: string;
         lastName: string;
         avatar?: string;
@@ -31,11 +34,41 @@ export const useFeedback = () => {
         },
     });
 
+    const [updateFeedbackMutation, { loading: updating }] = useMutation(UPDATE_FEEDBACK, {
+        onCompleted: () => {
+            refetch();
+        },
+    });
+
+    const [deleteFeedbackMutation, { loading: deleting }] = useMutation(DELETE_FEEDBACK, {
+        onCompleted: () => {
+            refetch();
+        },
+    });
+
     const createFeedback = async (message: string, type: FeedbackType) => {
         await createFeedbackMutation({
             variables: {
                 message,
                 type,
+            },
+        });
+    };
+
+    const updateFeedback = async (id: string, message: string, type: FeedbackType) => {
+        await updateFeedbackMutation({
+            variables: {
+                id,
+                message,
+                type,
+            },
+        });
+    };
+
+    const deleteFeedback = async (id: string) => {
+        await deleteFeedbackMutation({
+            variables: {
+                id,
             },
         });
     };
@@ -46,6 +79,10 @@ export const useFeedback = () => {
         error,
         createFeedback,
         creating,
+        updateFeedback,
+        updating,
+        deleteFeedback,
+        deleting,
         refetch,
     };
 };

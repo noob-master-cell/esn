@@ -10,6 +10,9 @@ export class User {
   @Field(() => ID)
   id: string;
 
+  @Field({ nullable: true })
+  auth0Id?: string;
+
   @Field()
   email: string;
 

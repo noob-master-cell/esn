@@ -1,26 +1,77 @@
 import React, { useState } from "react";
-import { useFeedback, FeedbackType } from "../../hooks/api/useFeedback";
+import { useFeedback, FeedbackType, type Feedback } from "../../hooks/api/useFeedback";
 import { useAuth } from "../../hooks/useAuth";
 import { format } from "date-fns";
-import { ChatBubbleLeftRightIcon, BugAntIcon, LightBulbIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
+import {
+    ChatBubbleLeftRightIcon,
+    BugAntIcon,
+    LightBulbIcon,
+    PaperAirplaneIcon,
+    PencilIcon,
+    TrashIcon
+} from "@heroicons/react/24/outline";
 
 const FeedbackPage: React.FC = () => {
-    const { feedbacks, loading, createFeedback, creating } = useFeedback();
-    const { user } = useAuth();
+    const {
+        feedbacks,
+        loading,
+        createFeedback,
+        creating,
+        updateFeedback,
+        updating,
+        deleteFeedback,
+        deleting
+    } = useFeedback();
+    const { user, isAdmin } = useAuth();
+
     const [message, setMessage] = useState("");
     const [type, setType] = useState<FeedbackType>(FeedbackType.FEEDBACK);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!message.trim()) return;
 
         try {
-            await createFeedback(message, type);
+            if (editingId) {
+                await updateFeedback(editingId, message, type);
+                setEditingId(null);
+            } else {
+                await createFeedback(message, type);
+            }
             setMessage("");
             setType(FeedbackType.FEEDBACK);
         } catch (err) {
             console.error("Failed to submit feedback:", err);
         }
+    };
+
+    const handleEdit = (feedback: Feedback) => {
+        setEditingId(feedback.id);
+        setMessage(feedback.message);
+        setType(feedback.type);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleCancelEdit = () => {
+        setEditingId(null);
+        setMessage("");
+        setType(FeedbackType.FEEDBACK);
+    };
+
+    const handleDelete = async (id: string) => {
+        if (window.confirm("Are you sure you want to delete this feedback?")) {
+            try {
+                await deleteFeedback(id);
+            } catch (err) {
+                console.error("Failed to delete feedback:", err);
+            }
+        }
+    };
+
+    const canModify = (feedback: Feedback) => {
+        if (!user) return false;
+        return (user.sub && feedback.user.auth0Id && user.sub === feedback.user.auth0Id) || isAdmin;
     };
 
     const getTypeIcon = (type: FeedbackType) => {
@@ -74,8 +125,17 @@ const FeedbackPage: React.FC = () => {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div className="p-6 sm:p-8">
                         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <PaperAirplaneIcon className="w-5 h-5 text-cyan-600" />
-                            Submit Feedback
+                            {editingId ? (
+                                <>
+                                    <PencilIcon className="w-5 h-5 text-cyan-600" />
+                                    Edit Feedback
+                                </>
+                            ) : (
+                                <>
+                                    <PaperAirplaneIcon className="w-5 h-5 text-cyan-600" />
+                                    Submit Feedback
+                                </>
+                            )}
                         </h2>
 
                         {user ? (
@@ -89,8 +149,8 @@ const FeedbackPage: React.FC = () => {
                                                 type="button"
                                                 onClick={() => setType(t)}
                                                 className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${type === t
-                                                        ? "bg-cyan-50 border-cyan-200 text-cyan-700 shadow-sm"
-                                                        : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                                                    ? "bg-cyan-50 border-cyan-200 text-cyan-700 shadow-sm"
+                                                    : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-2">
@@ -117,13 +177,22 @@ const FeedbackPage: React.FC = () => {
                                     />
                                 </div>
 
-                                <div className="flex justify-end">
+                                <div className="flex justify-end gap-3">
+                                    {editingId && (
+                                        <button
+                                            type="button"
+                                            onClick={handleCancelEdit}
+                                            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                    )}
                                     <button
                                         type="submit"
-                                        disabled={creating || !message.trim()}
+                                        disabled={creating || updating || !message.trim()}
                                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                     >
-                                        {creating ? "Submitting..." : "Submit Feedback"}
+                                        {editingId ? (updating ? "Updating..." : "Update Feedback") : (creating ? "Submitting..." : "Submit Feedback")}
                                     </button>
                                 </div>
                             </form>
@@ -152,7 +221,7 @@ const FeedbackPage: React.FC = () => {
                     ) : (
                         <div className="grid gap-4">
                             {feedbacks.map((feedback) => (
-                                <div key={feedback.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                                <div key={feedback.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
                                     <div className="flex items-start gap-4">
                                         <div className="flex-shrink-0">
                                             {feedback.user.avatar ? (
@@ -177,9 +246,32 @@ const FeedbackPage: React.FC = () => {
                                                         {getTypeLabel(feedback.type)}
                                                     </span>
                                                 </div>
-                                                <span className="text-xs text-gray-400">
-                                                    {format(new Date(feedback.createdAt), "MMM d, yyyy")}
-                                                </span>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-xs text-gray-400">
+                                                        {format(new Date(feedback.createdAt), "MMM d, yyyy")}
+                                                    </span>
+                                                    {canModify(feedback) && (
+                                                        <div className="flex items-center gap-1">
+                                                            {(user?.sub === feedback.user.auth0Id || isAdmin) && (
+                                                                <button
+                                                                    onClick={() => handleEdit(feedback)}
+                                                                    className="p-1 text-gray-400 hover:text-cyan-600 transition-colors"
+                                                                    title="Edit"
+                                                                >
+                                                                    <PencilIcon className="w-4 h-4" />
+                                                                </button>
+                                                            )}
+                                                            <button
+                                                                onClick={() => handleDelete(feedback.id)}
+                                                                disabled={deleting}
+                                                                className="p-1 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                                                                title="Delete"
+                                                            >
+                                                                <TrashIcon className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                             <p className="text-gray-600 text-sm whitespace-pre-wrap">{feedback.message}</p>
                                         </div>

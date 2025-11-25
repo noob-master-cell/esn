@@ -4,6 +4,7 @@
 
 type User {
   id: ID!
+  auth0Id: String
   email: String!
   firstName: String
   lastName: String
@@ -278,6 +279,8 @@ type Mutation {
   cancelRegistration(id: ID!): Registration!
   markAttendance(registrationId: ID!, attended: Boolean!): Registration!
   createFeedback(message: String!, type: FeedbackType!): Feedback!
+  updateFeedback(id: String!, message: String!, type: FeedbackType!): Feedback!
+  deleteFeedback(id: String!): Feedback!
 }
 
 input UpdateUserInput {
