@@ -24,8 +24,10 @@ export const useRegistrationStats = () => {
 };
 
 export const useAdminStats = () => {
-    const { data, loading, error, refetch } = useQuery(ADMIN_DASHBOARD_STATS);
-    return { stats: data?.adminDashboardStats, loading, error, refetch };
+    const { data, loading, error, refetch } = useQuery(ADMIN_DASHBOARD_STATS, {
+        pollInterval: 30000, // Poll every 30 seconds for realtime updates
+    });
+    return { stats: data?.adminStats, loading, error, refetch };
 };
 
 import { useState } from "react";

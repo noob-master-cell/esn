@@ -22,4 +22,16 @@ export class AdminStats {
 
     @Field(() => Float)
     revenueThisMonth: number;
+
+    @Field(() => Float, { nullable: true })
+    eventsChange?: number;
+
+    @Field(() => Float, { nullable: true })
+    activeUsersChange?: number;
+
+    @Field(() => Float, { nullable: true })
+    registrationsChange?: number;
+
+    @Field(() => Float, { nullable: true })
+    revenueChange?: number;
 }

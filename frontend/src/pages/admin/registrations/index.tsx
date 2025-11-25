@@ -54,7 +54,7 @@ export const AdminRegistrationsPage: React.FC = () => {
   const [pageSize, setPageSize] = useState(20);
   const [sortBy, setSortBy] = useState<string>('registeredAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [viewMode, setViewMode] = useState<'list' | 'grouped'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'grouped'>('grouped');
 
   const { registrations, loading, error, refetch } = useAdminRegistrations({
     filter: {

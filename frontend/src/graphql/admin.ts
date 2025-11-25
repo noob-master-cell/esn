@@ -10,6 +10,10 @@ export const ADMIN_DASHBOARD_STATS = gql`
       eventsThisMonth
       registrationsThisMonth
       revenueThisMonth
+      eventsChange
+      activeUsersChange
+      registrationsChange
+      revenueChange
     }
   }
 

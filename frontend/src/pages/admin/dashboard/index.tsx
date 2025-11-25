@@ -54,6 +54,10 @@ export const AdminDashboardPage: React.FC = () => {
     activeUsers: 0,
     totalRegistrations: 0,
     totalRevenue: 0,
+    eventsChange: 0,
+    activeUsersChange: 0,
+    registrationsChange: 0,
+    revenueChange: 0,
   };
 
   const eventsList = recentEvents || [];
@@ -70,8 +74,8 @@ export const AdminDashboardPage: React.FC = () => {
           <StatsCard
             title="Total Events"
             value={dashboardStats.totalEvents.toString()}
-            change="+12%" // TODO: Calculate change
-            trend="up"
+            change={`${dashboardStats.eventsChange >= 0 ? '+' : ''}${dashboardStats.eventsChange?.toFixed(1)}%`}
+            trend={dashboardStats.eventsChange >= 0 ? "up" : "down"}
             icon={
               <svg
                 className="w-6 h-6"
@@ -92,8 +96,8 @@ export const AdminDashboardPage: React.FC = () => {
           <StatsCard
             title="Active Users"
             value={dashboardStats.activeUsers.toString()}
-            change="+8%" // TODO: Calculate change
-            trend="up"
+            change={`${dashboardStats.activeUsersChange >= 0 ? '+' : ''}${dashboardStats.activeUsersChange?.toFixed(1)}%`}
+            trend={dashboardStats.activeUsersChange >= 0 ? "up" : "down"}
             icon={
               <svg
                 className="w-6 h-6"
@@ -114,8 +118,8 @@ export const AdminDashboardPage: React.FC = () => {
           <StatsCard
             title="Registrations"
             value={dashboardStats.totalRegistrations.toString()}
-            change="+15%" // TODO: Calculate change
-            trend="up"
+            change={`${dashboardStats.registrationsChange >= 0 ? '+' : ''}${dashboardStats.registrationsChange?.toFixed(1)}%`}
+            trend={dashboardStats.registrationsChange >= 0 ? "up" : "down"}
             icon={
               <svg
                 className="w-6 h-6"

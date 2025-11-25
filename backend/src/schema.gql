@@ -143,6 +143,7 @@ enum RegistrationStatus {
   CANCELLED
   ATTENDED
   NO_SHOW
+  WAITLIST
 }
 
 """Registration type options"""
@@ -170,6 +171,10 @@ type AdminStats {
   eventsThisMonth: Int!
   registrationsThisMonth: Int!
   revenueThisMonth: Float!
+  eventsChange: Float
+  activeUsersChange: Float
+  registrationsChange: Float
+  revenueChange: Float
 }
 
 type RegistrationStats {
@@ -330,6 +335,7 @@ input CreateRegistrationInput {
   dietary: String
   emergencyContact: String
   emergencyEmail: String
+  joinWaitlist: Boolean = false
 }
 
 input UpdateRegistrationInput {
@@ -343,6 +349,7 @@ input UpdateRegistrationInput {
   dietary: String
   emergencyContact: String
   emergencyEmail: String
+  joinWaitlist: Boolean = false
   id: ID!
   status: RegistrationStatus
   paymentStatus: PaymentStatus

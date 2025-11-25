@@ -309,6 +309,7 @@ enum RegistrationStatus {
   CANCELLED
   ATTENDED
   NO_SHOW
+  WAITLIST
 }
 
 enum RegistrationType {

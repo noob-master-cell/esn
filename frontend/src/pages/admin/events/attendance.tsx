@@ -141,8 +141,84 @@ export const AdminAttendancePage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Attendance List */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-4">
+                    {filteredRegistrations?.map((reg: any) => (
+                        <div key={reg.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-4">
+                            {/* Header: Avatar + Name + Status Badge */}
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-3">
+                                    {/* Avatar */}
+                                    <div className="flex-shrink-0 h-10 w-10">
+                                        {reg.user.avatar ? (
+                                            <img className="h-10 w-10 rounded-full object-cover" src={reg.user.avatar} alt="" />
+                                        ) : (
+                                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
+                                                {(reg.user?.firstName || '?').charAt(0)}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-medium text-gray-900">{reg.user?.firstName || 'Unknown'} {reg.user?.lastName || ''}</div>
+                                        <div className="text-xs text-gray-500">{reg.user?.email || 'No email'}</div>
+                                    </div>
+                                </div>
+                                {/* Status Badge */}
+                                {reg.status === 'ATTENDED' ? (
+                                    <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                        Attended
+                                    </span>
+                                ) : (
+                                    <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        Not Checked In
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Details: Ticket & Payment */}
+                            <div className="flex items-center justify-between text-sm border-t border-b border-gray-50 py-3">
+                                <div>
+                                    <span className="text-gray-500">Ticket:</span>
+                                    <span className="ml-2 font-medium text-gray-900">{reg.registrationType}</span>
+                                </div>
+                                <div>
+                                    {reg.amountDue > 0 ? (
+                                        <button
+                                            onClick={() => handlePaymentToggle(reg.id, reg.paymentStatus)}
+                                            className={`px-2 py-1 text-xs font-semibold rounded-full ${reg.paymentStatus === 'COMPLETED'
+                                                ? 'bg-green-100 text-green-800'
+                                                : 'bg-yellow-100 text-yellow-800'
+                                                }`}
+                                        >
+                                            {reg.paymentStatus === 'COMPLETED' ? 'Paid' : `Pending (€${reg.amountDue})`}
+                                        </button>
+                                    ) : (
+                                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">Free</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Action Button */}
+                            <button
+                                onClick={() => handleAttendanceToggle(reg.id, reg.status)}
+                                className={`w-full py-2.5 rounded-lg text-sm font-medium transition-colors ${reg.status === 'ATTENDED'
+                                    ? 'bg-white border border-gray-300 text-gray-700'
+                                    : 'bg-cyan-600 text-white shadow-sm'
+                                    }`}
+                            >
+                                {reg.status === 'ATTENDED' ? 'Undo Check-in' : 'Check In'}
+                            </button>
+                        </div>
+                    ))}
+                    {filteredRegistrations?.length === 0 && (
+                        <div className="text-center py-8 text-gray-500 bg-white rounded-xl border border-gray-100">
+                            No attendees found.
+                        </div>
+                    )}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>

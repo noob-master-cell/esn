@@ -48,4 +48,8 @@ export class CreateRegistrationInput {
   @IsOptional()
   @IsEmail()
   emergencyEmail?: string;
+
+  @Field({ nullable: true, defaultValue: false })
+  @IsOptional()
+  joinWaitlist?: boolean;
 }

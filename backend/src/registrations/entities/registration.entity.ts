@@ -17,6 +17,7 @@ export enum RegistrationStatus {
   CANCELLED = 'CANCELLED',
   ATTENDED = 'ATTENDED',
   NO_SHOW = 'NO_SHOW',
+  WAITLIST = 'WAITLIST',
 }
 
 export enum RegistrationType {

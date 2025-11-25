@@ -104,10 +104,16 @@ export class RegistrationsService {
     // Determine registration type and status
     let registrationType =
       createRegistrationInput.registrationType || RegistrationType.REGULAR;
-    let status = RegistrationStatus.PENDING;
+    let status = RegistrationStatus.CONFIRMED; // Default to CONFIRMED if spots available
 
     if (isEventFull) {
-      throw new BadRequestException('Event is full');
+      if (createRegistrationInput.joinWaitlist) {
+        status = RegistrationStatus.WAITLIST;
+      } else {
+        throw new ConflictException(
+          'Event is full. Would you like to join the waitlist?',
+        );
+      }
     }
 
     // Calculate pricing
@@ -377,6 +383,30 @@ export class RegistrationsService {
         event: true,
       },
     });
+
+    // Auto-promote next waitlisted user if event has spots now
+    // (Technically it has 1 spot because we just cancelled)
+    const nextWaitlisted = await this.prisma.registration.findFirst({
+      where: {
+        eventId: registration.eventId,
+        status: RegistrationStatus.WAITLIST,
+      },
+      orderBy: {
+        registeredAt: 'asc', // FIFO
+      },
+    });
+
+    if (nextWaitlisted) {
+      await this.prisma.registration.update({
+        where: { id: nextWaitlisted.id },
+        data: {
+          status: RegistrationStatus.CONFIRMED,
+          confirmedAt: new Date(),
+        },
+      });
+      // TODO: Notify the promoted user via email
+      console.log(`Auto-promoted user ${nextWaitlisted.userId} from waitlist to confirmed`);
+    }
 
 
 
