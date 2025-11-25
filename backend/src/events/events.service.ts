@@ -243,7 +243,7 @@ export class EventsService implements OnModuleInit {
     return result;
   }
 
-  async findOne(id: string, userId?: string) {
+  async findOne(id: string, userId?: string, userRole?: UserRole) {
 
 
     const event = await this.prisma.event.findUnique({
@@ -289,7 +289,8 @@ export class EventsService implements OnModuleInit {
     // Check if user can view this event
     const isDraftOrCancelled = event.status === EventStatus.DRAFT || event.status === EventStatus.CANCELLED;
     if (!event.isPublic || isDraftOrCancelled) {
-      if (!userId || event.organizerId !== userId) {
+      // Allow if user is ADMIN or the organizer
+      if (userRole !== UserRole.ADMIN && (!userId || event.organizerId !== userId)) {
         throw new ForbiddenException(
           'You do not have permission to view this event',
         );
@@ -308,7 +309,7 @@ export class EventsService implements OnModuleInit {
   ) {
 
 
-    const event = await this.findOne(id, userId);
+    const event = await this.findOne(id, userId, userRole);
 
     // Check permissions
     if (userRole !== UserRole.ADMIN && event.organizerId !== userId) {
@@ -457,7 +458,7 @@ export class EventsService implements OnModuleInit {
   async publish(id: string, userId: string, userRole: UserRole) {
 
 
-    const event = await this.findOne(id, userId);
+    const event = await this.findOne(id, userId, userRole);
 
     // Check permissions
     if (userRole !== UserRole.ADMIN && event.organizerId !== userId) {

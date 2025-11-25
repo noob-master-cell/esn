@@ -58,7 +58,7 @@ export class EventsResolver {
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() user?: User,
   ) {
-    return this.eventsService.findOne(id, user?.id);
+    return this.eventsService.findOne(id, user?.id, user?.role);
   }
 
   @Mutation(() => Event)

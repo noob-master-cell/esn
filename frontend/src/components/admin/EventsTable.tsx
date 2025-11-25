@@ -189,10 +189,10 @@ export const EventsTable: React.FC<EventsTableProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-100">
-          <thead className="bg-gray-50/50">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col max-h-[calc(100vh-18rem)]">
+      <div className="overflow-auto flex-1">
+        <table className="min-w-full divide-y divide-gray-100 relative">
+          <thead className="bg-gray-50/50 sticky top-0 z-10 shadow-sm">
             <tr>
               <th className="px-6 py-4 text-left">
                 <input
