@@ -55,7 +55,8 @@ export class EventsService implements OnModuleInit {
         });
 
         // Invalidate cache
-        await this.cacheManager.del(`events_all_*`).catch(() => { });
+        // Invalidate cache
+        await this.clearEventsCache();
 
         console.log(`Marked ${eventsToComplete.length} events as COMPLETED`);
       }
@@ -122,7 +123,8 @@ export class EventsService implements OnModuleInit {
     });
 
     // Invalidate events cache
-    await this.cacheManager.del(`events_all_*`).catch(() => { });
+    // Invalidate events cache
+    await this.clearEventsCache();
 
 
     return this.transformEvent(event);
@@ -357,7 +359,8 @@ export class EventsService implements OnModuleInit {
     });
 
     // Invalidate events cache
-    await this.cacheManager.del(`events_all_*`).catch(() => { });
+    // Invalidate events cache
+    await this.clearEventsCache();
 
     // Cloudinary Cleanup: Delete images that were removed
     if (updateData.images) {
@@ -441,7 +444,8 @@ export class EventsService implements OnModuleInit {
     });
 
     // Invalidate events cache
-    await this.cacheManager.del(`events_all_*`).catch(() => { });
+    // Invalidate events cache
+    await this.clearEventsCache();
 
     return true;
   }
@@ -601,5 +605,27 @@ export class EventsService implements OnModuleInit {
         status: statusFilter,
       },
     });
+  }
+
+  private async clearEventsCache() {
+    try {
+      // Access the underlying store to get keys (Redis specific)
+      const store = (this.cacheManager as any).store;
+      if (store.keys) {
+        const keys = await store.keys('events_all_*');
+        if (keys && keys.length > 0) {
+          // Delete keys individually or in bulk depending on store support
+          // cache-manager v5+ usually supports mdel or we loop
+          if (store.mdel) {
+            await store.mdel(...keys);
+          } else {
+            await Promise.all(keys.map((key: string) => this.cacheManager.del(key)));
+          }
+          console.log(`Cleared ${keys.length} event cache keys`);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to clear events cache:', error);
+    }
   }
 }

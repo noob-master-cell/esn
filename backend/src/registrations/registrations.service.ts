@@ -447,6 +447,13 @@ export class RegistrationsService {
       );
     }
 
+    // Check if event has ended
+    if (new Date() > registration.event.endDate) {
+      throw new BadRequestException(
+        'Cannot cancel registration for completed event',
+      );
+    }
+
     // Cancel the registration
     const cancelledRegistration = await this.prisma.registration.update({
       where: { id },

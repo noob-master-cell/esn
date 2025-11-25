@@ -24,6 +24,7 @@ interface Registration {
     id: string;
     title: string;
     startDate: string;
+    endDate: string;
     location: string;
   };
 }
@@ -398,7 +399,7 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
                     )}
                     {["PENDING", "CONFIRMED", "WAITLISTED"].includes(
                       registration.status
-                    ) && (
+                    ) && new Date() <= new Date(registration.event.endDate) && (
                         <button
                           onClick={() =>
                             onUpdateStatus(registration.id, "CANCELLED")
