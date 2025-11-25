@@ -126,30 +126,30 @@ const EventDetails: React.FC<EventDetailsProps> = ({
 
             {/* Event Header */}
             <div className="space-y-6">
-              <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-gray-100 shadow-sm group">
+              {/* Navigation & Actions */}
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                >
+                  <ArrowLeftIcon className="w-5 h-5" />
+                  Back
+                </button>
+                <button
+                  onClick={() => setShowShareModal(true)}
+                  className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors font-medium"
+                >
+                  <ShareIcon className="w-5 h-5" />
+                  Share
+                </button>
+              </div>
+              <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-gray-900 shadow-sm group">
                 <img
                   src={coverImage}
                   alt={event.title}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-contain"
                 />
 
-                {/* Overlay Controls */}
-                <div className="absolute top-4 left-4 z-10">
-                  <button
-                    onClick={() => navigate(-1)}
-                    className="p-2 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full shadow-sm transition-all text-gray-700"
-                  >
-                    <ArrowLeftIcon className="w-5 h-5" />
-                  </button>
-                </div>
-                <div className="absolute top-4 right-4 z-10">
-                  <button
-                    onClick={() => setShowShareModal(true)}
-                    className="p-2 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full shadow-sm transition-all text-gray-700"
-                  >
-                    <ShareIcon className="w-5 h-5" />
-                  </button>
-                </div>
               </div>
 
               <div>
@@ -232,7 +232,6 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                     <div>
                       <div className="font-semibold text-gray-900">{startDateTime.fullDate}</div>
                       <div className="text-gray-500">{startDateTime.time} - {endDateTime.time}</div>
-                      <div className="text-xs text-blue-600 font-medium mt-1 cursor-pointer hover:underline">Add to Calendar</div>
                     </div>
                   </div>
 

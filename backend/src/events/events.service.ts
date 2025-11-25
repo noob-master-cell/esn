@@ -7,12 +7,14 @@ import { UpdateEventInput } from './dto/update-event.input';
 import { EventsFilterInput } from './dto/events-filter.input';
 import { EventStatus, UserRole, RegistrationStatus } from '@prisma/client';
 import { PaginatedEvents } from './dto/paginated-events.output';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class EventsService {
   constructor(
     private prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private cloudinaryService: CloudinaryService,
   ) { }
 
   async create(createEventInput: CreateEventInput, organizerId: string) {
@@ -218,6 +220,24 @@ export class EventsService {
       },
     });
 
+    // Cloudinary Cleanup: Delete images that were removed
+    if (updateData.images) {
+      const oldImages = event.images || [];
+      const newImages = updateData.images;
+
+      // Find images that are in oldImages but NOT in newImages
+      const imagesToDelete = oldImages.filter(img => !newImages.includes(img));
+
+      for (const imageUrl of imagesToDelete) {
+        const publicId = this.cloudinaryService.extractPublicIdFromUrl(imageUrl);
+        if (publicId) {
+          // Fire and forget - don't await to avoid slowing down the response
+          this.cloudinaryService.deleteImage(publicId).catch(err =>
+            console.error(`Failed to delete image ${publicId}:`, err)
+          );
+        }
+      }
+    }
 
     return this.transformEvent(updatedEvent);
   }
@@ -263,6 +283,18 @@ export class EventsService {
         where: { eventId: id },
       });
 
+    }
+
+    // Cloudinary Cleanup: Delete all event images
+    if (eventData.images && eventData.images.length > 0) {
+      for (const imageUrl of eventData.images) {
+        const publicId = this.cloudinaryService.extractPublicIdFromUrl(imageUrl);
+        if (publicId) {
+          this.cloudinaryService.deleteImage(publicId).catch(err =>
+            console.error(`Failed to delete image ${publicId}:`, err)
+          );
+        }
+      }
     }
 
     await this.prisma.event.delete({

@@ -4,10 +4,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UsersFilterInput } from './dto/users-filter.input';
 import { PaginatedUsers } from './dto/paginated-users.output';
 import { Prisma } from '@prisma/client';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private cloudinaryService: CloudinaryService,
+  ) { }
 
   async findAll(filter: UsersFilterInput = {}): Promise<PaginatedUsers> {
     const where: Prisma.UserWhereInput = {};
@@ -95,6 +99,24 @@ export class UsersService {
         emergencyContactPhone: updateData.emergencyContactPhone,
       },
     });
+
+    // Cloudinary Cleanup: Delete old avatar if changed
+    if (updateData.avatar !== undefined) {
+      const oldAvatar = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { avatar: true },
+      }).then(u => u?.avatar);
+
+      // If there was an old avatar and it's different from the new one (or new one is null)
+      if (oldAvatar && oldAvatar !== updateData.avatar) {
+        const publicId = this.cloudinaryService.extractPublicIdFromUrl(oldAvatar);
+        if (publicId) {
+          this.cloudinaryService.deleteImage(publicId).catch(err =>
+            console.error(`Failed to delete old avatar ${publicId}:`, err)
+          );
+        }
+      }
+    }
 
     return this.transformPrismaUser(prismaUser);
   }

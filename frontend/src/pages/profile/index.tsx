@@ -37,7 +37,7 @@ const ProfilePage: React.FC = () => {
   const { updateUserProfile, cancelRegistration, deleteUser } = useProfileActions();
 
   // Handlers
-  const handlePhotoUpload = async (url: string) => {
+  const handlePhotoUpload = async (url: string | null) => {
     try {
       await updateUserProfile({
         variables: { updateUserInput: { avatar: url } },

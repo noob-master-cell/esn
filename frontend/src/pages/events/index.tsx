@@ -45,15 +45,7 @@ const EventsPage: React.FC = () => {
             <PullToRefreshIndicator isPulling={isPulling} pullDistance={pullDistance} />
             <OfflineIndicator show={showOfflineMessage} />
 
-            <div className="fixed bottom-6 right-6 z-30">
-                <a
-                    href={`${(import.meta.env.VITE_API_URL || 'http://localhost:4000').replace('http', 'webcal')}/calendar/feed`}
-                    className="flex items-center justify-center gap-2 px-5 py-3 bg-gray-900 text-white rounded-full hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 font-medium group"
-                >
-                    <CalendarDaysIcon className="w-5 h-5" />
-                    <span className="font-medium">Subscribe</span>
-                </a>
-            </div>
+
 
             <ResponsiveCalendarView
                 key={refreshKey}

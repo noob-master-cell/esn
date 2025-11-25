@@ -76,8 +76,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
             <div
                 className={`relative border-2 border-dashed rounded-lg p-6 transition-colors ${isDragging
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-300 hover:border-gray-400"
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300 hover:border-gray-400"
                     }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -96,7 +96,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                         <img
                             src={value}
                             alt="Preview"
-                            className="w-full h-64 object-cover rounded-lg"
+                            className="w-full h-64 object-contain rounded-lg bg-gray-100"
                         />
                         <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
                             <Button

@@ -6,7 +6,7 @@ import { useAuth } from "../../../hooks/useAuth";
 interface PhotoUploadModalProps {
     dbUser: any;
     onClose: () => void;
-    onUploadComplete: (url: string) => Promise<void>;
+    onUploadComplete: (url: string | null) => Promise<void>;
 }
 
 export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
@@ -22,8 +22,10 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                 <ImageUpload
                     value={dbUser?.avatar}
                     onChange={async (url) => {
-                        await onUploadComplete(url);
-                        onClose();
+                        if (url) {
+                            await onUploadComplete(url);
+                            onClose();
+                        }
                     }}
                     onUpload={async (file) => {
                         const token = await getToken();
@@ -46,10 +48,23 @@ export const PhotoUploadModal: React.FC<PhotoUploadModalProps> = ({
                         return data.url;
                     }}
                 />
-                <div className="mt-4 flex justify-end">
-                    <Button variant="secondary" onClick={onClose}>
-                        Cancel
-                    </Button>
+                <div className="mt-4 flex justify-between">
+                    {dbUser?.avatar && (
+                        <Button
+                            variant="danger"
+                            onClick={async () => {
+                                await onUploadComplete(null);
+                                onClose();
+                            }}
+                        >
+                            Remove Photo
+                        </Button>
+                    )}
+                    <div className="flex gap-2 ml-auto">
+                        <Button variant="secondary" onClick={onClose}>
+                            Cancel
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>
