@@ -151,6 +151,8 @@ model Event {
   payments     Payment[]
 
   @@map("events")
+  @@index([createdAt])
+  @@index([startDate])
 }
 
 // ================================
@@ -194,6 +196,7 @@ model Registration {
 
   @@unique([userId, eventId])
   @@index([eventId, status])
+  @@index([registeredAt])
   @@map("registrations")
 }
 
@@ -232,6 +235,8 @@ model Payment {
   failureReason  String?
 
   @@map("payments")
+  @@index([createdAt])
+  @@index([status])
 }
 
 // ================================

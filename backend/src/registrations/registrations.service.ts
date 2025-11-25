@@ -73,13 +73,7 @@ export class RegistrationsService {
     const event = await this.prisma.event.findUnique({
       where: { id: createRegistrationInput.eventId },
       include: {
-        registrations: {
-          where: {
-            status: {
-              in: [RegistrationStatus.CONFIRMED, RegistrationStatus.PENDING],
-            },
-          },
-        },
+
       },
     });
 
@@ -98,7 +92,14 @@ export class RegistrationsService {
     }
 
     // Count current confirmed registrations (excluding waitlist)
-    const confirmedRegistrations = event.registrations.length;
+    const confirmedRegistrations = await this.prisma.registration.count({
+      where: {
+        eventId: createRegistrationInput.eventId,
+        status: {
+          in: [RegistrationStatus.CONFIRMED, RegistrationStatus.PENDING],
+        },
+      },
+    });
     const isEventFull = confirmedRegistrations >= event.maxParticipants;
 
     // Determine registration type and status

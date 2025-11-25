@@ -12,97 +12,70 @@ export class AdminService {
         const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
-        // Total counts
-        const totalEvents = await this.prisma.event.count();
-        const activeUsers = await this.prisma.user.count({
-            where: { isActive: true },
-        });
-        const totalRegistrations = await this.prisma.registration.count({
-            where: {
-                status: {
-                    not: 'CANCELLED',
-                },
-            },
-        });
+        // Execute all independent queries in parallel
+        const [
+            totalEvents,
+            activeUsers,
+            totalRegistrations,
+            revenueResult,
+            eventsThisMonth,
+            registrationsThisMonth,
+            monthlyRevenueResult,
+            eventsLastMonth,
+            registrationsLastMonth,
+            lastMonthRevenueResult,
+            usersThisMonth,
+            usersLastMonth
+        ] = await Promise.all([
+            // Total counts
+            this.prisma.event.count(),
+            this.prisma.user.count({ where: { isActive: true } }),
+            this.prisma.registration.count({ where: { status: { not: 'CANCELLED' } } }),
 
-        // Revenue calculation (sum of all completed payments)
-        const revenueResult = await this.prisma.payment.aggregate({
-            _sum: {
-                amount: true,
-            },
-            where: {
-                status: 'COMPLETED',
-            },
-        });
+            // Total Revenue
+            this.prisma.payment.aggregate({
+                _sum: { amount: true },
+                where: { status: 'COMPLETED' },
+            }),
+
+            // Monthly stats
+            this.prisma.event.count({ where: { createdAt: { gte: startOfMonth } } }),
+            this.prisma.registration.count({
+                where: {
+                    registeredAt: { gte: startOfMonth },
+                    status: { not: 'CANCELLED' },
+                },
+            }),
+            this.prisma.payment.aggregate({
+                _sum: { amount: true },
+                where: { status: 'COMPLETED', createdAt: { gte: startOfMonth } },
+            }),
+
+            // Previous Month Stats
+            this.prisma.event.count({
+                where: { createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } },
+            }),
+            this.prisma.registration.count({
+                where: {
+                    registeredAt: { gte: startOfLastMonth, lte: endOfLastMonth },
+                    status: { not: 'CANCELLED' },
+                },
+            }),
+            this.prisma.payment.aggregate({
+                _sum: { amount: true },
+                where: {
+                    status: 'COMPLETED',
+                    createdAt: { gte: startOfLastMonth, lte: endOfLastMonth },
+                },
+            }),
+
+            // User Growth Stats
+            this.prisma.user.count({ where: { createdAt: { gte: startOfMonth } } }),
+            this.prisma.user.count({ where: { createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } } })
+        ]);
+
         const totalRevenue = Number(revenueResult._sum.amount) || 0;
-
-        // Monthly stats
-        const eventsThisMonth = await this.prisma.event.count({
-            where: {
-                createdAt: {
-                    gte: startOfMonth,
-                },
-            },
-        });
-
-        const registrationsThisMonth = await this.prisma.registration.count({
-            where: {
-                registeredAt: {
-                    gte: startOfMonth,
-                },
-                status: {
-                    not: 'CANCELLED',
-                },
-            },
-        });
-
-        const monthlyRevenueResult = await this.prisma.payment.aggregate({
-            _sum: {
-                amount: true,
-            },
-            where: {
-                status: 'COMPLETED',
-                createdAt: {
-                    gte: startOfMonth,
-                },
-            },
-        });
         const revenueThisMonth = Number(monthlyRevenueResult._sum.amount) || 0;
-
-        // Previous Month Stats for Percentage Calculation
-        const eventsLastMonth = await this.prisma.event.count({
-            where: {
-                createdAt: {
-                    gte: startOfLastMonth,
-                    lte: endOfLastMonth,
-                },
-            },
-        });
-
-        const registrationsLastMonth = await this.prisma.registration.count({
-            where: {
-                registeredAt: {
-                    gte: startOfLastMonth,
-                    lte: endOfLastMonth,
-                },
-                status: {
-                    not: 'CANCELLED',
-                },
-            },
-        });
-
-        const lastMonthRevenueResult = await this.prisma.payment.aggregate({
-            _sum: {
-                amount: true,
-            },
-            where: {
-                status: 'COMPLETED',
-                createdAt: {
-                    gte: startOfLastMonth,
-                    lte: endOfLastMonth,
-                },
-            },
-        });
         const revenueLastMonth = Number(lastMonthRevenueResult._sum.amount) || 0;
 
         // Calculate Percentage Changes
@@ -113,12 +86,7 @@ export class AdminService {
 
         // For active users, we don't track historical active status easily, so we'll mock it or use total growth
         // A better approach for active users would be users created this month vs last month
-        const usersThisMonth = await this.prisma.user.count({
-            where: { createdAt: { gte: startOfMonth } },
-        });
-        const usersLastMonth = await this.prisma.user.count({
-            where: { createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } },
-        });
+
 
         return {
             totalEvents,
