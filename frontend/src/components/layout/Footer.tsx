@@ -56,7 +56,7 @@ export const Footer: React.FC = () => {
               Supporting international students and promoting mobility across Europe.
             </p>
             <div className="flex gap-4">
-              <SocialLink href="#" icon="fab fa-instagram" label="Instagram" />
+              <SocialLink href="https://www.instagram.com/esn_kaiserslautern/?hl=en" icon="fab fa-instagram" label="Instagram" />
               <SocialLink href="#" icon="fab fa-facebook" label="Facebook" />
               <SocialLink href="#" icon="fab fa-twitter" label="Twitter" />
               <SocialLink href="#" icon="fab fa-linkedin" label="LinkedIn" />
