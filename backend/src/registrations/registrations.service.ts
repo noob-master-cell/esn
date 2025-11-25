@@ -153,7 +153,6 @@ export class RegistrationsService {
     try {
       // Check if we are re-registering (updating a cancelled registration)
       if (existingRegistration && existingRegistration.status === RegistrationStatus.CANCELLED) {
-        console.log(`Re-registering user ${userId} for event ${createRegistrationInput.eventId}. New status: ${status}`);
         const updatedRegistration = await this.prisma.registration.update({
           where: { id: existingRegistration.id },
           data: {
@@ -189,7 +188,6 @@ export class RegistrationsService {
             user: true,
           },
         });
-        console.log(`Re-registration successful. Updated status: ${updatedRegistration.status}`);
 
         return this.transformRegistration(updatedRegistration);
       }
