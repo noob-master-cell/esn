@@ -10,6 +10,7 @@ import EventsPage from './pages/events';
 import EventDetailsPage from './pages/events/EventDetailsPage';
 import EventRegistrationPage from './pages/events/EventRegistrationPage';
 import ProfilePage from './pages/profile';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 // Auth Pages
 import SignInPage from './pages/auth/sign-in';
@@ -32,6 +33,7 @@ export const AppRoutes: React.FC = () => (
         <Route path="/" element={<HomePage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:id" element={<EventDetailsPage />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
 
         {/* Auth Routes */}
         <Route
