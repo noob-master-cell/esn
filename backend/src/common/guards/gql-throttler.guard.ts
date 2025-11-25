@@ -36,7 +36,18 @@ export class GqlThrottlerGuard extends ThrottlerGuard {
                     ip: '0.0.0.0',
                     ips: []
                 },
-                res: {}
+                res: {
+                    header: () => { }, // Mock header setter
+                    headers: {},
+                }
+            };
+        }
+
+        // Ensure res is defined even if req was found (e.g. in subscriptions)
+        if (!res) {
+            res = {
+                header: () => { },
+                headers: {},
             };
         }
 
