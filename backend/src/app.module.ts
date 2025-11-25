@@ -25,6 +25,9 @@ import { FeedbackModule } from './feedback/feedback.module';
 import { GqlThrottlerGuard } from './common/guards/gql-throttler.guard';
 import { CommentsModule } from './comments/comments.module';
 
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -92,12 +95,13 @@ import { CommentsModule } from './comments/comments.module';
     CommentsModule,
   ],
   providers: [
+    AppService,
     {
       provide: APP_GUARD,
       useClass: GqlThrottlerGuard,
     },
   ],
-  controllers: [UploadController, HealthController],
+  controllers: [AppController, UploadController, HealthController],
   // Note: ThrottlerGuard not applied globally to avoid GraphQL conflicts
   // Apply @UseGuards(ThrottlerGuard) on individual REST controllers if needed
 })
