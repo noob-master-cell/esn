@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import logo from "../../assets/favicon/favicon.ico";
 
 const SocialLink: React.FC<{ href: string; icon: string; label: string }> = ({ href, icon, label }) => (
@@ -11,16 +12,28 @@ const SocialLink: React.FC<{ href: string; icon: string; label: string }> = ({ h
   </a>
 );
 
-const FooterLink: React.FC<{ href: string; children: React.ReactNode }> = ({ href, children }) => (
-  <li>
-    <a
-      href={href}
-      className="text-sm text-gray-400 hover:text-white transition-colors duration-200"
-    >
-      {children}
-    </a>
-  </li>
-);
+const FooterLink: React.FC<{ href: string; children: React.ReactNode }> = ({ href, children }) => {
+  const isInternal = href.startsWith('/');
+  return (
+    <li>
+      {isInternal ? (
+        <Link
+          to={href}
+          className="text-sm text-gray-400 hover:text-white transition-colors duration-200"
+        >
+          {children}
+        </Link>
+      ) : (
+        <a
+          href={href}
+          className="text-sm text-gray-400 hover:text-white transition-colors duration-200"
+        >
+          {children}
+        </a>
+      )}
+    </li>
+  );
+};
 
 const FooterColumn: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div className="space-y-4">
@@ -80,7 +93,7 @@ export const Footer: React.FC = () => {
             </FooterColumn>
 
             <FooterColumn title="Legal">
-              <FooterLink href="/privacy">Privacy Policy</FooterLink>
+              <FooterLink href="/privacy-policy">Privacy Policy</FooterLink>
               <FooterLink href="#">Terms of Service</FooterLink>
               <FooterLink href="#">Cookie Policy</FooterLink>
               <FooterLink href="#">Contact Us</FooterLink>

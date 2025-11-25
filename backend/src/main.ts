@@ -53,7 +53,11 @@ async function bootstrap() {
       // Allow requests with no origin (mobile apps, Postman, etc.)
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
+      // Check if origin is allowed or if it's a Vercel preview deployment
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app')
+      ) {
         callback(null, true);
       } else {
         console.warn(`⚠️  CORS: Blocked origin: ${origin}`);

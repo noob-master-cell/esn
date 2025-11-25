@@ -10,6 +10,8 @@ import { useEffect } from "react";
 import { initGA } from "./utils/analytics";
 import { usePageTracking } from "./hooks/usePageTracking";
 import { MobileNavbar } from "./components/layout/MobileNavbar";
+import { CookieConsent } from "./components/common/CookieConsent";
+import { Toaster } from 'react-hot-toast';
 
 import "./App.css";
 import "./styles/App.css";
@@ -79,6 +81,8 @@ function App() {
   return (
     <Router>
       <AppContent />
+      <CookieConsent />
+      <Toaster position="top-right" />
     </Router>
   );
 }

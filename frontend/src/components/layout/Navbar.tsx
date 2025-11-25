@@ -53,12 +53,16 @@ export const Navbar: React.FC = () => {
     });
   };
 
+  const isHomePage = location.pathname === "/";
+  const isTransparent = isHomePage && !scrolled;
+
   return (
     <>
       <nav
-        className={`sticky top-0 z-40 transition-all duration-300 ${scrolled
-          ? "bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm"
-          : "bg-white/80 backdrop-blur-md border-b border-gray-100"
+        className={`top-0 z-40 transition-all duration-700 ease-in-out w-full ${isHomePage ? "fixed" : "sticky"
+          } ${isTransparent
+            ? "bg-transparent border-b border-transparent"
+            : "bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm"
           }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -73,8 +77,8 @@ export const Navbar: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-lg font-bold text-gray-900 tracking-tight leading-none">ESN</span>
-                  <span className="text-xs font-medium text-gray-500 tracking-wide">Kaiserslautern</span>
+                  <span className={`text-lg font-bold tracking-tight leading-none ${isTransparent ? "text-white drop-shadow-md" : "text-gray-900"}`}>ESN</span>
+                  <span className={`text-xs font-medium tracking-wide ${isTransparent ? "text-gray-200 drop-shadow-md" : "text-gray-500"}`}>Kaiserslautern</span>
                 </div>
               </Link>
             </div>
@@ -87,7 +91,9 @@ export const Navbar: React.FC = () => {
                   to={item.path}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${isActivePath(item.path)
                     ? "bg-cyan-600 text-white shadow-md shadow-cyan-600/20"
-                    : "text-gray-600 hover:text-cyan-600 hover:bg-cyan-50"
+                    : isTransparent
+                      ? "text-white hover:text-cyan-400 hover:bg-white/10"
+                      : "text-gray-600 hover:text-cyan-600 hover:bg-cyan-50"
                     }`}
                 >
                   {item.name}
@@ -100,7 +106,9 @@ export const Navbar: React.FC = () => {
                   to="/admin"
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 ${location.pathname.startsWith("/admin")
                     ? "bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200"
-                    : "text-gray-600 hover:text-indigo-600 hover:bg-indigo-50"
+                    : isTransparent
+                      ? "text-white hover:text-indigo-400 hover:bg-white/10"
+                      : "text-gray-600 hover:text-indigo-600 hover:bg-indigo-50"
                     }`}
                 >
                   <ShieldCheckIcon className="w-4 h-4" />
@@ -182,7 +190,8 @@ export const Navbar: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <Link
                     to="/sign-in"
-                    className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                    className={`text-sm font-medium transition-colors ${isTransparent ? "text-white hover:text-cyan-400" : "text-gray-600 hover:text-gray-900"
+                      }`}
                   >
                     Log in
                   </Link>
