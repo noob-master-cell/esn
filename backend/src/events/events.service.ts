@@ -134,10 +134,12 @@ export class EventsService implements OnModuleInit {
     // Cache key based on filter and user (to handle personalized fields like isRegistered)
     const cacheKey = `events_all_${JSON.stringify(filter)}_${userId || 'public'}`;
 
-    // Try to get from cache
-    const cached = await this.cacheManager.get<PaginatedEvents>(cacheKey);
-    if (cached) {
-      return cached;
+    // Try to get from cache (skip for admins to ensure fresh data)
+    if (userRole !== UserRole.ADMIN) {
+      const cached = await this.cacheManager.get<PaginatedEvents>(cacheKey);
+      if (cached) {
+        return cached;
+      }
     }
 
 
@@ -233,8 +235,10 @@ export class EventsService implements OnModuleInit {
       total,
     };
 
-    // Cache for 5 minutes (300000 ms)
-    await this.cacheManager.set(cacheKey, result, 300000);
+    // Cache for 5 minutes (300000 ms) - skip for admins
+    if (userRole !== UserRole.ADMIN) {
+      await this.cacheManager.set(cacheKey, result, 300000);
+    }
 
     return result;
   }

@@ -126,7 +126,48 @@ export const useUpdateEvent = () => {
 };
 
 export const useDeleteEvent = () => {
-    const [deleteEvent, { loading, error }] = useMutation(DELETE_EVENT);
+    const [deleteEventMutation, { loading, error }] = useMutation(DELETE_EVENT);
+
+    const deleteEvent = async (options: any) => {
+        const id = options?.variables?.id;
+
+        return deleteEventMutation({
+            ...options,
+            update(cache, { data }) {
+                if (data?.removeEvent && id) {
+                    cache.modify({
+                        fields: {
+                            events(existingEvents = {}, { readField }) {
+                                return {
+                                    ...existingEvents,
+                                    items: existingEvents.items?.filter(
+                                        (eventRef: any) => readField('id', eventRef) !== id
+                                    ),
+                                    total: existingEvents.total - 1,
+                                };
+                            },
+                            adminEvents(existingEvents = {}, { readField }) {
+                                return {
+                                    ...existingEvents,
+                                    items: existingEvents.items?.filter(
+                                        (eventRef: any) => readField('id', eventRef) !== id
+                                    ),
+                                    total: existingEvents.total - 1,
+                                };
+                            }
+                        },
+                    });
+
+                    // Also try direct eviction for safety
+                    const normalizedId = cache.identify({ id, __typename: 'Event' });
+                    if (normalizedId) {
+                        cache.evict({ id: normalizedId });
+                        cache.gc();
+                    }
+                }
+            },
+        });
+    };
 
     return {
         deleteEvent,

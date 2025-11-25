@@ -89,6 +89,7 @@ export const GET_ADMIN_EVENTS = gql`
         id
         title
         startDate
+        endDate
         location
         maxParticipants
         registrationCount
