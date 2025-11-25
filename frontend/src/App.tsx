@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/react";
 import { BrowserRouter as Router, useLocation } from "react-router-dom";
 import { AppRoutes } from "./routes";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -62,6 +63,7 @@ function AppContent() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <ScrollToTop />
+      <Analytics />
       <ConditionalNavbar />
       <main className="flex-grow">
         <AppRoutes />
