@@ -1,4 +1,6 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEventInput } from './dto/create-event.input';
 import { UpdateEventInput } from './dto/update-event.input';
@@ -8,7 +10,10 @@ import { PaginatedEvents } from './dto/paginated-events.output';
 
 @Injectable()
 export class EventsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) { }
 
   async create(createEventInput: CreateEventInput, organizerId: string) {
 
@@ -51,6 +56,14 @@ export class EventsService {
   }
 
   async findAll(filter: EventsFilterInput = {}, userId?: string): Promise<PaginatedEvents> {
+    // Cache key based on filter and user (to handle personalized fields like isRegistered)
+    const cacheKey = `events_all_${JSON.stringify(filter)}_${userId || 'public'}`;
+
+    // Try to get from cache
+    const cached = await this.cacheManager.get<PaginatedEvents>(cacheKey);
+    if (cached) {
+      return cached;
+    }
 
 
     const where: any = {};
@@ -118,10 +131,15 @@ export class EventsService {
     ]);
 
 
-    return {
+    const result = {
       items: items.map((event) => this.transformEvent(event, userId)),
       total,
     };
+
+    // Cache for 60 seconds (60000 ms)
+    await this.cacheManager.set(cacheKey, result, 60000);
+
+    return result;
   }
 
   async findOne(id: string, userId?: string) {
