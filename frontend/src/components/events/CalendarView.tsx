@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import CalendarHeader, { type CalendarViewType } from "./CalendarHeader";
-import EventsByDate from "./EventsByDate";
+import EventsByDate from "./EventsByDate.tsx";
 import CalendarGrid from "./CalendarGrid";
 
 interface Event {
@@ -268,8 +268,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({
               {viewType === "monthly"
                 ? `${filteredEvents.length} events this month`
                 : viewType === "weekly"
-                ? `${filteredEvents.length} events this week`
-                : `${filteredEvents.length} events today`}
+                  ? `${filteredEvents.length} events this week`
+                  : `${filteredEvents.length} events today`}
             </span>
           </div>
         </div>
