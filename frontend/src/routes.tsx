@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { PublicRoute } from './components/auth/PublicRoute';
 
 
 // Public Pages
@@ -33,8 +34,22 @@ export const AppRoutes: React.FC = () => (
         <Route path="/events/:id" element={<EventDetailsPage />} />
 
         {/* Auth Routes */}
-        <Route path="/sign-in/*" element={<SignInPage />} />
-        <Route path="/sign-up/*" element={<SignUpPage />} />
+        <Route
+            path="/sign-in/*"
+            element={
+                <PublicRoute>
+                    <SignInPage />
+                </PublicRoute>
+            }
+        />
+        <Route
+            path="/sign-up/*"
+            element={
+                <PublicRoute>
+                    <SignUpPage />
+                </PublicRoute>
+            }
+        />
 
         {/* Protected User Routes */}
         <Route
