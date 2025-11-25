@@ -54,7 +54,7 @@ export const HeroSection: React.FC = () => {
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 animate-fadeIn">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight tracking-tight drop-shadow-2xl">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight drop-shadow-2xl">
               Welcome to <br />
               <span className="text-cyan-400 drop-shadow-md">
                 ESN Kaiserslautern

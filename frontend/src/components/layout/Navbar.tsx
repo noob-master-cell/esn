@@ -62,12 +62,12 @@ export const Navbar: React.FC = () => {
           }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+          <div className="flex justify-between items-center h-16">
 
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="flex items-center gap-3 group">
-                <div className="relative w-10 h-10 overflow-hidden rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5 shadow-lg group-hover:shadow-blue-500/30 transition-all duration-300">
+                <div className="relative w-10 h-10 overflow-hidden rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 p-0.5 shadow-lg group-hover:shadow-cyan-500/30 transition-all duration-300">
                   <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
                     <img src={logo} alt="ESN" className="w-6 h-6 object-contain" />
                   </div>
@@ -86,8 +86,8 @@ export const Navbar: React.FC = () => {
                   key={item.name}
                   to={item.path}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${isActivePath(item.path)
-                    ? "bg-gray-900 text-white shadow-md shadow-gray-900/10"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    ? "bg-cyan-600 text-white shadow-md shadow-cyan-600/20"
+                    : "text-gray-600 hover:text-cyan-600 hover:bg-cyan-50"
                     }`}
                 >
                   {item.name}
@@ -117,7 +117,7 @@ export const Navbar: React.FC = () => {
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                     className="flex items-center gap-3 pl-1 pr-2 py-1 rounded-full border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all bg-white"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 p-0.5">
                       <div className="w-full h-full rounded-full bg-white overflow-hidden">
                         {profileData?.avatar ? (
                           <img src={profileData.avatar} alt="Profile" className="w-full h-full object-cover" />
@@ -188,7 +188,7 @@ export const Navbar: React.FC = () => {
                   </Link>
                   <Link
                     to="/sign-up"
-                    className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-full hover:bg-black hover:shadow-lg hover:shadow-gray-900/20 transition-all transform hover:-translate-y-0.5"
+                    className="px-5 py-2.5 bg-cyan-600 text-white text-sm font-medium rounded-full hover:bg-cyan-500 hover:shadow-lg hover:shadow-cyan-600/30 transition-all transform hover:-translate-y-0.5"
                   >
                     Sign up
                   </Link>
