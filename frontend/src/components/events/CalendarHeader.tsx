@@ -1,4 +1,11 @@
 import React from "react";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CalendarIcon,
+  ListBulletIcon,
+  Squares2X2Icon
+} from "@heroicons/react/24/outline";
 
 export type CalendarViewType = "daily" | "weekly" | "monthly";
 
@@ -19,8 +26,6 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
 }) => {
   // Format display title based on view type
   const getDisplayTitle = () => {
-
-
     switch (viewType) {
       case "daily":
         return currentDate.toLocaleDateString("en-US", {
@@ -58,89 +63,65 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 mb-4 sm:mb-6">
+    <div className="flex flex-col gap-6 mb-8">
       {/* Mobile: Stack everything vertically */}
       <div className="block sm:hidden">
         {/* Mobile title */}
-        <h1 className="text-xl font-bold text-gray-900 text-center mb-4">
+        <h1 className="text-2xl font-bold text-gray-900 text-center mb-6 tracking-tight">
           {getDisplayTitle()}
         </h1>
 
         {/* Mobile navigation */}
-        <div className="flex items-center justify-center gap-2 mb-4">
+        <div className="flex items-center justify-center gap-3 mb-6">
           <button
             onClick={() => onNavigate("prev")}
-            className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+            className="p-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-95"
             title="Previous"
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            <ChevronLeftIcon className="w-5 h-5 text-gray-600" />
           </button>
 
           <button
             onClick={onToday}
-            className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-95 shadow-sm"
           >
             Today
           </button>
 
           <button
             onClick={() => onNavigate("next")}
-            className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+            className="p-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-95"
             title="Next"
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
+            <ChevronRightIcon className="w-5 h-5 text-gray-600" />
           </button>
         </div>
 
         {/* Mobile view toggle - full width */}
-        <div className="grid grid-cols-3 bg-gray-100 rounded-lg p-1">
+        <div className="grid grid-cols-3 bg-gray-100/80 p-1.5 rounded-2xl">
           <button
             onClick={() => onViewChange("daily")}
-            className={`py-2 text-sm font-medium rounded-md transition-colors ${viewType === "daily"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+            className={`py-2.5 text-sm font-semibold rounded-xl transition-all ${viewType === "daily"
+                ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
+                : "text-gray-500 hover:text-gray-900"
               }`}
           >
             Day
           </button>
           <button
             onClick={() => onViewChange("weekly")}
-            className={`py-2 text-sm font-medium rounded-md transition-colors ${viewType === "weekly"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+            className={`py-2.5 text-sm font-semibold rounded-xl transition-all ${viewType === "weekly"
+                ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
+                : "text-gray-500 hover:text-gray-900"
               }`}
           >
             Week
           </button>
           <button
             onClick={() => onViewChange("monthly")}
-            className={`py-2 text-sm font-medium rounded-md transition-colors ${viewType === "monthly"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+            className={`py-2.5 text-sm font-semibold rounded-xl transition-all ${viewType === "monthly"
+                ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
+                : "text-gray-500 hover:text-gray-900"
               }`}
           >
             Month
@@ -151,88 +132,67 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       {/* Desktop: Original horizontal layout */}
       <div className="hidden sm:flex sm:items-center sm:justify-between">
         {/* Left: Title and Navigation */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 bg-white p-1 rounded-xl border border-gray-200 shadow-sm">
             <button
               onClick={() => onNavigate("prev")}
-              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+              className="p-2 rounded-lg hover:bg-gray-50 text-gray-500 hover:text-gray-900 transition-colors"
               title="Previous"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
+              <ChevronLeftIcon className="w-5 h-5" />
             </button>
 
             <button
               onClick={onToday}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-4 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
             >
               Today
             </button>
 
             <button
               onClick={() => onNavigate("next")}
-              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+              className="p-2 rounded-lg hover:bg-gray-50 text-gray-500 hover:text-gray-900 transition-colors"
               title="Next"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
+              <ChevronRightIcon className="w-5 h-5" />
             </button>
           </div>
 
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
             {getDisplayTitle()}
           </h1>
         </div>
 
         {/* Right: View Toggle */}
-        <div className="flex bg-gray-100 rounded-lg p-1">
+        <div className="flex bg-gray-100/80 p-1 rounded-xl">
           <button
             onClick={() => onViewChange("daily")}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewType === "daily"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${viewType === "daily"
+                ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
+                : "text-gray-500 hover:text-gray-900"
               }`}
           >
+            <ListBulletIcon className="w-4 h-4" />
             Day
           </button>
           <button
             onClick={() => onViewChange("weekly")}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewType === "weekly"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${viewType === "weekly"
+                ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
+                : "text-gray-500 hover:text-gray-900"
               }`}
           >
+            <Squares2X2Icon className="w-4 h-4" />
             Week
           </button>
           <button
             onClick={() => onViewChange("monthly")}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewType === "monthly"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${viewType === "monthly"
+                ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
+                : "text-gray-500 hover:text-gray-900"
               }`}
           >
+            <CalendarIcon className="w-4 h-4" />
             Month
           </button>
         </div>

@@ -1,70 +1,42 @@
-import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useMyProfile } from "../../hooks/api/useUsers";
 import logo from "../../assets/favicon/favicon.ico";
+import {
+  HomeIcon,
+  CalendarIcon,
+  UserCircleIcon,
+  ArrowRightOnRectangleIcon,
+  ShieldCheckIcon,
+} from "@heroicons/react/24/outline";
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth0();
   const location = useLocation();
-  const navigate = useNavigate();
-  const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const { user: profileData } = useMyProfile({
     skip: !user,
   });
 
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const userRole = profileData?.role;
   const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(userRole);
   const isOrganizer = ["ORGANIZER", "ADMIN", "SUPER_ADMIN"].includes(userRole);
 
   const navItems = [
-    {
-      name: "Home",
-      path: "/",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-          />
-        </svg>
-      ),
-    },
-    {
-      name: "Events",
-      path: "/events",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-          />
-        </svg>
-      ),
-    },
-  ];
-
-  const adminNavItems = [
-    { name: "Dashboard", path: "/admin" },
-    { name: "Events", path: "/admin/events" },
-    { name: "Users", path: "/admin/users", adminOnly: true },
-    { name: "Registrations", path: "/admin/registrations" },
+    { name: "Home", path: "/", icon: HomeIcon },
+    { name: "Events", path: "/events", icon: CalendarIcon },
   ];
 
   const isActivePath = (path: string) => {
@@ -83,339 +55,149 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      {/* Desktop Navbar */}
-      <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50 hidden md:block">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="flex justify-between items-center h-16">
+      <nav
+        className={`sticky top-0 z-40 transition-all duration-300 ${scrolled
+          ? "bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm"
+          : "bg-white/80 backdrop-blur-md border-b border-gray-100"
+          }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+
             {/* Logo */}
-            <div className="flex-shrink-0">
-              <Link to="/" className="flex items-center gap-2 md:gap-3">
-                <img src={logo} alt="ESN Logo" className="w-8 h-8" />
-                <span className="text-lg md:text-xl font-semibold text-gray-900">
-                  ESN Kaiserslautern
-                </span>
+            <div className="flex-shrink-0 flex items-center">
+              <Link to="/" className="flex items-center gap-3 group">
+                <div className="relative w-10 h-10 overflow-hidden rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5 shadow-lg group-hover:shadow-blue-500/30 transition-all duration-300">
+                  <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
+                    <img src={logo} alt="ESN" className="w-6 h-6 object-contain" />
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-lg font-bold text-gray-900 tracking-tight leading-none">ESN</span>
+                  <span className="text-xs font-medium text-gray-500 tracking-wide">Kaiserslautern</span>
+                </div>
               </Link>
             </div>
 
             {/* Desktop Navigation */}
-            <div className="flex items-center space-x-1">
-              {/* Main Navigation */}
+            <div className="hidden md:flex items-center space-x-1">
               {navItems.map((item) => (
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActivePath(item.path)
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${isActivePath(item.path)
+                    ? "bg-gray-900 text-white shadow-md shadow-gray-900/10"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                     }`}
                 >
                   {item.name}
                 </Link>
               ))}
 
-              {/* Admin Dropdown */}
+              {/* Admin Link */}
               {(isAdmin || isOrganizer) && (
+                <Link
+                  to="/admin"
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 ${location.pathname.startsWith("/admin")
+                    ? "bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200"
+                    : "text-gray-600 hover:text-indigo-600 hover:bg-indigo-50"
+                    }`}
+                >
+                  <ShieldCheckIcon className="w-4 h-4" />
+                  Admin
+                </Link>
+              )}
+            </div>
+
+            {/* Right Side Actions */}
+            <div className="hidden md:flex items-center gap-4">
+              {isAuthenticated ? (
                 <div className="relative">
                   <button
-                    onClick={() => setAdminDropdownOpen(!adminDropdownOpen)}
-                    className={`px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${location.pathname.startsWith("/admin")
-                      ? "bg-blue-50 text-blue-700"
-                      : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                      }`}
-                  >
-                    Admin
-                    <svg
-                      className={`w-4 h-4 transition-transform ${adminDropdownOpen ? "rotate-180" : ""
-                        }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-
-                  {adminDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
-                      {adminNavItems
-                        .filter((item) => !item.adminOnly || isAdmin)
-                        .map((item) => (
-                          <Link
-                            key={item.name}
-                            to={item.path}
-                            onClick={() => setAdminDropdownOpen(false)}
-                            className={`block px-4 py-2 text-sm transition-colors ${isActivePath(item.path)
-                              ? "bg-blue-50 text-blue-700"
-                              : "text-gray-700 hover:bg-gray-50"
-                              }`}
-                          >
-                            {item.name}
-                          </Link>
-                        ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Auth Section */}
-              {isAuthenticated ? (
-                <div className="relative ml-2">
-                  <button
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-3 pl-1 pr-2 py-1 rounded-full border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all bg-white"
                   >
-                    <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center border border-gray-200">
-                      {profileData?.avatar ? (
-                        <img
-                          src={profileData.avatar}
-                          alt="Profile"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
-                          {profileData?.firstName?.[0] || user?.name?.[0] || user?.email?.[0] || "U"}
-                        </div>
-                      )}
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5">
+                      <div className="w-full h-full rounded-full bg-white overflow-hidden">
+                        {profileData?.avatar ? (
+                          <img src={profileData.avatar} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-xs font-bold text-gray-600">
+                            {profileData?.firstName?.[0] || user?.name?.[0] || "U"}
+                          </div>
+                        )}
+                      </div>
                     </div>
+                    <span className="text-sm font-medium text-gray-700 max-w-[100px] truncate">
+                      {profileData?.firstName || "Account"}
+                    </span>
                   </button>
 
+                  {/* Dropdown Menu */}
                   {userDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-auto min-w-[14rem] bg-white rounded-lg shadow-lg border border-gray-200 py-1">
-                      <div className="px-4 py-3 border-b border-gray-200">
-                        <p className="text-sm font-medium text-gray-900 whitespace-nowrap">
-                          {profileData?.firstName ? `${profileData.firstName} ${profileData.lastName || ''}` : (user?.name || "User")}
-                        </p>
-                        <p className="text-xs text-gray-500 whitespace-nowrap">
-                          {profileData?.email || user?.email}
-                        </p>
-                      </div>
-                      <Link
-                        to="/profile"
+                    <>
+                      <div
+                        className="fixed inset-0 z-30"
                         onClick={() => setUserDropdownOpen(false)}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        Profile
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
+                      />
+                      <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl ring-1 ring-black/5 z-40 overflow-hidden transform transition-all">
+                        <div className="p-4 bg-gray-50 border-b border-gray-100">
+                          <p className="text-sm font-semibold text-gray-900">
+                            {profileData?.firstName} {profileData?.lastName}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                        </div>
+                        <div className="p-2">
+                          <Link
+                            to="/profile"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                          >
+                            <UserCircleIcon className="w-5 h-5 text-gray-400" />
+                            My Profile
+                          </Link>
+                          {(isAdmin || isOrganizer) && (
+                            <Link
+                              to="/admin"
+                              onClick={() => setUserDropdownOpen(false)}
+                              className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                            >
+                              <ShieldCheckIcon className="w-5 h-5 text-gray-400" />
+                              Admin Dashboard
+                            </Link>
+                          )}
+                          <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 rounded-xl hover:bg-red-50 transition-colors"
+                          >
+                            <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                            Sign Out
+                          </button>
+                        </div>
+                      </div>
+                    </>
                   )}
                 </div>
               ) : (
-                <div className="flex items-center gap-2 ml-2">
-                  <button
-                    onClick={() => navigate("/sign-in")}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                <div className="flex items-center gap-3">
+                  <Link
+                    to="/sign-in"
+                    className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
                   >
-                    Sign In
-                  </button>
-                  <button
-                    onClick={() => navigate("/sign-up")}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                    Log in
+                  </Link>
+                  <Link
+                    to="/sign-up"
+                    className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-full hover:bg-black hover:shadow-lg hover:shadow-gray-900/20 transition-all transform hover:-translate-y-0.5"
                   >
-                    Sign Up
-                  </button>
+                    Sign up
+                  </Link>
                 </div>
               )}
             </div>
           </div>
         </div>
       </nav>
-
-
-      {/* Top Bar for Mobile */}
-      <div className="md:hidden bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
-        <div className="px-4 py-3">
-          <div className="flex justify-between items-center">
-            <Link to="/" className="flex items-center gap-2">
-              <img src={logo} alt="ESN Logo" className="w-7 h-7" />
-              <span className="text-base font-semibold text-gray-900">
-                ESN KL
-              </span>
-            </Link>
-
-            {isAuthenticated ? (
-              <button
-                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-2"
-              >
-                <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center border border-gray-200">
-                  {profileData?.avatar ? (
-                    <img
-                      src={profileData.avatar}
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm">
-                      {profileData?.firstName?.[0] || user?.name?.[0] || user?.email?.[0] || "U"}
-                    </div>
-                  )}
-                </div>
-              </button>
-            ) : (
-              <button
-                onClick={() => navigate("/sign-in")}
-                className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg"
-              >
-                Sign In
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile User Dropdown */}
-        {userDropdownOpen && isAuthenticated && (
-          <div className="border-t border-gray-200 px-4 py-3">
-            <div className="mb-3">
-              <p className="text-sm font-medium text-gray-900">
-                {user?.name || "User"}
-              </p>
-              <p className="text-xs text-gray-500 truncate">
-                {user?.email}
-              </p>
-            </div>
-            <Link
-              to="/profile"
-              onClick={() => setUserDropdownOpen(false)}
-              className="block py-2 text-sm text-gray-700"
-            >
-              Profile
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="w-full text-left py-2 text-sm text-red-600"
-            >
-              Sign Out
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-inset-bottom">
-        <div className="flex justify-around py-1">
-          {/* Home & Events */}
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              to={item.path}
-              className={`flex-1 flex flex-col items-center py-2 px-1 transition-colors ${isActivePath(item.path) ? "text-blue-600" : "text-gray-500"
-                }`}
-            >
-              <div
-                className={`p-1.5 rounded-lg ${isActivePath(item.path) ? "bg-blue-50" : ""
-                  }`}
-              >
-                {item.icon}
-              </div>
-              <span className="text-xs font-medium mt-0.5">{item.name}</span>
-            </Link>
-          ))}
-
-          {/* Profile */}
-          {isAuthenticated ? (
-            <Link
-              to="/profile"
-              className={`flex-1 flex flex-col items-center py-2 px-1 transition-colors ${isActivePath("/profile") ? "text-green-600" : "text-gray-500"
-                }`}
-            >
-              <div
-                className={`p-2 rounded-lg ${isActivePath("/profile") ? "bg-green-50" : ""
-                  }`}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
-              </div>
-              <span className="text-xs font-medium mt-1">Profile</span>
-            </Link>
-          ) : null}
-
-          {/* Admin */}
-          {isAuthenticated && isOrganizer && (
-            <Link
-              to="/admin"
-              className={`flex-1 flex flex-col items-center py-2 px-1 transition-colors ${location.pathname.startsWith("/admin")
-                ? "text-purple-600"
-                : "text-gray-500"
-                }`}
-            >
-              <div
-                className={`p-2 rounded-lg ${location.pathname.startsWith("/admin")
-                  ? "bg-purple-50"
-                  : ""
-                  }`}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-              </div>
-              <span className="text-xs font-medium mt-1">Admin</span>
-            </Link>
-          )}
-
-          {!isAuthenticated && (
-            <button
-              onClick={() => navigate("/sign-up")}
-              className="flex-1 flex flex-col items-center py-2 px-1 text-gray-500 transition-colors"
-            >
-              <div className="p-2 rounded-lg">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-                  />
-                </svg>
-              </div>
-              <span className="text-xs font-medium mt-1">Join</span>
-            </button>
-          )}
-        </div>
-      </div>
-
     </>
   );
 };

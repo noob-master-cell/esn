@@ -39,6 +39,6 @@ export interface Registration {
         title: string;
         startDate: string;
         location: string;
-        imageUrl?: string;
+        images: string[];
     };
 }

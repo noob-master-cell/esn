@@ -9,6 +9,7 @@ import { setTokenGetter } from "./lib/apollo";
 import { useEffect } from "react";
 import { initGA } from "./utils/analytics";
 import { usePageTracking } from "./hooks/usePageTracking";
+import { MobileNavbar } from "./components/layout/MobileNavbar";
 
 import "./App.css";
 import "./styles/App.css";
@@ -61,7 +62,7 @@ function AppContent() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-gray-50 pb-16 md:pb-0">
       <ScrollToTop />
       <Analytics />
       <ConditionalNavbar />
@@ -69,6 +70,7 @@ function AppContent() {
         <AppRoutes />
       </main>
       {!location.pathname.startsWith('/admin') && <Footer />}
+      <MobileNavbar />
     </div>
   );
 }

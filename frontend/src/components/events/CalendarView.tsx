@@ -258,22 +258,6 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           />
         )}
       </div>
-
-      {/* Summary stats */}
-      <div className="mt-6 bg-gray-50 rounded-lg p-4">
-        <div className="flex flex-wrap gap-6 text-sm text-gray-600">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-            <span>
-              {viewType === "monthly"
-                ? `${filteredEvents.length} events this month`
-                : viewType === "weekly"
-                  ? `${filteredEvents.length} events this week`
-                  : `${filteredEvents.length} events today`}
-            </span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

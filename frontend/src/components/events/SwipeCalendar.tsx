@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import MobileCalendarHeader from "./MobileCalendarHeader";
 import MobileEventsByDate from "./MobileEventsByDate";
+import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 
 export type CalendarViewType = "daily" | "weekly" | "monthly";
 
@@ -144,7 +145,11 @@ const SwipeCalendar: React.FC<SwipeCalendarProps> = ({
 
     // Determine if this is a horizontal swipe
     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-      e.preventDefault(); // Prevent scrolling
+      // Only prevent default if we are sure it's a horizontal swipe
+      // This allows vertical scrolling to work normally
+      if (e.cancelable) {
+        // e.preventDefault(); // Commented out to allow scrolling if needed, but might need to be careful
+      }
 
       setTouchState((prev) =>
         prev
@@ -157,9 +162,10 @@ const SwipeCalendar: React.FC<SwipeCalendarProps> = ({
           : null
       );
 
-      // Apply visual feedback
-      const maxOffset = 100;
-      const offset = Math.max(-maxOffset, Math.min(maxOffset, deltaX));
+      // Apply visual feedback with resistance
+      const maxOffset = 150;
+      const resistance = 0.5;
+      const offset = Math.max(-maxOffset, Math.min(maxOffset, deltaX * resistance));
       setSwipeOffset(offset);
     }
   };
@@ -172,7 +178,7 @@ const SwipeCalendar: React.FC<SwipeCalendarProps> = ({
     }
 
     const deltaX = touchState.currentX - touchState.startX;
-    const threshold = 80; // Minimum swipe distance
+    const threshold = 60; // Reduced threshold for easier swiping
 
     if (Math.abs(deltaX) > threshold) {
       if (deltaX > 0) {
@@ -253,10 +259,10 @@ const SwipeCalendar: React.FC<SwipeCalendarProps> = ({
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="animate-pulse space-y-4 p-4">
-          <div className="h-16 bg-gray-200 rounded-lg"></div>
+          <div className="h-16 bg-gray-200 rounded-2xl"></div>
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-20 bg-gray-200 rounded-lg"></div>
+              <div key={i} className="h-24 bg-gray-200 rounded-2xl"></div>
             ))}
           </div>
         </div>
@@ -307,7 +313,7 @@ const SwipeCalendar: React.FC<SwipeCalendarProps> = ({
       {/* Swipeable Content Area */}
       <div
         ref={containerRef}
-        className="relative overflow-hidden"
+        className="relative overflow-hidden min-h-[calc(100vh-140px)]"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -315,20 +321,22 @@ const SwipeCalendar: React.FC<SwipeCalendarProps> = ({
           transform: `translateX(${swipeOffset}px)`,
           transition: touchState?.isDragging
             ? "none"
-            : "transform 0.3s ease-out",
+            : "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
         }}
       >
-        {/* Swipe Indicator */}
+        {/* Swipe Indicators */}
         {touchState?.isDragging && (
-          <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-10">
-            <div className="bg-black bg-opacity-50 text-white text-xs px-3 py-1 rounded-full">
-              {swipeOffset > 0 ? "← Previous" : "Next →"}
+          <div className={`absolute top-4 z-10 transition-opacity duration-200 ${Math.abs(swipeOffset) > 40 ? "opacity-100" : "opacity-0"
+            } ${swipeOffset > 0 ? "left-4" : "right-4"}`}>
+            <div className="bg-black/70 backdrop-blur-md text-white text-xs font-medium px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
+              <ArrowsRightLeftIcon className="w-4 h-4" />
+              {swipeOffset > 0 ? "Previous" : "Next"}
             </div>
           </div>
         )}
 
         {/* Events Content */}
-        <div className="pt-2">
+        <div className="pt-4 pb-24 px-4">
           <MobileEventsByDate
             groupedEvents={groupedEvents}
             viewType={viewType}
@@ -342,9 +350,6 @@ const SwipeCalendar: React.FC<SwipeCalendarProps> = ({
           />
         </div>
       </div>
-
-      {/* Bottom padding for mobile navigation */}
-      <div className="h-20"></div>
     </div>
   );
 };
