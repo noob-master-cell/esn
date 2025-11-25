@@ -6,7 +6,7 @@ import {
   ForbiddenException,
   ConflictException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateRegistrationInput } from './dto/create-registration.input';
 import { UpdateRegistrationInput } from './dto/update-registration.input';
 import { RegistrationFilterInput } from './dto/registration-filter.input';

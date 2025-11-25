@@ -5,7 +5,7 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { UserTransformer } from '../../common/transformers/user.transformer';
 import * as jwt from 'jsonwebtoken';
 import { JwksClient } from 'jwks-rsa';

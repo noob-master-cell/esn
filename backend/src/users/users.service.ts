@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
-import { PrismaService } from './../../prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { UsersFilterInput } from './dto/users-filter.input';
 import { PaginatedUsers } from './dto/paginated-users.output';
 import { Prisma } from '@prisma/client';
