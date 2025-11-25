@@ -33,9 +33,16 @@ interface Event {
   organizer: {
     firstName: string;
     lastName: string;
+    avatar?: string;
   };
   canRegister?: boolean;
   isRegistered?: boolean;
+  attendees?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+  }[];
 }
 
 interface EventDetailsProps {
@@ -165,8 +172,12 @@ const EventDetails: React.FC<EventDetailsProps> = ({
 
               {/* Host Info */}
               <div className="flex items-center gap-3 py-4 border-y border-gray-100">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-medium shadow-sm">
-                  {event.organizer.firstName[0]}
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-medium shadow-sm overflow-hidden">
+                  {event.organizer.avatar ? (
+                    <img src={event.organizer.avatar} alt={event.organizer.firstName} className="w-full h-full object-cover" />
+                  ) : (
+                    event.organizer.firstName[0]
+                  )}
                 </div>
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-wider text-gray-500">Hosted By</div>
@@ -298,12 +309,18 @@ const EventDetails: React.FC<EventDetailsProps> = ({
                     Who's going
                   </h4>
                   <div className="flex -space-x-3 overflow-hidden py-2">
-                    {[...Array(Math.min(5, event.registrationCount))].map((_, i) => (
-                      <div key={i} className="inline-block h-10 w-10 rounded-full ring-2 ring-white bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-500">
-                        {String.fromCharCode(65 + i)}
+                    {event.attendees?.slice(0, 5).map((attendee) => (
+                      <div key={attendee.id} className="inline-block h-10 w-10 rounded-full ring-2 ring-white bg-gray-200 flex items-center justify-center overflow-hidden">
+                        {attendee.avatar ? (
+                          <img src={attendee.avatar} alt={attendee.firstName} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-xs font-medium text-gray-500">
+                            {attendee.firstName[0]}{attendee.lastName[0]}
+                          </span>
+                        )}
                       </div>
                     ))}
-                    {event.registrationCount > 5 && (
+                    {(event.registrationCount > 5) && (
                       <div className="inline-block h-10 w-10 rounded-full ring-2 ring-white bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-500">
                         +{event.registrationCount - 5}
                       </div>

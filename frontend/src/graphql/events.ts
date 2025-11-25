@@ -61,6 +61,12 @@ export const GET_EVENT = gql`
 
       isRegistered
       canRegister
+      attendees {
+        id
+        firstName
+        lastName
+        avatar
+      }
       createdAt
       updatedAt
       organizer {
@@ -68,6 +74,7 @@ export const GET_EVENT = gql`
         firstName
         lastName
         email
+        avatar
       }
     }
   }

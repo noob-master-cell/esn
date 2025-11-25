@@ -383,6 +383,8 @@ export class EventsService {
         reg.status === RegistrationStatus.NO_SHOW,
     );
 
+    const attendees = confirmedRegistrations.map((reg: any) => reg.user);
+
 
 
     const registrationCount = confirmedRegistrations.length;
@@ -405,6 +407,7 @@ export class EventsService {
 
       isRegistered,
       canRegister,
+      attendees,
     };
   }
 

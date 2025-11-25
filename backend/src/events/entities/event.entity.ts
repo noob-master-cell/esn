@@ -124,4 +124,7 @@ export class Event {
 
   @Field(() => Boolean, { nullable: true })
   canRegister?: boolean; // For current user
+
+  @Field(() => [User], { nullable: true })
+  attendees?: User[];
 }
