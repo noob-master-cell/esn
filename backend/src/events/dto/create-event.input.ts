@@ -14,7 +14,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 // Import enums directly from Prisma instead of entity file
-import { EventCategory, EventType } from '@prisma/client';
+import { EventCategory, EventType, EventStatus } from '@prisma/client';
 
 @InputType()
 export class CreateEventInput {
@@ -103,5 +103,8 @@ export class CreateEventInput {
   @IsBoolean()
   isPublic: boolean = true;
 
-
+  @Field(() => EventStatus, { nullable: true })
+  @IsOptional()
+  @IsEnum(EventStatus)
+  status?: EventStatus;
 }

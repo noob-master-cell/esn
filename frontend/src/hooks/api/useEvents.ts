@@ -7,6 +7,7 @@ import {
     DELETE_EVENT,
     PUBLISH_EVENT,
     GET_EVENT_FOR_EDIT,
+    GET_ADMIN_EVENTS,
 } from "../../graphql/events";
 
 import { useState } from "react";
@@ -28,11 +29,43 @@ export const useEvents = (initialFilter?: any) => {
 
     const { data, loading, error, refetch } = useQuery(GET_EVENTS, {
         variables,
+        fetchPolicy: "network-only",
     });
 
     return {
         events: data?.events?.items || [],
         total: data?.events?.total || 0,
+        page,
+        setPage,
+        pageSize,
+        loading,
+        error,
+        refetch,
+    };
+};
+
+export const useAdminEvents = (initialFilter?: any) => {
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(20);
+
+    const filterParams = initialFilter?.filter || initialFilter || {};
+
+    const variables = {
+        filter: {
+            ...filterParams,
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+        },
+    };
+
+    const { data, loading, error, refetch } = useQuery(GET_ADMIN_EVENTS, {
+        variables,
+        fetchPolicy: "network-only",
+    });
+
+    return {
+        events: data?.adminEvents?.items || [],
+        total: data?.adminEvents?.total || 0,
         page,
         setPage,
         pageSize,

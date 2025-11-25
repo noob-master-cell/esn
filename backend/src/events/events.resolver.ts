@@ -38,6 +38,15 @@ export class EventsResolver {
     return this.eventsService.findAll(filter, userId);
   }
 
+  @Query(() => PaginatedEvents, { name: 'adminEvents' })
+  @UseGuards(Auth0Guard)
+  async adminEvents(
+    @Args('filter', { nullable: true }) filter: EventsFilterInput = {},
+    @CurrentUser() user: User,
+  ) {
+    return this.eventsService.findAll(filter, user.id);
+  }
+
   @Query(() => [Event], { name: 'myEvents' })
   @UseGuards(Auth0Guard)
   async findMyEvents(@CurrentUser() user: User) {

@@ -17,13 +17,13 @@ import SignInPage from './pages/auth/sign-in';
 import SignUpPage from './pages/auth/sign-up';
 
 // Admin Pages
-const AdminDashboardPage = lazy(() => import('./pages/admin/dashboard/index.tsx'));
-const AdminEventsPage = lazy(() => import('./pages/admin/events/index.tsx'));
-const AdminUsersPage = lazy(() => import('./pages/admin/users/index.tsx'));
-const AdminRegistrationsPage = lazy(() => import('./pages/admin/registrations/index.tsx'));
-const EventCreatePage = lazy(() => import('./pages/admin/events/EventCreatePage.tsx'));
-const EventEditPage = lazy(() => import('./pages/admin/events/EventEditPage.tsx'));
-const AdminSettingsPage = lazy(() => import('./pages/admin/settings/index.tsx'));
+const AdminDashboardPage = lazy(() => import('./pages/admin/dashboard/index'));
+const AdminEventsPage = lazy(() => import('./pages/admin/events/index'));
+const AdminUsersPage = lazy(() => import('./pages/admin/users/index'));
+const AdminRegistrationsPage = lazy(() => import('./pages/admin/registrations/index'));
+const EventCreatePage = lazy(() => import('./pages/admin/events/EventCreatePage'));
+const EventEditPage = lazy(() => import('./pages/admin/events/EventEditPage'));
+const AdminSettingsPage = lazy(() => import('./pages/admin/settings/index'));
 
 
 export const AppRoutes: React.FC = () => (

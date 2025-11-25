@@ -77,7 +77,7 @@ export const GET_EVENT_FOR_EDIT = GET_EVENT;
 
 export const GET_ADMIN_EVENTS = gql`
   query GetAdminEvents($filter: EventsFilterInput) {
-    events(filter: $filter) {
+    adminEvents(filter: $filter) {
       items {
         id
         title

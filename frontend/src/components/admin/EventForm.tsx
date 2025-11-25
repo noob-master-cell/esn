@@ -31,7 +31,7 @@ interface EventFormData {
   requirements: string;
   additionalInfo: string;
   isPublic: boolean;
-
+  status: "DRAFT" | "PUBLISHED";
 }
 
 interface EventFormProps {
@@ -61,7 +61,7 @@ const defaultFormData: EventFormData = {
   requirements: "",
   additionalInfo: "",
   isPublic: true,
-
+  status: "DRAFT",
 };
 
 const CATEGORY_OPTIONS = [
@@ -101,12 +101,13 @@ export const EventForm: React.FC<EventFormProps> = ({
   const { getToken } = useAuth();
 
   const [createEvent, { loading: creating }] = useMutation(CREATE_EVENT, {
-    onCompleted: (data) => {
+    onCompleted: () => {
       onSuccess?.();
-      navigate(`/admin/events/${data.createEvent.id}`);
+      navigate("/admin/events");
     },
     onError: (error) => {
       console.error("Error creating event:", error);
+      alert(`Failed to create event: ${error.message}`);
     },
   });
 
@@ -114,11 +115,12 @@ export const EventForm: React.FC<EventFormProps> = ({
     onCompleted: () => {
       onSuccess?.();
       if (eventId) {
-        navigate(`/admin/events/${eventId}`);
+        navigate("/admin/events");
       }
     },
     onError: (error) => {
       console.error("Error updating event:", error);
+      alert(`Failed to update event: ${error.message}`);
     },
   });
 
@@ -289,6 +291,18 @@ export const EventForm: React.FC<EventFormProps> = ({
                   ? "Payments will be collected manually."
                   : undefined
               }
+            />
+
+            <Select
+              label="Status"
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              options={[
+                { value: "DRAFT", label: "Draft" },
+                { value: "PUBLISHED", label: "Published" },
+              ]}
+              helperText="Published events are visible to everyone."
             />
           </div>
 

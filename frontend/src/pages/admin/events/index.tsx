@@ -1,7 +1,7 @@
 // frontend/src/pages/admin/AdminEventsPage.tsx
 import React, { useState } from "react";
 import {
-  useEvents,
+  useAdminEvents,
   useDeleteEvent,
   usePublishEvent,
 } from "../../../hooks/api/useEvents";
@@ -23,7 +23,7 @@ export const AdminEventsPage: React.FC = () => {
   const [filters, setFilters] = useState<EventFiltersState>({});
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
 
-  const { events, loading, error, refetch } = useEvents({
+  const { events, loading, error, refetch } = useAdminEvents({
     filter: filters,
   });
 

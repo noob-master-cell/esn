@@ -152,30 +152,22 @@ export class RegistrationsService {
         },
         include: {
           event: {
-            select: {
-              id: true,
-              title: true,
-              startDate: true,
-              location: true,
-              price: true,
-              memberPrice: true,
-              type: true,
+            include: {
+              organizer: true,
+              registrations: {
+                where: {
+                  status: {
+                    not: RegistrationStatus.CANCELLED,
+                  },
+                },
+              },
             },
           },
-          user: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
-            },
-          },
+          user: true,
         },
       });
 
-
-
-      return registration;
+      return this.transformRegistration(registration);
     } catch (error) {
       // Handle Prisma unique constraint errors more gracefully
       if (
