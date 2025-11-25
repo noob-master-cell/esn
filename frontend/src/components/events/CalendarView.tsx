@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import CalendarHeader, { type CalendarViewType } from "./CalendarHeader";
-import EventsByDate from "./EventsByDate.tsx";
+import EventsByDate from "./EventsByDate";
 import CalendarGrid from "./CalendarGrid";
 
 interface Event {
