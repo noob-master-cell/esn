@@ -232,7 +232,7 @@ const FeedbackPage: React.FC = () => {
                                                 />
                                             ) : (
                                                 <div className="h-10 w-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
-                                                    {feedback.user.firstName[0]}
+                                                    {feedback.user.firstName?.[0] || '?'}
                                                 </div>
                                             )}
                                         </div>

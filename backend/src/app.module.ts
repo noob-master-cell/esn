@@ -68,7 +68,16 @@ import { GqlThrottlerGuard } from './common/guards/gql-throttler.guard';
       introspection:
         process.env.NODE_ENV !== 'production' ||
         process.env.ENABLE_PLAYGROUND === 'true',
-      context: ({ req }) => ({ req }),
+      context: ({ req, connection, extra }) => {
+        // Handle subscriptions (connection) and HTTP requests (req)
+        if (connection) {
+          return { req: connection.context, connection };
+        }
+        if (extra) {
+          return { req: extra.request, extra };
+        }
+        return { req };
+      },
     }),
     PrismaModule,
     AuthModule,

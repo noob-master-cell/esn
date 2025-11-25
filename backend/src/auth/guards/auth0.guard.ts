@@ -38,8 +38,24 @@ export class Auth0Guard implements CanActivate {
             const ctx = GqlExecutionContext.create(context);
             const req = ctx.getContext().req;
 
-            // Extract token from Authorization header
-            const authHeader = req.headers?.authorization;
+            // Extract token from Authorization header or connection params (for subscriptions)
+            let authHeader = req?.headers?.authorization;
+
+            if (!authHeader) {
+                // Try to find token in connectionParams for subscriptions
+                const connectionParams = ctx.getContext().connectionParams;
+                if (connectionParams) {
+                    authHeader = connectionParams.Authorization || connectionParams.authorization;
+                }
+            }
+
+            if (!authHeader) {
+                // Try to find token in extra (for some subscription setups)
+                const extra = ctx.getContext().extra;
+                if (extra) {
+                    authHeader = extra.Authorization || extra.authorization;
+                }
+            }
 
 
             if (!authHeader) {
