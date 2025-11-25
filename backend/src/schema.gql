@@ -200,6 +200,15 @@ enum FeedbackType {
   IMPROVEMENT
 }
 
+type Comment {
+  id: ID!
+  content: String!
+  createdAt: DateTime!
+  user: User!
+  userId: String!
+  eventId: String!
+}
+
 type Query {
   me: User!
   hello: String!
@@ -221,6 +230,7 @@ type Query {
   adminStats: AdminStats!
   registrationStats: RegistrationStats!
   feedbacks: [Feedback!]!
+  comments(eventId: String!, skip: Int = 0, take: Int = 10): [Comment!]!
 }
 
 input UsersFilterInput {
@@ -281,6 +291,7 @@ type Mutation {
   createFeedback(message: String!, type: FeedbackType!): Feedback!
   updateFeedback(id: String!, message: String!, type: FeedbackType!): Feedback!
   deleteFeedback(id: String!): Feedback!
+  createComment(createCommentInput: CreateCommentInput!): Comment!
 }
 
 input UpdateUserInput {
@@ -373,4 +384,9 @@ input UpdateRegistrationInput {
   id: ID!
   status: RegistrationStatus
   paymentStatus: PaymentStatus
+}
+
+input CreateCommentInput {
+  content: String!
+  eventId: String!
 }

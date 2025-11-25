@@ -9,21 +9,31 @@
   --color-text-primary: #1A1A1A;
   --color-text-secondary: #6B7280;
   --color-border: #E5E7EB;
-  
+
   /* Spacing Scale */
-  --spacing-xs: 0.25rem;  /* 4px */
-  --spacing-sm: 0.5rem;   /* 8px */
-  --spacing-md: 1rem;     /* 16px */
-  --spacing-lg: 1.5rem;   /* 24px */
-  --spacing-xl: 2rem;     /* 32px */
-  --spacing-2xl: 3rem;    /* 48px */
-  
+  --spacing-xs: 0.25rem;
+  /* 4px */
+  --spacing-sm: 0.5rem;
+  /* 8px */
+  --spacing-md: 1rem;
+  /* 16px */
+  --spacing-lg: 1.5rem;
+  /* 24px */
+  --spacing-xl: 2rem;
+  /* 32px */
+  --spacing-2xl: 3rem;
+  /* 48px */
+
   /* Border Radius */
-  --radius-sm: 0.5rem;    /* 8px */
-  --radius-md: 0.75rem;   /* 12px */
-  --radius-lg: 1rem;      /* 16px */
-  --radius-xl: 1.5rem;    /* 24px */
-  
+  --radius-sm: 0.5rem;
+  /* 8px */
+  --radius-md: 0.75rem;
+  /* 12px */
+  --radius-lg: 1rem;
+  /* 16px */
+  --radius-xl: 1.5rem;
+  /* 24px */
+
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
@@ -73,7 +83,17 @@ code {
   -webkit-line-clamp: 3;
 }
 
-/* Container Utilities */
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 .container-padding {
   padding-left: var(--spacing-md);
   padding-right: var(--spacing-md);

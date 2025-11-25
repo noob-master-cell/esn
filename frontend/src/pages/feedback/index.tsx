@@ -142,7 +142,7 @@ const FeedbackPage: React.FC = () => {
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Feedback Type</label>
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-wrap gap-2">
                                         {Object.values(FeedbackType).map((t) => (
                                             <button
                                                 key={t}
@@ -221,7 +221,7 @@ const FeedbackPage: React.FC = () => {
                     ) : (
                         <div className="grid gap-4">
                             {feedbacks.map((feedback) => (
-                                <div key={feedback.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
+                                <div key={feedback.id} className="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
                                     <div className="flex items-start gap-4">
                                         <div className="flex-shrink-0">
                                             {feedback.user.avatar ? (
@@ -237,7 +237,7 @@ const FeedbackPage: React.FC = () => {
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between mb-1">
+                                            <div className="flex flex-wrap items-center justify-between gap-y-2 mb-2">
                                                 <div className="flex items-center gap-2">
                                                     <h3 className="text-sm font-semibold text-gray-900">
                                                         {feedback.user.firstName} {feedback.user.lastName}

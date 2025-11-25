@@ -92,51 +92,48 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
     <div
       onClick={handleCardClick}
       className={`
-        group relative w-full bg-white rounded-xl border border-gray-100 shadow-sm 
-        hover:shadow-md hover:border-blue-100 transition-all duration-300 cursor-pointer overflow-hidden
+        group relative w-full h-full flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm 
+        hover:shadow-md hover:border-gray-200 transition-all duration-300 cursor-pointer overflow-hidden
       `}
       role="button"
       tabIndex={0}
     >
-      {/* Left colored accent bar */}
-      <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${colors.bg.replace('bg-', 'bg-').replace('50', '500')}`} />
-
-      <div className="p-4 pl-5">
-        <div className="flex items-start justify-between mb-3">
+      <div className="p-5 flex flex-col h-full">
+        <div className="flex items-start justify-between mb-4">
           {/* Category Icon & Badge */}
           <div className={`
-            flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium 
-            ${colors.bg} ${colors.text} border ${colors.border}
+            flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium 
+            ${colors.bg} ${colors.text}
           `}>
             <Icon className="w-3.5 h-3.5" />
             <span className="capitalize">{event.category.toLowerCase()}</span>
           </div>
 
           {/* Time */}
-          <div className="flex items-center text-gray-400 text-xs font-medium">
-            <ClockIcon className="w-3.5 h-3.5 mr-1" />
+          <div className="flex items-center text-gray-400 text-xs font-medium bg-gray-50 px-2 py-1 rounded-full">
+            <ClockIcon className="w-3.5 h-3.5 mr-1.5" />
             {formatTime(event.startDate)}
           </div>
         </div>
 
         {/* Title */}
-        <h3 className="text-gray-900 font-semibold text-base leading-tight mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+        <h3 className="text-gray-900 font-semibold text-lg leading-snug mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors flex-grow">
           {event.title}
         </h3>
 
         {/* Location */}
         {event.location && (
-          <div className="flex items-center text-gray-500 text-xs mb-3">
-            <MapPinIcon className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
+          <div className="flex items-center text-gray-500 text-sm mb-4">
+            <MapPinIcon className="w-4 h-4 mr-2 flex-shrink-0 text-gray-400" />
             <span className="truncate">{event.location}</span>
           </div>
         )}
 
         {/* Footer: Spots & Type */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-auto">
+        <div className="flex items-center justify-between pt-2 mt-auto border-t border-gray-50">
           {/* Spots */}
           <div className="flex items-center gap-1.5">
-            <UsersIcon className="w-3.5 h-3.5 text-gray-400" />
+            <UsersIcon className="w-4 h-4 text-gray-400" />
             <span className={`text-xs font-medium ${spotsLeft <= 5 ? 'text-red-500' : 'text-gray-600'}`}>
               {spotsLeft <= 0 ? 'Full' : `${spotsLeft} spots left`}
             </span>
@@ -144,7 +141,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
 
           {/* Type Badge */}
           {event.type && (
-            <span className="text-xs font-medium text-gray-400 bg-gray-50 px-2 py-0.5 rounded">
+            <span className="text-xs font-medium text-gray-500 bg-gray-50 px-2.5 py-1 rounded-full">
               {event.type === 'FREE' ? 'Free' : 'Paid'}
             </span>
           )}

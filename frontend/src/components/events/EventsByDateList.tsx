@@ -126,7 +126,7 @@ const EventsByDate: React.FC<EventsByDateProps> = ({
             {group.events.map((event, eventIndex) => (
               <div
                 key={event.id}
-                className="opacity-0 animate-fadeInUp"
+                className="opacity-0 animate-fadeInUp h-full"
                 style={{
                   animationDelay: `${groupIndex * 0.1 + eventIndex * 0.05}s`,
                   animationFillMode: "forwards",

@@ -102,8 +102,8 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           <button
             onClick={() => onViewChange("daily")}
             className={`py-2.5 text-sm font-semibold rounded-xl transition-all ${viewType === "daily"
-                ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
-                : "text-gray-500 hover:text-gray-900"
+              ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
+              : "text-gray-500 hover:text-gray-900"
               }`}
           >
             Day
@@ -111,8 +111,8 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           <button
             onClick={() => onViewChange("weekly")}
             className={`py-2.5 text-sm font-semibold rounded-xl transition-all ${viewType === "weekly"
-                ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
-                : "text-gray-500 hover:text-gray-900"
+              ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
+              : "text-gray-500 hover:text-gray-900"
               }`}
           >
             Week
@@ -120,8 +120,8 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           <button
             onClick={() => onViewChange("monthly")}
             className={`py-2.5 text-sm font-semibold rounded-xl transition-all ${viewType === "monthly"
-                ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
-                : "text-gray-500 hover:text-gray-900"
+              ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
+              : "text-gray-500 hover:text-gray-900"
               }`}
           >
             Month
@@ -132,11 +132,15 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       {/* Desktop: Original horizontal layout */}
       <div className="hidden sm:flex sm:items-center sm:justify-between">
         {/* Left: Title and Navigation */}
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 bg-white p-1 rounded-xl border border-gray-200 shadow-sm">
+        <div className="flex items-center gap-8">
+          <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">
+            {getDisplayTitle()}
+          </h1>
+
+          <div className="flex items-center gap-1">
             <button
               onClick={() => onNavigate("prev")}
-              className="p-2 rounded-lg hover:bg-gray-50 text-gray-500 hover:text-gray-900 transition-colors"
+              className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors"
               title="Previous"
             >
               <ChevronLeftIcon className="w-5 h-5" />
@@ -144,32 +148,28 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
 
             <button
               onClick={onToday}
-              className="px-4 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              className="px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
             >
               Today
             </button>
 
             <button
               onClick={() => onNavigate("next")}
-              className="p-2 rounded-lg hover:bg-gray-50 text-gray-500 hover:text-gray-900 transition-colors"
+              className="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors"
               title="Next"
             >
               <ChevronRightIcon className="w-5 h-5" />
             </button>
           </div>
-
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-            {getDisplayTitle()}
-          </h1>
         </div>
 
         {/* Right: View Toggle */}
-        <div className="flex bg-gray-100/80 p-1 rounded-xl">
+        <div className="flex bg-gray-100 p-1 rounded-lg">
           <button
             onClick={() => onViewChange("daily")}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${viewType === "daily"
-                ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
-                : "text-gray-500 hover:text-gray-900"
+            className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-md transition-all ${viewType === "daily"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-500 hover:text-gray-900"
               }`}
           >
             <ListBulletIcon className="w-4 h-4" />
@@ -177,9 +177,9 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           </button>
           <button
             onClick={() => onViewChange("weekly")}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${viewType === "weekly"
-                ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
-                : "text-gray-500 hover:text-gray-900"
+            className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-md transition-all ${viewType === "weekly"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-500 hover:text-gray-900"
               }`}
           >
             <Squares2X2Icon className="w-4 h-4" />
@@ -187,9 +187,9 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           </button>
           <button
             onClick={() => onViewChange("monthly")}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${viewType === "monthly"
-                ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
-                : "text-gray-500 hover:text-gray-900"
+            className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-md transition-all ${viewType === "monthly"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-500 hover:text-gray-900"
               }`}
           >
             <CalendarIcon className="w-4 h-4" />

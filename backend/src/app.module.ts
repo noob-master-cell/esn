@@ -23,6 +23,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 import { FeedbackModule } from './feedback/feedback.module';
 import { GqlThrottlerGuard } from './common/guards/gql-throttler.guard';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { GqlThrottlerGuard } from './common/guards/gql-throttler.guard';
     CalendarModule,
     CloudinaryModule,
     FeedbackModule,
+    CommentsModule,
   ],
   providers: [
     {

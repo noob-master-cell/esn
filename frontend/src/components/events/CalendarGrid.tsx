@@ -61,17 +61,17 @@ const isSameMonth = (date1: Date, date2: Date): boolean => {
 // Get category color for event pills
 const getCategoryStyles = (category: string) => {
   const styles = {
-    PARTY: "bg-purple-50 text-purple-700 border-purple-100 hover:bg-purple-100",
-    CULTURAL: "bg-pink-50 text-pink-700 border-pink-100 hover:bg-pink-100",
-    SPORTS: "bg-green-50 text-green-700 border-green-100 hover:bg-green-100",
-    TRAVEL: "bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100",
-    SOCIAL: "bg-orange-50 text-orange-700 border-orange-100 hover:bg-orange-100",
-    EDUCATIONAL: "bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100",
-    VOLUNTEER: "bg-yellow-50 text-yellow-700 border-yellow-100 hover:bg-yellow-100",
-    NETWORKING: "bg-gray-50 text-gray-700 border-gray-100 hover:bg-gray-100",
-    WORKSHOP: "bg-red-50 text-red-700 border-red-100 hover:bg-red-100",
-    CONFERENCE: "bg-teal-50 text-teal-700 border-teal-100 hover:bg-teal-100",
-    OTHER: "bg-gray-50 text-gray-600 border-gray-100 hover:bg-gray-100",
+    PARTY: "bg-purple-50 text-purple-700 hover:bg-purple-100",
+    CULTURAL: "bg-pink-50 text-pink-700 hover:bg-pink-100",
+    SPORTS: "bg-green-50 text-green-700 hover:bg-green-100",
+    TRAVEL: "bg-blue-50 text-blue-700 hover:bg-blue-100",
+    SOCIAL: "bg-orange-50 text-orange-700 hover:bg-orange-100",
+    EDUCATIONAL: "bg-indigo-50 text-indigo-700 hover:bg-indigo-100",
+    VOLUNTEER: "bg-yellow-50 text-yellow-700 hover:bg-yellow-100",
+    NETWORKING: "bg-gray-50 text-gray-700 hover:bg-gray-100",
+    WORKSHOP: "bg-red-50 text-red-700 hover:bg-red-100",
+    CONFERENCE: "bg-teal-50 text-teal-700 hover:bg-teal-100",
+    OTHER: "bg-gray-50 text-gray-600 hover:bg-gray-100",
   };
   return styles[category as keyof typeof styles] || styles.OTHER;
 };
@@ -117,13 +117,13 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, events }) => {
   const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
       {/* Week day headers */}
       <div className="grid grid-cols-7 border-b border-gray-100">
         {weekDays.map((day) => (
           <div
             key={day}
-            className="py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-500 bg-gray-50/50"
+            className="py-4 text-center text-xs font-medium uppercase tracking-widest text-gray-400"
           >
             {day}
           </div>
@@ -131,7 +131,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, events }) => {
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 bg-gray-100 gap-px">
+      <div className="grid grid-cols-7">
         {calendarDays.map((day, index) => {
           const dayEvents = eventsByDate.get(day.toDateString()) || [];
           const isCurrentMonth = isSameMonth(day, currentDate);
@@ -140,18 +140,18 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, events }) => {
           return (
             <div
               key={index}
-              className={`min-h-[140px] p-2 bg-white relative group transition-all hover:z-10 ${!isCurrentMonth ? "bg-gray-50/30" : ""
-                }`}
+              className={`min-h-[140px] p-3 border-b border-r border-gray-50 relative group transition-all hover:bg-gray-50/50 ${!isCurrentMonth ? "bg-gray-50/30 text-gray-300" : ""
+                } ${index % 7 === 6 ? "border-r-0" : ""}`}
               onClick={() => handleDayClick(day)}
             >
               {/* Day number */}
-              <div className="flex justify-between items-start mb-2">
+              <div className="flex justify-between items-start mb-3">
                 <span
-                  className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full transition-colors ${isDayToday
-                      ? "bg-gray-900 text-white shadow-md"
-                      : isCurrentMonth
-                        ? "text-gray-700 group-hover:bg-gray-100"
-                        : "text-gray-400"
+                  className={`text-sm font-medium w-8 h-8 flex items-center justify-center rounded-full transition-all ${isDayToday
+                    ? "bg-black text-white shadow-lg shadow-gray-200"
+                    : isCurrentMonth
+                      ? "text-gray-700 group-hover:bg-white group-hover:shadow-sm"
+                      : "text-gray-300"
                     }`}
                 >
                   {day.getDate()}
@@ -163,7 +163,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ currentDate, events }) => {
                 {dayEvents.slice(0, 3).map((event) => (
                   <div
                     key={event.id}
-                    className={`px-2 py-1 rounded-md border text-xs font-medium truncate cursor-pointer transition-all ${getCategoryStyles(
+                    className={`px-2.5 py-1 rounded text-xs font-medium truncate cursor-pointer transition-all ${getCategoryStyles(
                       event.category
                     )}`}
                     onClick={(e) => {

@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useQuery, gql } from "@apollo/client";
 
 const GET_UPCOMING_EVENTS = gql`
@@ -22,7 +22,6 @@ const GET_UPCOMING_EVENTS = gql`
 `;
 
 export const FeaturedEventsSection: React.FC = () => {
-    const navigate = useNavigate();
     const { data, loading, error } = useQuery(GET_UPCOMING_EVENTS);
 
     // Filter for upcoming events and take the first 7
@@ -39,19 +38,12 @@ export const FeaturedEventsSection: React.FC = () => {
     const duplicatedEvents = [...upcomingEvents, ...upcomingEvents];
 
     return (
-        <section className="w-full bg-white py-12 border-t border-gray-100 overflow-hidden">
+        <section
+            className="w-full bg-transparent py-12 overflow-hidden"
+        >
             <div className="max-w-7xl mx-auto px-4 md:px-6">
                 <div className="flex justify-between items-center mb-8">
                     <h2 className="text-2xl font-bold text-gray-900">Upcoming Events</h2>
-                    <button
-                        onClick={() => navigate("/events")}
-                        className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
-                    >
-                        View All
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
                 </div>
 
                 {/* Auto-scrolling Container */}

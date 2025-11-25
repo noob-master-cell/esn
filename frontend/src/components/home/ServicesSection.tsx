@@ -8,7 +8,8 @@ export const ServicesSection: React.FC = () => {
     {
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 21a1.5 1.5 0 001.5-1.5v-3a1.5 1.5 0 00-1.5-1.5h-3a1.5 1.5 0 00-1.5 1.5v3a1.5 1.5 0 001.5 1.5h3zM9 10a1 1 0 011-1h4a1 1 0 011 1v10a1 1 0 01-1 1H10a1 1 0 01-1-1V10zM5 14a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
       ),
       title: "Exciting Events",
@@ -44,7 +45,7 @@ export const ServicesSection: React.FC = () => {
   ];
 
   return (
-    <section className="w-full bg-white py-20 md:py-32 relative overflow-hidden">
+    <section className="w-full bg-transparent py-20 md:py-32 relative overflow-hidden">
       {/* Background Decorative Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-96 h-96 bg-blue-50/50 rounded-full mix-blend-multiply filter blur-[100px] opacity-70 animate-blob"></div>

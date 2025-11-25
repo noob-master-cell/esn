@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useMyProfile } from "../../hooks/api/useUsers";
-import logo from "../../assets/favicon/favicon.ico";
+import logo from "../../assets/logos/star-color.svg";
 import {
   HomeIcon,
   CalendarIcon,
@@ -73,11 +73,7 @@ export const Navbar: React.FC = () => {
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="flex items-center gap-3 group">
-                <div className="relative w-10 h-10 overflow-hidden rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 p-0.5 shadow-lg group-hover:shadow-cyan-500/30 transition-all duration-300">
-                  <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
-                    <img src={logo} alt="ESN" className="w-6 h-6 object-contain" />
-                  </div>
-                </div>
+                <img src={logo} alt="ESN" className="w-10 h-10 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300" />
                 <div className="flex flex-col">
                   <span className={`text-lg font-bold tracking-tight leading-none ${isTransparent ? "text-white drop-shadow-md" : "text-gray-900"}`}>ESN</span>
                   <span className={`text-xs font-medium tracking-wide ${isTransparent ? "text-gray-200 drop-shadow-md" : "text-gray-500"}`}>Kaiserslautern</span>

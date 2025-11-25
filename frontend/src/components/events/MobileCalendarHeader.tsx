@@ -69,23 +69,23 @@ const MobileCalendarHeader: React.FC<MobileCalendarHeaderProps> = ({
   };
 
   return (
-    <div className="sticky top-20 z-20 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all">
+    <div className="sticky top-16 z-20 bg-white/90 backdrop-blur-xl border-b border-gray-50 shadow-sm transition-all">
       {/* Main Header */}
       <div className="flex items-center justify-between px-4 py-3">
         {/* Left: Navigation */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <button
             onClick={() => onNavigate("prev")}
-            className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 active:scale-95 transition-all touch-manipulation"
+            className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-50 active:scale-95 transition-all touch-manipulation"
           >
-            <ChevronLeftIcon className="w-5 h-5 text-gray-600" />
+            <ChevronLeftIcon className="w-6 h-6 text-gray-600" />
           </button>
 
           <button
             onClick={() => onNavigate("next")}
-            className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 hover:bg-gray-50 active:scale-95 transition-all touch-manipulation"
+            className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-50 active:scale-95 transition-all touch-manipulation"
           >
-            <ChevronRightIcon className="w-5 h-5 text-gray-600" />
+            <ChevronRightIcon className="w-6 h-6 text-gray-600" />
           </button>
         </div>
 
@@ -94,7 +94,7 @@ const MobileCalendarHeader: React.FC<MobileCalendarHeaderProps> = ({
           onClick={onToday}
           className="flex-1 text-center px-2 active:scale-95 transition-transform touch-manipulation"
         >
-          <h1 className="text-lg font-bold text-gray-900 truncate leading-tight">
+          <h1 className="text-xl font-semibold text-gray-900 truncate leading-tight tracking-tight">
             {getDisplayTitle()}
           </h1>
           <p className="text-[10px] font-medium text-blue-600 uppercase tracking-wider mt-0.5">Tap for today</p>
@@ -104,7 +104,7 @@ const MobileCalendarHeader: React.FC<MobileCalendarHeaderProps> = ({
         <div className="relative">
           <button
             onClick={() => setShowViewSelector(!showViewSelector)}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200 active:bg-gray-300 transition-colors touch-manipulation"
+            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
           >
             {getViewDisplayName(viewType)}
             <ChevronDownIcon
@@ -129,8 +129,8 @@ const MobileCalendarHeader: React.FC<MobileCalendarHeaderProps> = ({
                         setShowViewSelector(false);
                       }}
                       className={`w-full text-left px-4 py-3 text-sm transition-colors touch-manipulation flex items-center justify-between ${viewType === view
-                          ? "bg-blue-50 text-blue-700 font-medium"
-                          : "text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+                        ? "bg-blue-50 text-blue-700 font-medium"
+                        : "text-gray-700 hover:bg-gray-50 active:bg-gray-100"
                         }`}
                     >
                       {getViewDisplayName(view)}
@@ -165,8 +165,8 @@ const MobileCalendarHeader: React.FC<MobileCalendarHeaderProps> = ({
                     }
                   }}
                   className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all touch-manipulation ${isCurrentMonth
-                      ? "bg-gray-900 text-white shadow-md"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-gray-900 text-white shadow-md"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
                 >
                   {date.toLocaleDateString("en-US", { month: "short" })}
