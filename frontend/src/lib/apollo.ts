@@ -10,6 +10,9 @@ import { onError } from "@apollo/client/link/error";
 // HTTP link to your GraphQL endpoint
 const httpLink = createHttpLink({
   uri: import.meta.env.VITE_API_URL || "http://localhost:4000/graphql",
+  headers: {
+    "apollo-require-preflight": "true",
+  },
 });
 
 // Token getter function - will be set by Auth0 provider
