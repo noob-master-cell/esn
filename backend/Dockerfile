@@ -12,7 +12,7 @@ WORKDIR /app
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 # Generate client for build (needed for type checking/compilation)
-RUN npx prisma generate
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate
 RUN npm run build
 
 # Stage 3: Production
@@ -44,7 +44,7 @@ COPY --from=build --chown=nestjs:nodejs /app/dist ./dist
 
 # Generate the Prisma Client explicitly in the production environment
 # using the globally installed v6 CLI.
-RUN prisma generate
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" prisma generate
 
 # Create uploads directory with proper permissions
 RUN mkdir -p /app/uploads && chown -R nestjs:nodejs /app/uploads
