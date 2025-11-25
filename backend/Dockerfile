@@ -19,6 +19,8 @@ RUN npm run build
 FROM node:20-alpine AS production
 WORKDIR /app
 
+ENV NODE_ENV=production
+
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
 
