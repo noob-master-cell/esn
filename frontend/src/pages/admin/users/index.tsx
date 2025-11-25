@@ -80,13 +80,16 @@ export const AdminUsersPage: React.FC = () => {
   const actions =
     selectedUsers.length > 0 ? (
       <div className="flex items-center gap-3">
-        <span className="text-sm text-gray-600">
+        <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
           {selectedUsers.length} selected
         </span>
         <button
           onClick={() => handleBulkAction("make_organizer")}
-          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
         >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
           Make Organizer
         </button>
       </div>

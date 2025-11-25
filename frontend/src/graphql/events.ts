@@ -86,6 +86,16 @@ export const GET_ADMIN_EVENTS = gql`
         maxParticipants
         registrationCount
         status
+        category
+        images
+        type
+        price
+        memberPrice
+        organizer {
+          id
+          firstName
+          lastName
+        }
       }
       total
     }

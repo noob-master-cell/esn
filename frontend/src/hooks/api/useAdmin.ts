@@ -9,7 +9,13 @@ import {
     RECENT_EVENTS,
     DELETE_USER_ADMIN,
     ALL_EVENTS_SIMPLE,
+    REGISTRATION_STATS,
 } from "../../graphql/admin";
+
+export const useRegistrationStats = () => {
+    const { data, loading, error, refetch } = useQuery(REGISTRATION_STATS);
+    return { stats: data?.registrationStats, loading, error, refetch };
+};
 
 export const useAdminStats = () => {
     const { data, loading, error, refetch } = useQuery(ADMIN_DASHBOARD_STATS);

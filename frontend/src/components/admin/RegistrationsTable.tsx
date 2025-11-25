@@ -17,6 +17,7 @@ interface Registration {
     id: string;
     firstName: string;
     lastName: string;
+    avatar?: string;
     email: string;
   };
   event: {
@@ -79,7 +80,7 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
 
     return (
       <span
-        className={`inline - flex px - 2 py - 1 text - xs font - semibold rounded - full ${config.bg} ${config.text} `}
+        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${config.bg} ${config.text}`}
       >
         {config.label}
       </span>
@@ -120,13 +121,7 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
     });
   };
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      onSelectionChange(registrations.map((reg) => reg.id));
-    } else {
-      onSelectionChange([]);
-    }
-  };
+
 
   const handleSelectRegistration = (
     registrationId: string,
@@ -185,11 +180,26 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
                 <input
                   type="checkbox"
                   checked={
-                    selectedRegistrations.length === registrations.length &&
-                    registrations.length > 0
+                    registrations.length > 0 &&
+                    registrations.every((r) => selectedRegistrations.includes(r.id))
                   }
-                  onChange={(e) => handleSelectAll(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      const newSelected = [
+                        ...new Set([
+                          ...selectedRegistrations,
+                          ...registrations.map((r) => r.id),
+                        ]),
+                      ];
+                      onSelectionChange(newSelected);
+                    } else {
+                      const pageIds = registrations.map((r) => r.id);
+                      onSelectionChange(
+                        selectedRegistrations.filter((id) => !pageIds.includes(id))
+                      );
+                    }
+                  }}
+                  className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-300 rounded"
                 />
               </th>
               <th
@@ -275,12 +285,28 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">
-                      {registration.user.firstName} {registration.user.lastName}
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 h-8 w-8 mr-3">
+                      {registration.user.avatar ? (
+                        <img
+                          className="h-8 w-8 rounded-full object-cover"
+                          src={registration.user.avatar}
+                          alt={`${registration.user.firstName} ${registration.user.lastName}`}
+                        />
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
+                          {registration.user.firstName.charAt(0)}
+                          {registration.user.lastName.charAt(0)}
+                        </div>
+                      )}
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {registration.user.email}
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {registration.user.firstName} {registration.user.lastName}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {registration.user.email}
+                      </div>
                     </div>
                   </div>
                 </td>

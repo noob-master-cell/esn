@@ -82,28 +82,38 @@ export const AdminEventsPage: React.FC = () => {
   const actions = (
     <div className="flex items-center gap-3">
       {selectedEvents.length > 0 && (
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600">
+        <div className="flex items-center gap-2 mr-2">
+          <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
             {selectedEvents.length} selected
           </span>
           <button
             onClick={() => handleBulkAction("publish")}
-            className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+            title="Publish Selected"
           >
-            Publish
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
           </button>
           <button
             onClick={() => handleBulkAction("delete")}
-            className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            title="Delete Selected"
           >
-            Delete
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
           </button>
+          <div className="w-px h-6 bg-gray-200 mx-1"></div>
         </div>
       )}
       <button
         onClick={() => navigate("/admin/events/create")}
-        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        className="flex items-center gap-2 bg-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-cyan-700 transition-all shadow-sm hover:shadow-cyan-600/20 text-sm font-medium"
       >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
         Create Event
       </button>
     </div>

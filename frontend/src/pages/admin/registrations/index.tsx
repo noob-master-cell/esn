@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import {
   useAdminRegistrations,
   useUpdateRegistrationStatus,
+  useRegistrationStats,
 } from "../../../hooks/api/useAdmin";
 import { AdminLayout } from "../../../components/admin/AdminLayout";
 import { RegistrationFilters } from "../../../components/admin/RegistrationFilters";
@@ -38,6 +39,7 @@ interface Registration {
     title: string;
     startDate: string;
     location: string;
+    images?: string[];
   };
 }
 
@@ -125,42 +127,69 @@ export const AdminRegistrationsPage: React.FC = () => {
     }
   };
 
-  const getStats = () => {
-    const regs = registrations || [];
-    return {
-      total: regs.length,
-      confirmed: regs.filter((r: Registration) => r.status === "CONFIRMED")
-        .length,
-      pending: regs.filter((r: Registration) => r.status === "PENDING").length,
+  const { stats: globalStats } = useRegistrationStats();
 
-      cancelled: regs.filter((r: Registration) => r.status === "CANCELLED")
-        .length,
-    };
+  const stats = globalStats || {
+    total: 0,
+    confirmed: 0,
+    pending: 0,
+    cancelled: 0,
   };
-
-  const stats = getStats();
 
   const actions =
     selectedRegistrations.length > 0 ? (
       <div className="flex items-center gap-3">
-        <span className="text-sm text-gray-600">
+        <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
           {selectedRegistrations.length} selected
         </span>
         <button
           onClick={() => handleBulkAction("confirm")}
-          className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-green-600 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
         >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
           Confirm
         </button>
 
         <button
           onClick={() => handleBulkAction("cancel")}
-          className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
         >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
           Cancel
         </button>
       </div>
-    ) : null;
+    ) : (
+      <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
+        <button
+          onClick={() => setViewMode('list')}
+          className={`p-1.5 rounded-md transition-all ${viewMode === 'list'
+            ? 'bg-white text-cyan-600 shadow-sm'
+            : 'text-gray-500 hover:text-gray-700'
+            }`}
+          title="List View"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <button
+          onClick={() => setViewMode('grouped')}
+          className={`p-1.5 rounded-md transition-all ${viewMode === 'grouped'
+            ? 'bg-white text-cyan-600 shadow-sm'
+            : 'text-gray-500 hover:text-gray-700'
+            }`}
+          title="Grouped View"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+        </button>
+      </div>
+    );
 
   return (
     <AdminLayout
@@ -169,56 +198,68 @@ export const AdminRegistrationsPage: React.FC = () => {
       actions={actions}
     >
       <div className="space-y-6">
-        {/* View Mode Toggle */}
-        <div className="flex justify-end">
-          <div className="inline-flex rounded-lg border border-gray-300 bg-white p-1">
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewMode === 'list'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-700 hover:bg-gray-100'
-                }`}
-            >
-              List View
-            </button>
-            <button
-              onClick={() => setViewMode('grouped')}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewMode === 'grouped'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-700 hover:bg-gray-100'
-                }`}
-            >
-              Grouped by Event
-            </button>
-          </div>
-        </div>
+
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow-sm border">
-            <div className="text-2xl font-bold text-gray-900">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-gray-500 bg-gray-50 px-2 py-1 rounded-full">Total</span>
+            </div>
+            <div className="text-3xl font-bold text-gray-900">
               {stats.total}
             </div>
-            <div className="text-sm text-gray-500">Total</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm border">
-            <div className="text-2xl font-bold text-green-600">
-              {stats.confirmed}
-            </div>
-            <div className="text-sm text-gray-500">Confirmed</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm border">
-            <div className="text-2xl font-bold text-yellow-600">
-              {stats.pending}
-            </div>
-            <div className="text-sm text-gray-500">Pending</div>
+            <div className="text-sm text-gray-500 mt-1">Total Registrations</div>
           </div>
 
-          <div className="bg-white p-4 rounded-lg shadow-sm border">
-            <div className="text-2xl font-bold text-red-600">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2 bg-green-50 rounded-lg">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">Confirmed</span>
+            </div>
+            <div className="text-3xl font-bold text-gray-900">
+              {stats.confirmed}
+            </div>
+            <div className="text-sm text-gray-500 mt-1">Confirmed Attendees</div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2 bg-yellow-50 rounded-lg">
+                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-yellow-600 bg-yellow-50 px-2 py-1 rounded-full">Pending</span>
+            </div>
+            <div className="text-3xl font-bold text-gray-900">
+              {stats.pending}
+            </div>
+            <div className="text-sm text-gray-500 mt-1">Awaiting Approval</div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2 bg-red-50 rounded-lg">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded-full">Cancelled</span>
+            </div>
+            <div className="text-3xl font-bold text-gray-900">
               {stats.cancelled}
             </div>
-            <div className="text-sm text-gray-500">Cancelled</div>
+            <div className="text-sm text-gray-500 mt-1">Cancelled Registrations</div>
           </div>
         </div>
 
@@ -250,25 +291,62 @@ export const AdminRegistrationsPage: React.FC = () => {
           />
         ) : (
           /* Grouped View */
-          <div className="space-y-4">
+          <div className="space-y-6">
             {Object.entries(groupedRegistrations).map(([eventId, eventRegs]) => {
               const event = eventRegs[0]?.event;
               const confirmedCount = eventRegs.filter(r => r.status === 'CONFIRMED').length;
+              const pendingCount = eventRegs.filter(r => r.status === 'PENDING').length;
 
               return (
-                <details key={eventId} className="bg-white rounded-lg shadow-sm overflow-hidden" open>
-                  <summary className="px-6 py-4 cursor-pointer hover:bg-gray-50 flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{event?.title}</h3>
-                      <p className="text-sm text-gray-500">{event?.location} • {new Date(event?.startDate).toLocaleDateString()}</p>
-                    </div>
+                <div key={eventId} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md">
+                  <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                      <span className="text-sm text-gray-600">
-                        {confirmedCount} confirmed • {eventRegs.length} total
-                      </span>
+                      <div className="h-12 w-12 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center text-xl font-bold overflow-hidden">
+                        {event?.images && event.images.length > 0 ? (
+                          <img src={event.images[0]} alt={event.title} className="h-full w-full object-cover" />
+                        ) : (
+                          event?.title.charAt(0)
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900">{event?.title}</h3>
+                        <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
+                          <span className="flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            {new Date(event?.startDate).toLocaleDateString()}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {event?.location}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </summary>
-                  <div className="border-t border-gray-200">
+
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <div className="text-xs text-gray-500 uppercase font-semibold">Confirmed</div>
+                        <div className="text-lg font-bold text-green-600">{confirmedCount}</div>
+                      </div>
+                      <div className="w-px h-8 bg-gray-200 hidden sm:block"></div>
+                      <div className="text-right">
+                        <div className="text-xs text-gray-500 uppercase font-semibold">Pending</div>
+                        <div className="text-lg font-bold text-yellow-600">{pendingCount}</div>
+                      </div>
+                      <div className="w-px h-8 bg-gray-200 hidden sm:block"></div>
+                      <div className="text-right">
+                        <div className="text-xs text-gray-500 uppercase font-semibold">Total</div>
+                        <div className="text-lg font-bold text-gray-900">{eventRegs.length}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-0">
                     <RegistrationsTable
                       registrations={eventRegs}
                       loading={false}
@@ -288,13 +366,19 @@ export const AdminRegistrationsPage: React.FC = () => {
                       }}
                     />
                   </div>
-                </details>
+                </div>
               );
             })}
 
             {Object.keys(groupedRegistrations).length === 0 && !loading && (
-              <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-                <p className="text-gray-500">No registrations found.</p>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900">No registrations found</h3>
+                <p className="text-gray-500 mt-1">Try adjusting your filters or search criteria</p>
               </div>
             )}
           </div>

@@ -12,6 +12,18 @@ export const ADMIN_DASHBOARD_STATS = gql`
       revenueThisMonth
     }
   }
+
+`;
+
+export const REGISTRATION_STATS = gql`
+  query RegistrationStats {
+    registrationStats {
+      total
+      confirmed
+      pending
+      cancelled
+    }
+  }
 `;
 
 export const ALL_EVENTS_SIMPLE = gql`
@@ -94,12 +106,14 @@ export const ALL_REGISTRATIONS = gql`
         firstName
         lastName
         email
+        avatar
       }
       event {
         id
         title
         startDate
         location
+        images
       }
     }
   }

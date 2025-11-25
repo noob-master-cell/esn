@@ -11,6 +11,7 @@ interface Event {
   category: string;
   maxParticipants: number;
   registrationCount: number;
+  images?: string[];
   imageUrl?: string;
   price?: number;
   memberPrice?: number;
@@ -188,47 +189,47 @@ export const EventsTable: React.FC<EventsTableProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-gray-100">
+          <thead className="bg-gray-50/50">
             <tr>
-              <th className="px-6 py-3 text-left">
+              <th className="px-6 py-4 text-left">
                 <input
                   type="checkbox"
                   checked={
                     selectedEvents.length === events.length && events.length > 0
                   }
                   onChange={(e) => handleSelectAll(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-300 rounded"
                 />
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Event
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Date
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Category
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Registrations
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Price
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y divide-gray-100">
             {events.map((event) => (
-              <tr key={event.id} className="hover:bg-gray-50">
+              <tr key={event.id} className="hover:bg-gray-50/50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
@@ -236,33 +237,37 @@ export const EventsTable: React.FC<EventsTableProps> = ({
                     onChange={(e) =>
                       handleSelectEvent(event.id, e.target.checked)
                     }
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-300 rounded"
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    {event.imageUrl && (
-                      <img
-                        className="h-12 w-12 rounded-lg object-cover mr-4"
-                        src={event.imageUrl}
-                        alt={event.title}
-                      />
-                    )}
+                    <div className="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center text-xl mr-4 overflow-hidden">
+                      {(event.images && event.images.length > 0) || event.imageUrl ? (
+                        <img
+                          className="h-full w-full object-cover"
+                          src={event.images && event.images.length > 0 ? event.images[0] : event.imageUrl}
+                          alt={event.title}
+                        />
+                      ) : (
+                        <span>📅</span>
+                      )}
+                    </div>
                     <div>
-                      <div className="text-sm font-medium text-gray-900 max-w-xs truncate">
+                      <div className="text-sm font-bold text-gray-900 max-w-xs truncate">
                         {event.title}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-xs text-gray-500">
                         {event.location}
                       </div>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
                   <div>
                     <div>{formatDate(event.startDate)}</div>
                     {event.startDate !== event.endDate && (
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-400">
                         to {formatDate(event.endDate)}
                       </div>
                     )}
@@ -272,16 +277,10 @@ export const EventsTable: React.FC<EventsTableProps> = ({
                   {getCategoryBadge(event.category)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <div className="flex items-center">
-                    <span className="font-medium">
-                      {event.registrationCount}
-                    </span>
-                    <span className="text-gray-500">
-                      /{event.maxParticipants}
-                    </span>
-                    <div className="ml-2 w-16 bg-gray-200 rounded-full h-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className="bg-blue-600 h-2 rounded-full"
+                        className="bg-cyan-500 h-2 rounded-full"
                         style={{
                           width: `${Math.min(
                             (event.registrationCount / event.maxParticipants) *
@@ -291,6 +290,12 @@ export const EventsTable: React.FC<EventsTableProps> = ({
                         }}
                       />
                     </div>
+                    <span className="font-medium text-gray-700">
+                      {event.registrationCount}
+                    </span>
+                    <span className="text-gray-400 text-xs">
+                      /{event.maxParticipants}
+                    </span>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -299,44 +304,57 @@ export const EventsTable: React.FC<EventsTableProps> = ({
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {event.price ? (
                     <div>
-                      <div>€{event.price}</div>
+                      <div className="font-medium">€{event.price}</div>
                       {event.memberPrice && (
-                        <div className="text-xs text-green-600">
+                        <div className="text-xs text-cyan-600 font-medium">
                           €{event.memberPrice} (ESN)
                         </div>
                       )}
                     </div>
                   ) : (
-                    <span className="text-green-600 font-medium">Free</span>
+                    <span className="text-green-600 font-bold text-xs uppercase tracking-wide bg-green-50 px-2 py-1 rounded-full">Free</span>
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex items-center gap-2">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
+                  <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => onViewEvent(event.id)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="p-1 text-gray-400 hover:text-cyan-600 transition-colors rounded-lg hover:bg-cyan-50"
+                      title="View"
                     >
-                      View
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
                     </button>
                     <button
                       onClick={() => onEditEvent(event.id)}
-                      className="text-indigo-600 hover:text-indigo-900"
+                      className="p-1 text-gray-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50"
+                      title="Edit"
                     >
-                      Edit
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
                     </button>
                     {event.status === "DRAFT" && (
                       <button
                         onClick={() => onPublishEvent(event.id)}
-                        className="text-green-600 hover:text-green-900"
+                        className="p-1 text-gray-400 hover:text-green-600 transition-colors rounded-lg hover:bg-green-50"
+                        title="Publish"
                       >
-                        Publish
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
                       </button>
                     )}
                     <button
                       onClick={() => onDeleteEvent(event.id)}
-                      className="text-red-600 hover:text-red-900"
+                      className="p-1 text-gray-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
+                      title="Delete"
                     >
-                      Delete
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
                     </button>
                   </div>
                 </td>

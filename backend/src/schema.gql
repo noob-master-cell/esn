@@ -169,6 +169,13 @@ type AdminStats {
   revenueThisMonth: Float!
 }
 
+type RegistrationStats {
+  total: Int!
+  confirmed: Int!
+  pending: Int!
+  cancelled: Int!
+}
+
 type Query {
   me: User!
   hello: String!
@@ -188,6 +195,7 @@ type Query {
   registrationsCount(filter: RegistrationFilterInput): Int!
   eventCapacityInfo(eventId: ID!): Int!
   adminStats: AdminStats!
+  registrationStats: RegistrationStats!
 }
 
 input UsersFilterInput {

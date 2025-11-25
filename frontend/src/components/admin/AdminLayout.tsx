@@ -127,16 +127,16 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                   key={item.name}
                   to={item.href}
                   className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all border-b-2 ${isActive
-                    ? "border-blue-600 text-blue-600"
+                    ? "border-cyan-500 text-cyan-600"
                     : "border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300"
                     }`}
                 >
-                  <span className={isActive ? "text-blue-600" : "text-gray-400"}>
+                  <span className={isActive ? "text-cyan-500" : "text-gray-400"}>
                     {item.icon}
                   </span>
                   <span>{item.name}</span>
                   {item.badge && (
-                    <span className="ml-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    <span className="ml-1 bg-cyan-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                       {item.badge}
                     </span>
                   )}
@@ -145,28 +145,68 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             })}
           </nav>
 
-          {/* Mobile Navigation */}
+          {/* Mobile Navigation Overlay */}
           {isMobileMenuOpen && (
-            <div className="lg:hidden border-t border-gray-200 py-3 space-y-1">
-              {menuItems.map((item) => {
-                const isActive = isActiveLink(item.href);
-                return (
-                  <NavLink
-                    key={item.name}
-                    to={item.href}
+            <div className="fixed inset-0 z-50 lg:hidden">
+              {/* Backdrop */}
+              <div
+                className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity"
+                onClick={() => setIsMobileMenuOpen(false)}
+              />
+
+              {/* Menu Panel */}
+              <div className="fixed inset-y-0 right-0 w-full max-w-xs bg-white shadow-xl p-6 flex flex-col animate-slideInRight">
+                <div className="flex items-center justify-between mb-8">
+                  <span className="text-lg font-bold text-gray-900">Menu</span>
+                  <button
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive
-                      ? "bg-blue-50 text-blue-700"
-                      : "text-gray-700 hover:bg-gray-50"
-                      }`}
+                    className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
                   >
-                    <span className={isActive ? "text-blue-600" : "text-gray-400"}>
-                      {item.icon}
-                    </span>
-                    <span>{item.name}</span>
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="space-y-2 flex-1">
+                  {menuItems.map((item) => {
+                    const isActive = isActiveLink(item.href);
+                    return (
+                      <NavLink
+                        key={item.name}
+                        to={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
+                          ? "bg-cyan-50 text-cyan-700"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                          }`}
+                      >
+                        <span className={isActive ? "text-cyan-600" : "text-gray-400"}>
+                          {item.icon}
+                        </span>
+                        <span>{item.name}</span>
+                        {item.badge && (
+                          <span className="ml-auto bg-cyan-100 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                            {item.badge}
+                          </span>
+                        )}
+                      </NavLink>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-8 pt-8 border-t border-gray-100">
+                  <NavLink
+                    to="/"
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Site
                   </NavLink>
-                );
-              })}
+                </div>
+              </div>
             </div>
           )}
         </div>

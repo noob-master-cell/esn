@@ -68,4 +68,24 @@ export class AdminService {
             revenueThisMonth,
         };
     }
+
+    async getRegistrationStats() {
+        const total = await this.prisma.registration.count();
+        const confirmed = await this.prisma.registration.count({
+            where: { status: 'CONFIRMED' },
+        });
+        const pending = await this.prisma.registration.count({
+            where: { status: 'PENDING' },
+        });
+        const cancelled = await this.prisma.registration.count({
+            where: { status: 'CANCELLED' },
+        });
+
+        return {
+            total,
+            confirmed,
+            pending,
+            cancelled,
+        };
+    }
 }
