@@ -176,9 +176,7 @@ export class EventsService implements OnModuleInit {
     // Only show published/active events to regular users (not drafts or cancelled)
     // Unless the user is an ADMIN
     if (userRole !== UserRole.ADMIN) {
-      where.status = {
-        notIn: [EventStatus.DRAFT, EventStatus.CANCELLED],
-      };
+      where.status = EventStatus.PUBLISHED;
       where.isPublic = true;
     }
 
@@ -538,28 +536,29 @@ export class EventsService implements OnModuleInit {
       ? activeRegistrations.some((reg: any) => reg.userId === userId)
       : false;
 
-    // Check if user can register (spots available and not already registered)
-    const canRegister =
-      !isRegistered && registrationCount < event.maxParticipants;
-
     // Compute derived status
     let status = event.status;
-    if (event.status === EventStatus.PUBLISHED) {
-      const now = new Date();
-      const startDate = new Date(event.startDate);
-      const endDate = new Date(event.endDate);
-      const registrationDeadline = event.registrationDeadline ? new Date(event.registrationDeadline) : startDate;
+    const now = new Date();
+    const startDate = new Date(event.startDate);
+    const endDate = new Date(event.endDate);
+    const registrationDeadline = event.registrationDeadline ? new Date(event.registrationDeadline) : startDate;
 
+    if (event.status === EventStatus.PUBLISHED) {
       if (now > endDate) {
         status = EventStatus.COMPLETED;
       } else if (now > startDate) {
-        status = EventStatus.ONGOING;
+        status = EventStatus.ONGOING; // Event started, registration closed
       } else if (registrationCount >= event.maxParticipants || now > registrationDeadline) {
         status = EventStatus.REGISTRATION_CLOSED;
       } else {
         status = EventStatus.REGISTRATION_OPEN;
       }
     }
+
+    // Check if user can register (spots available and not already registered and registration is open)
+    const canRegister =
+      !isRegistered &&
+      status === EventStatus.REGISTRATION_OPEN;
 
     return {
       ...event,

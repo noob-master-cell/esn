@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 const images = [
   "https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=2070&auto=format&fit=crop", // Students studying/talking
@@ -42,6 +43,7 @@ const HeroSlideshow = () => {
 
 export const HeroSection: React.FC = () => {
   const navigate = useNavigate();
+  const { isSignedIn } = useAuth();
 
   return (
     <section className="relative w-full min-h-screen bg-gray-900 overflow-hidden flex items-center">
@@ -75,12 +77,14 @@ export const HeroSection: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </button>
-              <button
-                onClick={() => navigate("/sign-up")}
-                className="px-8 py-4 bg-white/10 text-white backdrop-blur-md border border-white/30 rounded-2xl font-bold hover:bg-white/20 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg"
-              >
-                Become a Member
-              </button>
+              {!isSignedIn && (
+                <button
+                  onClick={() => navigate("/sign-up")}
+                  className="px-8 py-4 bg-white/10 text-white backdrop-blur-md border border-white/30 rounded-2xl font-bold hover:bg-white/20 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+                >
+                  Become a Member
+                </button>
+              )}
             </div>
 
             <div className="flex items-center gap-8 pt-8 border-t border-white/10">

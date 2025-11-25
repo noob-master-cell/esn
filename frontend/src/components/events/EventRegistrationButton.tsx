@@ -54,10 +54,13 @@ export const EventRegistrationButton: React.FC<
   const isEventFull = spotsLeft <= 0;
   const canRegisterForSpot = !isEventFull && canRegister;
 
-  // Check if registration deadline has passed
-  const isRegistrationClosed = event.registrationDeadline
-    ? new Date(event.registrationDeadline) < new Date()
-    : false;
+  // Check if registration deadline has passed or event status indicates closed
+  const isRegistrationClosed =
+    (event.registrationDeadline && new Date(event.registrationDeadline) < new Date()) ||
+    event.status === 'REGISTRATION_CLOSED';
+
+  const isEventStarted = event.status === 'ONGOING';
+  const isEventEnded = event.status === 'COMPLETED';
 
   const handleQuickRegister = async () => {
     // Prevent registration if already registered
@@ -73,9 +76,7 @@ export const EventRegistrationButton: React.FC<
 
     try {
       await register({
-        // registrationType is handled in the hook or backend, but we can pass it if needed
-        // The hook signature I defined earlier takes optional specialRequests etc.
-        // I might need to update the hook to accept registrationType if it's dynamic
+        // registrationType is handled in the hook or backend
       });
     } catch (error) {
       // Error handled in onError callback
@@ -173,7 +174,6 @@ export const EventRegistrationButton: React.FC<
           ) : (
             <p className="text-sm text-red-600 mt-2 text-center font-medium">
               Event is full
-
             </p>
           )}
         </div>
@@ -198,13 +198,26 @@ export const EventRegistrationButton: React.FC<
   }
 
   // Registration closed state
-  if (isRegistrationClosed) {
+  if (isRegistrationClosed || isEventStarted || isEventEnded) {
+    let title = "Registration Closed";
+    let message = "Registration is no longer available";
+
+    if (isEventEnded) {
+      title = "Event Ended";
+      message = "This event has already taken place";
+    } else if (isEventStarted) {
+      title = "Event Started";
+      message = "This event has already started";
+    } else if (isRegistrationClosed) {
+      message = "Registration deadline has passed or spots are full";
+    }
+
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
         <h3 className="text-lg font-semibold text-gray-700 mb-2">
-          Registration Closed
+          {title}
         </h3>
-        <p className="text-gray-600">Registration deadline has passed</p>
+        <p className="text-gray-600">{message}</p>
         <button
           onClick={() => navigate(`/events/${event.id}`)}
           className="mt-4 w-full bg-gray-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"

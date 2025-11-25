@@ -112,7 +112,11 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+
+    return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -295,8 +299,8 @@ export const RegistrationsTable: React.FC<RegistrationsTableProps> = ({
                         />
                       ) : (
                         <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
-                          {registration.user.firstName.charAt(0)}
-                          {registration.user.lastName.charAt(0)}
+                          {registration.user.firstName?.charAt(0) || '-'}
+                          {registration.user.lastName?.charAt(0) || '-'}
                         </div>
                       )}
                     </div>

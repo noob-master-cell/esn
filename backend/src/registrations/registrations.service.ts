@@ -104,6 +104,11 @@ export class RegistrationsService {
       throw new BadRequestException('Registration deadline has passed');
     }
 
+    // Check if event has started
+    if (new Date() > event.startDate) {
+      throw new BadRequestException('Event has already started');
+    }
+
     // Count current confirmed registrations (excluding waitlist)
     const confirmedRegistrations = await this.prisma.registration.count({
       where: {
