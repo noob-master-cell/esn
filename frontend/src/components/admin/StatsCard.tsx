@@ -1,5 +1,5 @@
 import React from "react";
-
+import { ArrowTrendingUpIcon, ArrowTrendingDownIcon, MinusIcon } from "@heroicons/react/24/solid";
 
 interface StatsCardProps {
   title: string;
@@ -36,53 +36,11 @@ export const StatsCard: React.FC<StatsCardProps> = ({
 
     switch (trend) {
       case "up":
-        return (
-          <svg
-            className={iconClass}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M7 17l9.2-9.2M17 17V7H7"
-            />
-          </svg>
-        );
+        return <ArrowTrendingUpIcon className={iconClass} />;
       case "down":
-        return (
-          <svg
-            className={iconClass}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 7l-9.2 9.2M7 7v10h10"
-            />
-          </svg>
-        );
+        return <ArrowTrendingDownIcon className={iconClass} />;
       default:
-        return (
-          <svg
-            className={iconClass}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 12h14"
-            />
-          </svg>
-        );
+        return <MinusIcon className={iconClass} />;
     }
   };
 

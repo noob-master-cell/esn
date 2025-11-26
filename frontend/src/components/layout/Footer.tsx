@@ -60,18 +60,19 @@ export const Footer: React.FC = () => {
               </Link>
 
               <p className="text-gray-400 text-base leading-relaxed max-w-md">
-                Subscribe to our newsletter to get the latest ESN news, event updates, and community stories delivered straight to your inbox.
+                Become part of the Erasmus Student Network and help international students make the most of their exchange experience.
               </p>
 
               <div className="flex gap-2 max-w-md">
-                <input
-                  type="email"
-                  placeholder="Email address"
-                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                />
-                <button className="px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-colors">
-                  Subscribe
-                </button>
+                <Link
+                  to="/join"
+                  className="px-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-colors inline-flex items-center gap-2"
+                >
+                  Join ESN Now
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </Link>
               </div>
 
               <div className="flex gap-4 pt-4">
