@@ -57,7 +57,14 @@ export class CommentsService {
                 eventId,
             },
             include: {
-                user: true,
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        avatar: true,
+                    }
+                },
             },
         });
     }
@@ -66,7 +73,14 @@ export class CommentsService {
         return this.prisma.comment.findMany({
             where: { eventId },
             include: {
-                user: true,
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        avatar: true,
+                    }
+                },
             },
             orderBy: {
                 createdAt: 'desc',

@@ -62,6 +62,7 @@ model User {
   createdEvents Event[] @relation("EventCreator")
 
   @@map("users")
+  @@index([createdAt])
 }
 
 model UserPreferences {
@@ -156,6 +157,8 @@ model Event {
   @@map("events")
   @@index([createdAt])
   @@index([startDate])
+  @@index([status, isPublic, startDate])
+  @@index([organizerId])
 }
 
 // ================================
@@ -200,6 +203,7 @@ model Registration {
   @@unique([userId, eventId])
   @@index([eventId, status])
   @@index([registeredAt])
+  @@index([userId])
   @@map("registrations")
 }
 
@@ -240,6 +244,8 @@ model Payment {
   @@map("payments")
   @@index([createdAt])
   @@index([status])
+  @@index([userId])
+  @@index([eventId])
 }
 
 // ================================
@@ -267,6 +273,8 @@ model Review {
   isVerified Boolean @default(false) // Only users who attended can review
 
   @@unique([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
   @@map("reviews")
 }
 
@@ -362,6 +370,7 @@ model Feedback {
 
   @@map("feedbacks")
   @@index([createdAt])
+  @@index([userId])
 }
 
 enum FeedbackType {
@@ -388,5 +397,6 @@ model Comment {
   event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@index([eventId])
+  @@index([userId])
   @@map("comments")
 }

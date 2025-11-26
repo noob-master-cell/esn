@@ -8,14 +8,35 @@ export class CalendarService {
     constructor(private prisma: PrismaService) { }
 
     async getCalendarFeed() {
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
         const events = await this.prisma.event.findMany({
             where: {
                 status: EventStatus.PUBLISHED,
                 isPublic: true,
+                startDate: {
+                    gte: oneYearAgo,
+                },
             },
-            include: {
-                organizer: true,
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                location: true,
+                startDate: true,
+                endDate: true,
+                organizer: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    }
+                }
             },
+            orderBy: {
+                startDate: 'asc',
+            }
         });
 
         const calendar = ical({

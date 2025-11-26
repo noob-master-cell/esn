@@ -193,6 +193,24 @@ const EventDetails: React.FC<EventDetailsProps> = ({
               {event.description.split('\n').map((p, i) => (
                 <p key={i} className="text-gray-600 leading-relaxed mb-4">{p}</p>
               ))}
+
+              {event.requirements && (
+                <>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 mt-8">Requirements</h3>
+                  <div className="text-gray-600 leading-relaxed mb-4 whitespace-pre-line">
+                    {event.requirements}
+                  </div>
+                </>
+              )}
+
+              {event.additionalInfo && (
+                <>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 mt-8">Additional Information</h3>
+                  <div className="text-gray-600 leading-relaxed mb-4 whitespace-pre-line">
+                    {event.additionalInfo}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Location Map */}

@@ -274,8 +274,6 @@ export class RegistrationsService {
     requestingUserId?: string,
     userRole?: UserRole,
   ) {
-
-
     const where: any = {};
 
     // Apply filters
@@ -317,8 +315,26 @@ export class RegistrationsService {
     const registrations = await this.prisma.registration.findMany({
       where,
       include: {
-        user: true,
-        event: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatar: true,
+          },
+        },
+        event: {
+          select: {
+            id: true,
+            title: true,
+            startDate: true,
+            endDate: true,
+            status: true,
+            location: true,
+            images: true,
+          }
+        },
       },
       orderBy,
       skip: filter.skip || 0,
@@ -332,12 +348,20 @@ export class RegistrationsService {
   }
 
   async findOne(id: string, requestingUserId?: string, userRole?: UserRole) {
-
-
     const registration = await this.prisma.registration.findUnique({
       where: { id },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatar: true,
+            phone: true,
+            university: true,
+          }
+        },
         event: true,
       },
     });
@@ -365,8 +389,6 @@ export class RegistrationsService {
     requestingUserId: string,
     userRole: UserRole,
   ) {
-
-
     const registration = await this.findOne(id, requestingUserId, userRole);
 
     // Permission check: Users can only update their own registrations (limited fields)
@@ -422,7 +444,15 @@ export class RegistrationsService {
       where: { id },
       data: updateData,
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatar: true,
+          }
+        },
         event: true,
       },
     });
@@ -432,8 +462,6 @@ export class RegistrationsService {
   }
 
   async cancel(id: string, requestingUserId: string, userRole: UserRole) {
-
-
     const registration = await this.findOne(id, requestingUserId, userRole);
 
     // Check if cancellation is allowed
@@ -462,7 +490,15 @@ export class RegistrationsService {
         cancelledAt: new Date(),
       },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatar: true,
+          }
+        },
         event: true,
       },
     });
@@ -491,15 +527,10 @@ export class RegistrationsService {
       console.log(`Auto-promoted user ${nextWaitlisted.userId} from waitlist to confirmed`);
     }
 
-
-
-
     return this.transformRegistration(cancelledRegistration);
   }
 
   async getMyRegistrations(userId: string) {
-
-
     const registrations = await this.prisma.registration.findMany({
       where: {
         userId,
@@ -508,25 +539,42 @@ export class RegistrationsService {
         },
       },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatar: true,
+          }
+        },
         event: {
           include: {
-            organizer: true,
-            registrations: {
-              where: {
-                status: {
-                  not: RegistrationStatus.CANCELLED,
+            organizer: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                avatar: true,
+              }
+            },
+            _count: {
+              select: {
+                registrations: {
+                  where: {
+                    status: {
+                      not: RegistrationStatus.CANCELLED,
+                    },
+                  },
                 },
               },
-              include: { user: true },
             },
           },
         },
       },
       orderBy: { registeredAt: 'desc' },
     });
-
-
 
     return registrations.map((registration) => {
       const transformedReg = this.transformRegistration(registration);
@@ -550,40 +598,34 @@ export class RegistrationsService {
   private transformEventForRegistration(event: any) {
     if (!event) return null;
 
-    // Safely get registrations array
-    const registrations = Array.isArray(event.registrations)
-      ? event.registrations
-      : [];
+    // Use pre-fetched count if available, otherwise fall back to array length (for backward compatibility)
+    let registrationCount = 0;
 
-    // Filter active registrations (not cancelled)
-    const activeRegistrations = registrations.filter(
-      (reg: any) => reg.status !== RegistrationStatus.CANCELLED,
-    );
+    if (event._count && typeof event._count.registrations === 'number') {
+      registrationCount = event._count.registrations;
+    } else if (Array.isArray(event.registrations)) {
+      // Fallback logic if _count wasn't fetched
+      const activeRegistrations = event.registrations.filter(
+        (reg: any) => reg.status !== RegistrationStatus.CANCELLED,
+      );
 
-    // Count confirmed/pending registrations
-    const confirmedRegistrations = activeRegistrations.filter(
-      (reg: any) =>
-        reg.status === RegistrationStatus.CONFIRMED ||
-        reg.status === RegistrationStatus.PENDING ||
-        reg.status === RegistrationStatus.ATTENDED ||
-        reg.status === RegistrationStatus.NO_SHOW,
-    );
-
-
-
-    const registrationCount = confirmedRegistrations.length;
-
+      const confirmedRegistrations = activeRegistrations.filter(
+        (reg: any) =>
+          reg.status === RegistrationStatus.CONFIRMED ||
+          reg.status === RegistrationStatus.PENDING ||
+          reg.status === RegistrationStatus.ATTENDED ||
+          reg.status === RegistrationStatus.NO_SHOW,
+      );
+      registrationCount = confirmedRegistrations.length;
+    }
 
     // For registration context, we know this user is now registered
     const isRegistered = true;
     const canRegister = false; // User just registered, so they can't register again
 
-
-
     return {
       ...event,
       registrationCount,
-
       isRegistered,
       canRegister,
     };

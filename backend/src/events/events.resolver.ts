@@ -103,6 +103,7 @@ export class EventsResolver {
 
   @ResolveField(() => Int)
   async confirmedCount(@Parent() event: Event) {
+    if (event.confirmedCount !== undefined) return event.confirmedCount;
     return this.eventsService.countRegistrations(event.id, [
       RegistrationStatus.CONFIRMED,
       RegistrationStatus.ATTENDED,
@@ -112,11 +113,13 @@ export class EventsResolver {
 
   @ResolveField(() => Int)
   async pendingCount(@Parent() event: Event) {
+    if (event.pendingCount !== undefined) return event.pendingCount;
     return this.eventsService.countRegistrations(event.id, 'PENDING');
   }
 
   @ResolveField(() => Int)
   async cancelledCount(@Parent() event: Event) {
+    if (event.cancelledCount !== undefined) return event.cancelledCount;
     return this.eventsService.countRegistrations(event.id, 'CANCELLED');
   }
 

@@ -39,7 +39,7 @@ import { AppService } from './app.service';
       throttlers: [
         {
           ttl: 60000,
-          limit: 100,
+          limit: 1000,
         },
       ],
       storage: new ThrottlerStorageRedisService(

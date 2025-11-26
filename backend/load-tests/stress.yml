@@ -1,0 +1,171 @@
+config:
+  target: "http://localhost:4000"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: Warm up
+    - duration: 300
+      arrivalRate: 5
+      rampTo: 200
+      name: Ramp up load
+    - duration: 120
+      arrivalRate: 200
+      name: Sustained high load
+  plugins:
+    ensure: {}
+    apdex: {}
+    metrics-by-endpoint: {}
+  apdex:
+    threshold: 100
+  ensure:
+    thresholds:
+      - http.response_time.p99: 500
+      - http.response_time.p95: 200
+scenarios:
+  - name: "Browse Public Content"
+    flow:
+      # 1. App Startup / Health Check
+      - get:
+          url: "/health"
+      
+      # 2. Load Calendar Feed (Simulate Dashboard/Calendar View)
+      - get:
+          url: "/calendar/feed"
+      
+      # 3. Initial Event List Load (No filters)
+      - post:
+          url: "/graphql"
+          json:
+            query: |
+              query {
+                events(filter: { take: 10 }) {
+                  items { id title startDate }
+                  total
+                }
+              }
+      
+      - think: 1
+
+      # 4. Search for Events (Simulate user typing "party")
+      - post:
+          url: "/graphql"
+          json:
+            query: |
+              query {
+                events(filter: { search: "party", take: 5 }) {
+                  items { id title }
+                  total
+                }
+              }
+
+      - think: 2
+
+      # 5. Filter by Category (SOCIAL)
+      - post:
+          url: "/graphql"
+          json:
+            query: |
+              query {
+                events(filter: { category: SOCIAL, take: 5 }) {
+                  items { id title category }
+                  total
+                }
+              }
+
+      # 6. Filter by Type (FREE)
+      - post:
+          url: "/graphql"
+          json:
+            query: |
+              query {
+                events(filter: { type: FREE, take: 5 }) {
+                  items { id title type }
+                  total
+                }
+              }
+
+      - think: 1
+
+      # 7. Filter by Date (Future events)
+      - post:
+          url: "/graphql"
+          json:
+            query: |
+              query {
+                events(filter: { startDate: "2024-01-01T00:00:00Z", take: 5 }) {
+                  items { id title startDate }
+                  total
+                }
+              }
+
+      # 8. Sort by Date Descending
+      - post:
+          url: "/graphql"
+          json:
+            query: |
+              query {
+                events(filter: { orderBy: "startDate", orderDirection: "desc", take: 5 }) {
+                  items { id title startDate }
+                }
+              }
+
+      # 9. Capture an Event ID for details view
+      - post:
+          url: "/graphql"
+          json:
+            query: |
+              query {
+                events(filter: { take: 1 }) {
+                  items { id }
+                }
+              }
+          capture:
+            - json: "$.data.events.items[0].id"
+              as: "eventId"
+
+      - think: 1
+
+      # 10. View Event Details (Main Action)
+      - post:
+          url: "/graphql"
+          json:
+            query: |
+              query ($id: ID!) {
+                event(id: $id) {
+                  id
+                  title
+                  description
+                  confirmedCount
+                  status
+                  organizer { firstName lastName }
+                }
+              }
+            variables:
+              id: "{{ eventId }}"
+
+      # 11. View Event Registrations (Simulate checking who is going)
+      # Note: This might return empty if public, but it's a valid query
+      - post:
+          url: "/graphql"
+          json:
+            query: |
+              query ($id: ID!) {
+                event(id: $id) {
+                  attendees { firstName avatar }
+                }
+              }
+            variables:
+              id: "{{ eventId }}"
+      
+      - think: 2
+
+      # 12. Return to Home (Re-fetch initial list)
+      - post:
+          url: "/graphql"
+          json:
+            query: |
+              query {
+                events(filter: { take: 20 }) {
+                  items { id title }
+                }
+              }
