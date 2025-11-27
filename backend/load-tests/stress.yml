@@ -2,14 +2,14 @@ config:
   target: "http://localhost:4000"
   phases:
     - duration: 60
+      arrivalRate: 2  # 120 req/min (Slightly above Medium limit) - Should start seeing some 429s
+      name: Warm up & Rate Limit Check
+    - duration: 120
       arrivalRate: 5
-      name: Warm up
-    - duration: 300
-      arrivalRate: 5
-      rampTo: 200
+      rampTo: 50      # Ramp to 50 req/sec (Well above Burst limit) - Stress test
       name: Ramp up load
     - duration: 120
-      arrivalRate: 200
+      arrivalRate: 50 # Sustained high load - Verify system stability under 429s
       name: Sustained high load
   plugins:
     ensure: {}
@@ -19,8 +19,8 @@ config:
     threshold: 100
   ensure:
     thresholds:
-      - http.response_time.p99: 500
-      - http.response_time.p95: 200
+      - http.response_time.p99: 200 # Tightened from 500ms
+      - http.response_time.p95: 100 # Tightened from 200ms
 scenarios:
   - name: "Browse Public Content"
     flow:

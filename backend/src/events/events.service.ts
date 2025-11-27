@@ -9,6 +9,14 @@ import { EventStatus, UserRole, RegistrationStatus } from '@prisma/client';
 import { PaginatedEvents } from './dto/paginated-events.output';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
+// Tiered cache TTL strategy (in milliseconds)
+const CACHE_TTLS = {
+  EVENTS_LIST: 60000,      // 1 minute - frequently changing
+  EVENT_DETAIL: 300000,    // 5 minutes - less frequent updates
+  USER_PROFILE: 600000,    // 10 minutes - rarely changes
+  STATIC_DATA: 3600000,    // 1 hour - enums, categories
+} as const;
+
 @Injectable()
 export class EventsService implements OnModuleInit {
   constructor(
@@ -111,8 +119,19 @@ export class EventsService implements OnModuleInit {
   }
 
   async findAll(filter: EventsFilterInput = {}, userId?: string, userRole?: UserRole): Promise<PaginatedEvents> {
-    // Cache key based on filter and user (to handle personalized fields like isRegistered)
-    const cacheKey = `events_all_${JSON.stringify(filter)}_${userId || 'public'}`;
+    // Generate stable cache key (avoid JSON.stringify which is order-dependent)
+    const cacheKey = [
+      'events',
+      filter.category || 'all',
+      filter.type || 'all',
+      filter.status || 'all',
+      filter.location || 'all',
+      filter.search || 'none',
+      filter.skip || 0,
+      filter.take || 20,
+      userId || 'public',
+      userRole || 'guest'
+    ].join(':');
 
     // Try to get from cache (skip for admins to ensure fresh data)
     if (userRole !== UserRole.ADMIN) {
@@ -208,79 +227,35 @@ export class EventsService implements OnModuleInit {
       this.prisma.event.count({ where }),
     ]);
 
-    // We need to fetch attendees separately or in a different way if we want to show avatars in the list
-    // For performance, we might only fetch a few avatars for the list view if needed,
-    // but the current transformEvent expects 'attendees'.
-    // Let's fetch a small subset of attendees for each event to show faces
-    // Since we can't do a second 'registrations' include with different args easily in one query without raw query,
-    // we will fetch the top 5 attendees for these events in a separate optimized query or just accept we don't show all attendees in list view.
-    // For now, let's fetch top 5 attendees for the list view to keep it fast.
-
-    // Actually, we can't have two 'registrations' keys in include.
-    // So we have to choose. The 'isRegistered' check is more important for logic.
-    // But we also want to show "Who is going".
-    // We can use a trick: include registrations where (userId = current OR status != CANCELLED) take 5? No, that messes up isRegistered check.
-
-    // Strategy:
-    // 1. Get events with _count and isRegistered check (via registrations filtered by userId).
-    // 2. If we really need attendees for the list, we can fetch them separately or just not show them in the main list (often better for perf).
-    // The previous code fetched 100 registrations.
-    // Let's fetch the top 5 confirmed attendees for these events in a second query if we want to show them.
-    // Or, we can just omit attendees from the list view (PaginatedEvents usually doesn't need full attendee list).
-    // Let's check PaginatedEvents output... it returns Event[].
-    // If the UI needs attendees in the card, we should provide a few.
-
-    // Let's do a second query to fetch top 3 attendees for the events we found, to populate the "attendees" field with a preview.
-    const eventIds = items.map(e => e.id);
-    let attendeesMap: Record<string, any[]> = {};
-
-    if (eventIds.length > 0) {
-      const attendees = await this.prisma.registration.findMany({
-        where: {
-          eventId: { in: eventIds },
-          status: { in: [RegistrationStatus.CONFIRMED, RegistrationStatus.ATTENDED] }
-        },
-        take: 500, // 5 per event * 100 events max = 500. But we can't limit per group easily in Prisma.
-        // So we might just skip this for the list view or fetch a flat list and map in memory if dataset is small.
-        // For now, let's NOT return attendees in the list view to save bandwidth/DB time. 
-        // The UI usually fetches full details on detail page.
-        select: {
-          eventId: true,
-          user: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              avatar: true
-            }
-          }
-        },
-        orderBy: { registeredAt: 'desc' }
-      });
-
-      // Group by eventId, take top 5
-      attendees.forEach(att => {
-        if (!attendeesMap[att.eventId]) attendeesMap[att.eventId] = [];
-        if (attendeesMap[att.eventId].length < 5) {
-          attendeesMap[att.eventId].push(att.user);
-        }
-      });
-    }
+    // OPTIMIZATION: Don't fetch attendees for list view
+    // This eliminates the N+1 query problem (500+ extra rows)
+    // Attendees are only shown in detail view where they make sense
 
     const result = {
-      items: items.map((event) => this.transformEvent(event, userId, attendeesMap[event.id])),
+      items: items.map((event) => this.transformEvent(event, userId, [], undefined)), // Empty attendees array for list
       total,
     };
 
-    // Cache for 5 minutes (300000 ms) - skip for admins
+    // Cache for 1 minute - skip for admins
     if (userRole !== UserRole.ADMIN) {
-      await this.cacheManager.set(cacheKey, result, 300000);
+      await this.cacheManager.set(cacheKey, result, CACHE_TTLS.EVENTS_LIST);
     }
 
     return result;
   }
 
   async findOne(id: string, userId?: string, userRole?: UserRole) {
+    // Generate cache key for event detail
+    const cacheKey = `event:${id}:${userRole || 'public'}`;
+
+    // Try cache first (skip for admins)
+    if (userRole !== UserRole.ADMIN) {
+      const cached = await this.cacheManager.get(cacheKey);
+      if (cached) {
+        return cached;
+      }
+    }
+
     const event = await this.prisma.event.findUnique({
       where: { id },
       include: {
@@ -374,7 +349,14 @@ export class EventsService implements OnModuleInit {
     // OR update transformEvent to accept explicit data.
     // Let's update transformEvent to be more flexible.
 
-    return this.transformEvent(event, userId, attendees, isRegistered);
+    const result = this.transformEvent(event, userId, attendees, isRegistered);
+
+    // Cache the result (skip for admins)
+    if (userRole !== UserRole.ADMIN) {
+      await this.cacheManager.set(cacheKey, result, CACHE_TTLS.EVENT_DETAIL);
+    }
+
+    return result;
   }
 
   async update(
@@ -664,16 +646,20 @@ export class EventsService implements OnModuleInit {
       // Access the underlying store to get keys (Redis specific)
       const store = (this.cacheManager as any).store;
       if (store.keys) {
-        const keys = await store.keys('events_all_*');
-        if (keys && keys.length > 0) {
+        // Clear both list and detail caches
+        const keys = await store.keys('events:*');
+        const eventKeys = await store.keys('event:*');
+        const allKeys = [...(keys || []), ...(eventKeys || [])];
+
+        if (allKeys && allKeys.length > 0) {
           // Delete keys individually or in bulk depending on store support
           // cache-manager v5+ usually supports mdel or we loop
           if (store.mdel) {
-            await store.mdel(...keys);
+            await store.mdel(...allKeys);
           } else {
-            await Promise.all(keys.map((key: string) => this.cacheManager.del(key)));
+            await Promise.all(allKeys.map((key: string) => this.cacheManager.del(key)));
           }
-          console.log(`Cleared ${keys.length} event cache keys`);
+          console.log(`Cleared ${allKeys.length} event cache keys`);
         }
       }
     } catch (error) {

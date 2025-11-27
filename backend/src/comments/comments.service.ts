@@ -1,11 +1,19 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCommentInput } from './dto/create-comment.input';
 import { User } from '../users/entities/user.entity';
 
+// Cache TTL for comments (1 minute - frequently updated)
+const COMMENTS_CACHE_TTL = 60000; // 1 minute
+
 @Injectable()
 export class CommentsService {
-    constructor(private readonly prisma: PrismaService) { }
+    constructor(
+        private readonly prisma: PrismaService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    ) { }
 
     async create(createCommentInput: CreateCommentInput, user: User) {
         const { eventId, content } = createCommentInput;
@@ -50,7 +58,7 @@ export class CommentsService {
             throw new ForbiddenException('Only registered users can comment on this event');
         }
 
-        return this.prisma.comment.create({
+        const comment = await this.prisma.comment.create({
             data: {
                 content,
                 userId: user.id,
@@ -67,10 +75,25 @@ export class CommentsService {
                 },
             },
         });
+
+        // Invalidate cache for this event's comments
+        await this.clearEventCommentsCache(eventId);
+
+        return comment;
     }
 
     async findAll(eventId: string, skip: number = 0, take: number = 10) {
-        return this.prisma.comment.findMany({
+        // Generate cache key
+        const cacheKey = `comments:${eventId}:${skip}:${take}`;
+
+        // Try cache first
+        const cached = await this.cacheManager.get(cacheKey);
+        if (cached) {
+            return cached;
+        }
+
+        // Fetch from database
+        const comments = await this.prisma.comment.findMany({
             where: { eventId },
             include: {
                 user: {
@@ -88,5 +111,29 @@ export class CommentsService {
             skip,
             take,
         });
+
+        // Cache the result
+        await this.cacheManager.set(cacheKey, comments, COMMENTS_CACHE_TTL);
+
+        return comments;
+    }
+
+    // Helper method to clear cache for an event's comments
+    private async clearEventCommentsCache(eventId: string) {
+        try {
+            const store = (this.cacheManager as any).store;
+            if (store.keys) {
+                const keys = await store.keys(`comments:${eventId}:*`);
+                if (keys && keys.length > 0) {
+                    if (store.mdel) {
+                        await store.mdel(...keys);
+                    } else {
+                        await Promise.all(keys.map((key: string) => this.cacheManager.del(key)));
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Failed to clear comments cache:', error);
+        }
     }
 }

@@ -1,4 +1,8 @@
 // backend/src/main.ts
+// MUST be imported first for proper error instrumentation
+import { initializeSentry } from './instrument';
+initializeSentry();
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -10,8 +14,11 @@ import compression from 'compression';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Enable Gzip compression
-  app.use(compression());
+  // Enable Gzip/Brotli compression with optimized settings
+  app.use(compression({
+    threshold: 1024,  // Only compress responses > 1KB
+    level: 6,         // Balance between speed (1) and compression (9)
+  }));
 
   // Security Headers with Helmet
   app.use(helmet({

@@ -144,6 +144,11 @@ model Event {
   @@index([organizerId])
   @@index([category])
   @@index([type])
+  // Compound indexes for optimized query patterns
+  @@index([category, startDate, status])  // Category browsing with date filtering
+  @@index([type, status, startDate])      // Free/paid event filtering
+  @@index([organizerId, status, startDate]) // Admin "my events" view
+  @@index([location, startDate])          // Location-based event search
 }
 
 // ================================
@@ -190,6 +195,9 @@ model Registration {
   @@index([registeredAt])
   @@index([userId])
   @@index([paymentStatus])
+  // Compound indexes for optimized query patterns
+  @@index([userId, status, registeredAt])  // User's registration history
+  @@index([eventId, paymentStatus])        // Event payment tracking
   @@map("registrations")
 }
 

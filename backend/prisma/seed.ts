@@ -19,13 +19,12 @@ async function main() {
 
   // Clear existing data (optional - comment out if you want to keep existing data)
   console.log('🗑️  Clearing existing data...');
+  await prisma.comment.deleteMany();
   await prisma.feedback.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.review.deleteMany();
   await prisma.registration.deleteMany();
   await prisma.event.deleteMany();
-  await prisma.notificationSettings.deleteMany();
-  await prisma.userPreferences.deleteMany();
   await prisma.user.deleteMany();
   console.log('✅ Existing data cleared');
 
@@ -53,21 +52,8 @@ async function main() {
       emergencyContactPhone: '+49 151 98765432',
       preferences: {
         create: {
-          emailEvents: true,
-          emailReminders: true,
-          emailNewsletter: true,
-          emailPromotions: false,
           language: 'en',
           timezone: 'Europe/Berlin',
-        },
-      },
-      notifications: {
-        create: {
-          pushEvents: true,
-          pushReminders: true,
-          pushUpdates: true,
-          smsReminders: false,
-          smsUpdates: false,
         },
       },
     },
