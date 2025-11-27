@@ -8,6 +8,7 @@ import { StatsCards } from "./components/StatsCards";
 import { QuickActions } from "./components/QuickActions";
 import { EmptyState } from "./components/EmptyState";
 import { EventsList } from "./components/EventsList";
+import { Avatar } from "../../components/ui/Avatar";
 
 interface Registration {
     id: string;
@@ -114,10 +115,13 @@ const DashboardPage: React.FC = () => {
                 {/* Header */}
                 <div className="mb-6 md:mb-8">
                     <div className="flex items-center gap-3 md:gap-4 mb-4">
-                        <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-base md:text-lg">
-                            {user?.firstName?.[0]}
-                            {user?.lastName?.[0]}
-                        </div>
+                        <Avatar
+                            src={user?.publicMetadata?.avatar as string}
+                            alt={`${user?.firstName} ${user?.lastName}`}
+                            fallback={`${user?.firstName?.[0]}${user?.lastName?.[0]}`}
+                            size="lg"
+                            bordered
+                        />
                         <div>
                             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
                                 Welcome back, {user?.firstName}!

@@ -8,6 +8,7 @@ import {
   useRegistrationStats,
 } from "../../../hooks/api/useAdmin";
 import { AdminLayout } from "../../../components/admin/AdminLayout";
+import { Avatar } from "../../../components/ui/Avatar";
 import { RegistrationFilters } from "../../../components/admin/RegistrationFilters";
 import { RegistrationsTable } from "../../../components/admin/RegistrationsTable";
 
@@ -216,13 +217,13 @@ export const AdminRegistrationsPage: React.FC = () => {
                     <div className="w-full px-6 py-4 bg-gray-50/50 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-100/50 transition-colors">
                       <Disclosure.Button className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left focus:outline-none group">
                         <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center text-xl font-bold overflow-hidden shrink-0">
-                            {event?.images && event.images.length > 0 ? (
-                              <img src={event.images[0]} alt={event.title} className="h-full w-full object-cover" />
-                            ) : (
-                              event?.title.charAt(0)
-                            )}
-                          </div>
+                          <Avatar
+                            src={event?.images && event.images.length > 0 ? event.images[0] : null}
+                            alt={event.title}
+                            fallback={event?.title.charAt(0)}
+                            size="lg"
+                            bordered
+                          />
                           <div>
                             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 group-hover:text-cyan-600 transition-colors">
                               {event?.title}

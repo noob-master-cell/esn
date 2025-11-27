@@ -11,6 +11,7 @@ import {
   LinkIcon,
 } from "@heroicons/react/24/outline";
 import CommentsSection from "./CommentsSection";
+import { Avatar } from "../ui/Avatar";
 
 interface Event {
   id: string;
@@ -180,17 +181,17 @@ const EventDetails: React.FC<EventDetailsProps> = ({
               </div>
 
               {/* Host Info */}
-              <div className="flex items-center gap-3 py-4 border-y border-gray-100">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-medium shadow-sm overflow-hidden">
-                  {event.organizer.avatar ? (
-                    <img src={event.organizer.avatar} alt={event.organizer.firstName} className="w-full h-full object-cover" />
-                  ) : (
-                    event.organizer.firstName[0]
-                  )}
-                </div>
+              <div className="flex items-center gap-4 py-4 border-y border-gray-100">
+                <Avatar
+                  src={event.organizer.avatar}
+                  alt={`${event.organizer.firstName} ${event.organizer.lastName}`}
+                  fallback={event.organizer.firstName || "?"}
+                  size="lg"
+                  className="ring-4 ring-gray-50"
+                />
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-wider text-gray-500">Hosted By</div>
-                  <div className="font-medium text-gray-900">{event.organizer.firstName} {event.organizer.lastName}</div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-0.5">Hosted By</div>
+                  <div className="text-xl font-bold text-gray-900">{event.organizer.firstName} {event.organizer.lastName}</div>
                 </div>
               </div>
             </div>

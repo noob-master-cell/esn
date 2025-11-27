@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useMyProfile } from "../../hooks/api/useUsers";
+import { Avatar } from "../ui/Avatar";
 import logo from "../../assets/logos/star-color.svg";
 import {
   HomeIcon,
@@ -124,15 +125,13 @@ export const Navbar: React.FC = () => {
                     className="flex items-center gap-3 pl-1 pr-2 py-1 rounded-full border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all bg-white"
                   >
                     <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 p-0.5">
-                      <div className="w-full h-full rounded-full bg-white overflow-hidden">
-                        {profileData?.avatar ? (
-                          <img src={profileData.avatar} alt="Profile" className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-xs font-bold text-gray-600">
-                            {profileData?.firstName?.[0] || user?.name?.[0] || "U"}
-                          </div>
-                        )}
-                      </div>
+                      <Avatar
+                        src={profileData?.avatar}
+                        alt="Profile"
+                        fallback={profileData?.firstName?.[0] || user?.name?.[0] || "U"}
+                        size="sm"
+                        className="ring-1 ring-white"
+                      />
                     </div>
                     <span className="text-sm font-medium text-gray-700 max-w-[100px] truncate">
                       {profileData?.firstName || "Account"}

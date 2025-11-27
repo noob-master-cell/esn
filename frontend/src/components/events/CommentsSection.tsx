@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Avatar } from "../ui/Avatar";
 import { useQuery, useMutation } from "@apollo/client";
 import { GET_COMMENTS, CREATE_COMMENT } from "../../graphql/comments";
 import { useRealtimeComments } from "../../hooks/useRealtimeComments";
@@ -99,17 +100,14 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ eventId, isRegistered
                         {comments.map((comment) => (
                             <div key={comment.id} className="flex gap-3 group">
                                 <div className="flex-shrink-0">
-                                    {comment.user.avatar ? (
-                                        <img
-                                            src={comment.user.avatar}
-                                            alt={comment.user.firstName}
-                                            className="w-10 h-10 rounded-full object-cover shadow-sm"
-                                        />
-                                    ) : (
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                                            {comment.user.firstName?.[0] || '?'}
-                                        </div>
-                                    )}
+                                    <Avatar
+                                        src={comment.user.avatar}
+                                        alt={comment.user.firstName}
+                                        fallback={comment.user.firstName || "?"}
+                                        size="md"
+                                        className="shadow-sm"
+                                        bordered
+                                    />
                                 </div>
                                 <div className="flex-1 max-w-[90%]">
                                     <div className="bg-gray-50 rounded-2xl rounded-tl-none p-3 hover:bg-gray-100 transition-colors">

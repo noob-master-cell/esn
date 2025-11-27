@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Avatar } from '../../../components/ui/Avatar';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAdminRegistrations, useMarkAttendance, useUpdateRegistration } from '../../../hooks/api/useAdmin';
 import { AdminLayout } from '../../../components/admin/AdminLayout';
@@ -149,14 +150,14 @@ export const AdminAttendancePage: React.FC = () => {
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-3">
                                     {/* Avatar */}
-                                    <div className="flex-shrink-0 h-10 w-10">
-                                        {reg.user.avatar ? (
-                                            <img className="h-10 w-10 rounded-full object-cover" src={reg.user.avatar} alt="" />
-                                        ) : (
-                                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
-                                                {(reg.user?.firstName || '?').charAt(0)}
-                                            </div>
-                                        )}
+                                    <div className="flex-shrink-0">
+                                        <Avatar
+                                            src={reg.user.avatar}
+                                            alt={`${reg.user.firstName} ${reg.user.lastName}`}
+                                            fallback={reg.user.firstName || "?"}
+                                            size="md"
+                                            bordered
+                                        />
                                     </div>
                                     <div>
                                         <div className="text-sm font-medium text-gray-900">{reg.user?.firstName || 'Unknown'} {reg.user?.lastName || ''}</div>
@@ -234,14 +235,14 @@ export const AdminAttendancePage: React.FC = () => {
                                 <tr key={reg.id} className={`hover:bg-gray-50 transition-colors ${reg.status === 'ATTENDED' ? 'bg-green-50/30' : ''}`}>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <div className="flex-shrink-0 h-10 w-10">
-                                                {reg.user.avatar ? (
-                                                    <img className="h-10 w-10 rounded-full object-cover" src={reg.user.avatar} alt="" />
-                                                ) : (
-                                                    <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
-                                                        {(reg.user?.firstName || '?').charAt(0)}
-                                                    </div>
-                                                )}
+                                            <div className="flex-shrink-0">
+                                                <Avatar
+                                                    src={reg.user.avatar}
+                                                    alt={`${reg.user.firstName} ${reg.user.lastName}`}
+                                                    fallback={reg.user.firstName || "?"}
+                                                    size="md"
+                                                    bordered
+                                                />
                                             </div>
                                             <div className="ml-4">
                                                 <div className="text-sm font-medium text-gray-900">{reg.user?.firstName || 'Unknown'} {reg.user?.lastName || ''}</div>

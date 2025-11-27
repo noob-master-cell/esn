@@ -1,5 +1,6 @@
 // frontend/src/components/admin/EventsTable.tsx
 import React, { Fragment } from "react";
+import { Avatar } from "../ui/Avatar";
 import { Menu, Transition } from "@headlessui/react";
 import { EllipsisVerticalIcon, CalendarIcon } from "@heroicons/react/24/outline";
 
@@ -215,18 +216,14 @@ export const EventsTable: React.FC<EventsTableProps> = ({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 h-10 w-10">
-                      {event.images && event.images.length > 0 ? (
-                        <img
-                          className="h-10 w-10 rounded-full object-cover"
-                          src={event.images[0]}
-                          alt={event.title}
-                        />
-                      ) : (
-                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                          <CalendarIcon className="h-6 w-6 text-gray-400" />
-                        </div>
-                      )}
+                    <div className="flex-shrink-0">
+                      <Avatar
+                        src={event.images && event.images.length > 0 ? event.images[0] : null}
+                        alt={event.title}
+                        fallback={<CalendarIcon className="h-6 w-6 text-gray-400" />}
+                        size="md"
+                        bordered
+                      />
                     </div>
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900">
@@ -376,18 +373,14 @@ export const EventsTable: React.FC<EventsTableProps> = ({
                   aria-label={`Select event ${event.title}`}
                 />
                 <div className="flex items-center gap-3">
-                  <div className="flex-shrink-0 h-10 w-10">
-                    {event.images && event.images.length > 0 ? (
-                      <img
-                        className="h-10 w-10 rounded-full object-cover"
-                        src={event.images[0]}
-                        alt={event.title}
-                      />
-                    ) : (
-                      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                        <CalendarIcon className="h-6 w-6 text-gray-400" />
-                      </div>
-                    )}
+                  <div className="flex-shrink-0">
+                    <Avatar
+                      src={event.images && event.images.length > 0 ? event.images[0] : null}
+                      alt={event.title}
+                      fallback={<CalendarIcon className="h-6 w-6 text-gray-400" />}
+                      size="md"
+                      bordered
+                    />
                   </div>
                   <div>
                     <div className="text-sm font-medium text-gray-900">

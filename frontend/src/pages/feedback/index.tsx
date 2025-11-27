@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Avatar } from "../../components/ui/Avatar";
 import { useFeedback, FeedbackType, type Feedback } from "../../hooks/api/useFeedback";
 import { useRealtimeFeedback } from "../../hooks/useRealtimeFeedback";
 import { useAuth } from "../../hooks/useAuth";
@@ -273,17 +274,14 @@ const FeedbackPage: React.FC = () => {
                                 <div key={feedback.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group">
                                     <div className="flex items-start gap-4">
                                         <div className="flex-shrink-0">
-                                            {feedback.user.avatar ? (
-                                                <img
-                                                    src={feedback.user.avatar}
-                                                    alt={feedback.user.firstName}
-                                                    className="h-11 w-11 rounded-full object-cover border-2 border-white shadow-sm"
-                                                />
-                                            ) : (
-                                                <div className="h-11 w-11 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-white font-bold text-sm shadow-sm border-2 border-white">
-                                                    {feedback.user.firstName?.[0] || '?'}
-                                                </div>
-                                            )}
+                                            <Avatar
+                                                src={feedback.user.avatar}
+                                                alt={`${feedback.user.firstName} ${feedback.user.lastName}`}
+                                                fallback={feedback.user.firstName || "?"}
+                                                size="md"
+                                                className="border-2 border-white shadow-sm"
+                                                bordered
+                                            />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex flex-wrap items-center justify-between gap-y-2 mb-2">

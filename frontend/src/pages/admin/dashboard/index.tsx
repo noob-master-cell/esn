@@ -4,6 +4,7 @@ import { AdminLayout } from "../../../components/admin/AdminLayout";
 import { StatsCard } from "../../../components/admin/StatsCard";
 import { useAdminStats, useRecentEvents } from "../../../hooks/api/useAdmin";
 import { CalendarIcon, UsersIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
+import { Avatar } from "../../../components/ui/Avatar";
 
 export const AdminDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -217,12 +218,15 @@ export const AdminDashboardPage: React.FC = () => {
                     <tr key={event.id} className="hover:bg-gray-50/50 transition-colors group">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="h-12 w-12 rounded-xl bg-gray-100 flex items-center justify-center text-2xl mr-4 overflow-hidden shadow-sm border border-gray-100">
-                            {(event.images && event.images.length > 0) ? (
-                              <img src={event.images[0]} alt="" className="h-full w-full object-cover" />
-                            ) : (
-                              <span className="opacity-50">📅</span>
-                            )}
+                          <div className="mr-4">
+                            <Avatar
+                              src={(event.images && event.images.length > 0) ? event.images[0] : null}
+                              alt={event.title}
+                              fallback="📅"
+                              size="lg"
+                              className="rounded-xl shadow-sm border border-gray-100"
+                              bordered={false}
+                            />
                           </div>
                           <div>
                             <div className="text-sm font-bold text-gray-900 group-hover:text-cyan-600 transition-colors">{event.title}</div>

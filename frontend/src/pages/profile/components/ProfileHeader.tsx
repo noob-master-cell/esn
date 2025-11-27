@@ -1,4 +1,5 @@
 import React from "react";
+import { Avatar } from "../../../components/ui/Avatar";
 
 interface ProfileHeaderProps {
     dbUser: any;
@@ -17,35 +18,28 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6 max-w-5xl mx-auto">
 
                     {/* Avatar */}
-                    <div className="relative shrink-0">
-                        <div className="w-24 h-24 md:w-32 md:h-32 rounded-full p-1 bg-white ring-2 ring-gray-100">
-                            <div className="w-full h-full rounded-full overflow-hidden bg-gray-50 relative group/avatar">
-                                {dbUser?.avatar ? (
-                                    <img
-                                        src={dbUser.avatar}
-                                        alt="Profile"
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-3xl font-bold text-gray-400">
-                                        {dbUser?.firstName?.[0]?.toUpperCase() || "U"}
-                                    </div>
-                                )}
+                    <div className="relative shrink-0 group/avatar">
+                        <Avatar
+                            src={dbUser?.avatar}
+                            alt="Profile"
+                            fallback={dbUser?.firstName || "U"}
+                            size="2xl"
+                            bordered
+                        />
 
-                                {/* Edit Overlay */}
-                                <button
-                                    onClick={onChangePhoto}
-                                    className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-all duration-200 cursor-pointer"
-                                >
-                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
+                        {/* Edit Overlay */}
+                        <button
+                            onClick={onChangePhoto}
+                            className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-all duration-200 cursor-pointer rounded-full ring-2 ring-white"
+                        >
+                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </button>
+
                         {/* Status Indicator */}
-                        <div className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full" title="Active Member"></div>
+                        <div className="absolute bottom-1 right-1 w-5 h-5 bg-emerald-500 border-2 border-white rounded-full" title="Active Member"></div>
                     </div>
 
                     {/* User Info */}

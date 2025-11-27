@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useMyProfile } from "../../hooks/api/useUsers";
+import { Avatar } from "../ui/Avatar";
 import {
     HomeIcon,
     CalendarIcon,
@@ -97,9 +98,14 @@ export const MobileNavbar: React.FC = () => {
                         }`}
                 >
                     {isAuthenticated && profileData?.avatar ? (
-                        <div className={`w-6 h-6 rounded-full overflow-hidden border-2 ${isActive(profileItem.path) ? "border-blue-600" : "border-transparent"}`}>
-                            <img src={profileData.avatar} alt="Profile" className="w-full h-full object-cover" />
-                        </div>
+                        <Avatar
+                            src={profileData.avatar}
+                            alt="Profile"
+                            fallback={profileData.firstName || "U"}
+                            size="sm"
+                            className={`border-2 ${isActive(profileItem.path) ? "border-blue-600" : "border-transparent"}`}
+                            bordered={false}
+                        />
                     ) : (
                         <profileItem.icon className="w-6 h-6" />
                     )}

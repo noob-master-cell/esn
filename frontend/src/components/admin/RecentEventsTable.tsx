@@ -1,7 +1,9 @@
 // frontend/src/components/admin/RecentEventsTable.tsx
 import React from "react";
+import { Avatar } from "../ui/Avatar";
 import { useRecentEvents } from "../../hooks/api/useAdmin";
 import { useNavigate } from "react-router-dom";
+import { CalendarIcon } from "@heroicons/react/24/outline";
 
 export const RecentEventsTable: React.FC = () => {
   const navigate = useNavigate();
@@ -134,13 +136,15 @@ export const RecentEventsTable: React.FC = () => {
                 <tr key={event.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      {event.imageUrl && (
-                        <img
-                          className="h-10 w-10 rounded-full object-cover mr-3"
-                          src={event.imageUrl}
+                      <div className="flex-shrink-0">
+                        <Avatar
+                          src={event.images && event.images.length > 0 ? event.images[0] : null}
                           alt={event.title}
+                          fallback={<CalendarIcon className="h-6 w-6 text-gray-400" />}
+                          size="md"
+                          bordered
                         />
-                      )}
+                      </div>
                       <div>
                         <div className="text-sm font-medium text-gray-900">
                           {event.title}
