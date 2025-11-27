@@ -105,3 +105,9 @@ export const DELETE_USER = gql`
     deleteUser
   }
 `;
+
+export const EXPORT_MY_DATA = gql`
+  query ExportMyData {
+    exportMyData
+  }
+`;

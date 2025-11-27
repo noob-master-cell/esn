@@ -20,6 +20,7 @@ import { CalendarModule } from './calendar/calendar.module';
 import { UploadController } from './common/upload.controller';
 import { HealthController } from './common/health.controller';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { PubSubModule } from './common/pubsub.module';
 
 import { FeedbackModule } from './feedback/feedback.module';
 import { GqlThrottlerGuard } from './common/guards/gql-throttler.guard';
@@ -39,7 +40,7 @@ import { AppService } from './app.service';
       throttlers: [
         {
           ttl: 60000,
-          limit: 1000,
+          limit: 300,
         },
       ],
       storage: new ThrottlerStorageRedisService(
@@ -72,6 +73,9 @@ import { AppService } from './app.service';
       introspection:
         process.env.NODE_ENV !== 'production' ||
         process.env.ENABLE_PLAYGROUND === 'true',
+      subscriptions: {
+        'graphql-ws': true,
+      },
       context: ({ req, connection, extra }) => {
         // Handle subscriptions (connection) and HTTP requests (req)
         if (connection) {
@@ -93,6 +97,7 @@ import { AppService } from './app.service';
     CloudinaryModule,
     FeedbackModule,
     CommentsModule,
+    PubSubModule,
   ],
   providers: [
     AppService,

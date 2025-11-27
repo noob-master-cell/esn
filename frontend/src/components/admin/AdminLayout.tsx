@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import logo from "../../assets/favicon/favicon.ico";
+import logo from "../../assets/logos/star-color.svg";
 // --- AdminNavbar Component ---
 // To resolve the import error, the AdminNavbar component is now defined
 // directly within this file.
@@ -85,9 +85,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top Bar */}
           <div className="flex items-center justify-between h-16">
-            <NavLink to="/admin" className="flex items-center gap-3">
-              <img src={esnLogo} alt="ESN Logo" className="h-9 w-auto" />
-              <span className="text-lg font-bold text-gray-900 hidden sm:inline">Admin Panel</span>
+            <NavLink to="/admin" className="flex items-center gap-3 group">
+              <img src={esnLogo} alt="ESN" className="w-9 h-9 object-contain drop-shadow-sm group-hover:scale-110 transition-transform duration-300" />
+              <div className="flex flex-col">
+                <span className="text-lg font-bold text-gray-900 tracking-tight leading-none">ESN</span>
+                <span className="text-[10px] font-medium text-gray-500 tracking-wide uppercase">Admin Panel</span>
+              </div>
             </NavLink>
 
             <div className="flex items-center gap-3">
@@ -215,7 +218,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       {/* Page Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
                 {title}
@@ -227,7 +230,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               )}
             </div>
             {actions && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 self-start md:self-auto">
                 {actions}
               </div>
             )}

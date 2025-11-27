@@ -50,7 +50,7 @@ model User {
   role          UserRole @default(USER)
 
   // Preferences
-  notifications NotificationSettings?
+
   preferences   UserPreferences?
 
   // Relations
@@ -63,6 +63,7 @@ model User {
 
   @@map("users")
   @@index([createdAt])
+  @@index([role])
 }
 
 model UserPreferences {
@@ -70,11 +71,7 @@ model UserPreferences {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Email preferences
-  emailEvents       Boolean @default(true)
-  emailReminders    Boolean @default(true)
-  emailNewsletter   Boolean @default(false)
-  emailPromotions   Boolean @default(false)
+
 
   // Language and display
   language String @default("en")
@@ -83,22 +80,7 @@ model UserPreferences {
   @@map("user_preferences")
 }
 
-model NotificationSettings {
-  id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Push notifications
-  pushEvents     Boolean @default(true)
-  pushReminders  Boolean @default(true)
-  pushUpdates    Boolean @default(true)
-
-  // SMS notifications
-  smsReminders   Boolean @default(false)
-  smsUpdates     Boolean @default(false)
-
-  @@map("notification_settings")
-}
 
 // ================================
 // EVENT MANAGEMENT
@@ -143,6 +125,7 @@ model Event {
   
   // Settings
   isPublic     Boolean @default(true)
+  isUnlimited  Boolean @default(false)
 
   
   // Relations - Only ADMIN can create events
@@ -159,6 +142,8 @@ model Event {
   @@index([startDate])
   @@index([status, isPublic, startDate])
   @@index([organizerId])
+  @@index([category])
+  @@index([type])
 }
 
 // ================================
@@ -204,6 +189,7 @@ model Registration {
   @@index([eventId, status])
   @@index([registeredAt])
   @@index([userId])
+  @@index([paymentStatus])
   @@map("registrations")
 }
 
@@ -228,12 +214,9 @@ model Payment {
   amount         Decimal
   currency       String        @default("EUR")
   status         PaymentStatus @default(PENDING)
-  method         PaymentMethod @default(STRIPE)
+  method         PaymentMethod @default(CASH)
 
-  // Stripe Integration
-  stripePaymentIntentId String? @unique
-  stripeSessionId       String? @unique
-  stripeFeeAmount       Decimal @default(0)
+
 
   // Metadata
   description    String?
@@ -345,7 +328,7 @@ enum PaymentStatus {
 }
 
 enum PaymentMethod {
-  STRIPE
+
   CASH
   BANK_TRANSFER
   FREE

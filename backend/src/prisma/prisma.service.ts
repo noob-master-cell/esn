@@ -14,7 +14,7 @@ export class PrismaService
       },
       log: process.env.NODE_ENV === 'production'
         ? ['warn', 'error']
-        : ['query', 'info', 'warn', 'error'],
+        : ['info', 'warn', 'error'],
       errorFormat: 'pretty',
     });
   }

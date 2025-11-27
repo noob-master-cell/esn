@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Disclosure } from '@headlessui/react';
-import { ChevronUpIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 // FAQ Data
 const faqs = [
@@ -163,14 +163,11 @@ const FAQPage: React.FC = () => {
                                 transition={{ duration: 0.2 }}
                             >
                                 <Disclosure as="div" className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-                                    {({ open }) => (
+                                    {() => (
                                         <>
                                             <Disclosure.Button className="flex justify-between w-full px-6 py-5 text-left text-gray-900 focus:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-opacity-75">
                                                 <span className="text-lg font-medium">{faq.question}</span>
-                                                <ChevronUpIcon
-                                                    className={`${open ? 'transform rotate-180' : ''
-                                                        } w-6 h-6 text-blue-500 transition-transform duration-200`}
-                                                />
+
                                             </Disclosure.Button>
                                             <Disclosure.Panel className="px-6 pb-6 pt-2 text-gray-600 leading-relaxed">
                                                 <motion.div

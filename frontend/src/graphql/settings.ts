@@ -52,25 +52,7 @@ export const GET_SYSTEM_SETTINGS = gql`
 
 
 
-      notifications {
-        pushNotificationsEnabled
-        emailNotificationsEnabled
-        smsNotificationsEnabled
-        webhookNotificationsEnabled
-        slackIntegrationEnabled
-        discordIntegrationEnabled
-        notificationFrequency
-        digestEmailEnabled
-        digestEmailTime
-        eventReminderDays
-        registrationDeadlineReminder
-        eventUpdateNotifications
-        paymentNotifications
-        systemAlerts
-        webhookUrl
-        slackWebhookUrl
-        discordWebhookUrl
-      }
+
 
       security {
         passwordMinLength
@@ -274,15 +256,7 @@ export const CLEAR_CACHE = gql`
   }
 `;
 
-export const SEND_TEST_NOTIFICATION = gql`
-  mutation SendTestNotification($type: NotificationType!, $recipient: String!) {
-    sendTestNotification(type: $type, recipient: $recipient) {
-      success
-      message
-      sentAt
-    }
-  }
-`;
+
 
 export const GET_INTEGRATION_STATUS = gql`
   query GetIntegrationStatus {

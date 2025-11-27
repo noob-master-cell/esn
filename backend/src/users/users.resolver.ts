@@ -47,6 +47,14 @@ export class UsersResolver {
 
     return this.usersService.findOne(user.id);
   }
+
+  @Query(() => String)
+  @UseGuards(Auth0Guard)
+  async exportMyData(@CurrentUser() user: User) {
+    const data = await this.usersService.exportUserData(user.id);
+    return JSON.stringify(data);
+  }
+
   @Mutation(() => User)
   @UseGuards(Auth0Guard, RolesGuard)
   @Roles(UserRole.ADMIN)

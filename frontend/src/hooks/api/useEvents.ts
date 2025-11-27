@@ -46,7 +46,7 @@ export const useEvents = (initialFilter?: any) => {
 
 export const useAdminEvents = (initialFilter?: any) => {
     const [page, setPage] = useState(1);
-    const [pageSize] = useState(20);
+    const [pageSize, setPageSize] = useState(20);
 
     const filterParams = initialFilter?.filter || initialFilter || {};
 
@@ -69,6 +69,7 @@ export const useAdminEvents = (initialFilter?: any) => {
         page,
         setPage,
         pageSize,
+        setPageSize,
         loading,
         error,
         refetch,
@@ -79,7 +80,6 @@ export const useEvent = (id: string) => {
     const { data, loading, error, refetch } = useQuery(GET_EVENT, {
         variables: { id },
         skip: !id,
-        pollInterval: 30000, // Poll every 30 seconds (reduced from 5s)
     });
 
     return {

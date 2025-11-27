@@ -50,7 +50,21 @@ const PrivacyPolicy: React.FC = () => {
                         </section>
 
                         <section>
-                            <h2 className="text-xl font-semibold text-gray-900 mb-3">5. How We Handle Your Social Logins</h2>
+                            <h2 className="text-xl font-semibold text-gray-900 mb-3">5. Your Rights (GDPR)</h2>
+                            <p>Under the General Data Protection Regulation (GDPR), you have the following rights regarding your personal data:</p>
+                            <ul className="list-disc pl-5 mt-2 space-y-1">
+                                <li><strong>Right to Access:</strong> You can request a copy of the personal data we hold about you.</li>
+                                <li><strong>Right to Rectification:</strong> You can request correction of inaccurate personal data.</li>
+                                <li><strong>Right to Erasure ("Right to be Forgotten"):</strong> You can request deletion of your personal data.</li>
+                                <li><strong>Right to Restrict Processing:</strong> You can request that we limit how we use your data.</li>
+                                <li><strong>Right to Data Portability:</strong> You can request your data in a structured, machine-readable format.</li>
+                                <li><strong>Right to Object:</strong> You can object to the processing of your data.</li>
+                            </ul>
+                            <p className="mt-2">To exercise these rights, please contact us using the details provided in our <a href="/imprint" className="text-blue-600 hover:underline">Imprint</a>.</p>
+                        </section>
+
+                        <section>
+                            <h2 className="text-xl font-semibold text-gray-900 mb-3">6. How We Handle Your Social Logins</h2>
                             <p>
                                 Our website offers you the ability to register and login using your third-party social media account details (like your Google logins). Where you choose to do this, we will receive certain profile information about you from your social media provider. The profile information we receive may vary depending on the social media provider concerned, but will often include your name, email address, friends list, and profile picture, as well as other information you choose to make public on such a social media platform.
                             </p>
@@ -60,7 +74,7 @@ const PrivacyPolicy: React.FC = () => {
                         </section>
 
                         <section>
-                            <h2 className="text-xl font-semibold text-gray-900 mb-3">6. Contact Us</h2>
+                            <h2 className="text-xl font-semibold text-gray-900 mb-3">7. Contact Us</h2>
                             <p>If you have questions or comments about this policy, you may email us at esn.events.kaiserslautern@gmail.com.</p>
                         </section>
                     </div>

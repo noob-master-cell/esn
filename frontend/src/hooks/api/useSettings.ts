@@ -131,33 +131,7 @@ export const useUpdatePaymentSettings = () => {
     return { updatePaymentSettings, loading, error };
 };
 
-export const useNotificationSettings = () => {
-    const { data, loading, error, refetch } = useSystemSettingsQuery();
-    return {
-        settings: data?.systemSettings?.notifications,
-        loading,
-        error,
-        refetch,
-    };
-};
 
-export const useUpdateNotificationSettings = () => {
-    const [updateSettings, { loading, error }] = useMutation(
-        UPDATE_SYSTEM_SETTINGS
-    );
-
-    const updateNotificationSettings = (variables: any) => {
-        return updateSettings({
-            variables: {
-                category: "notifications",
-                settings: variables,
-            },
-            refetchQueries: [{ query: GET_SYSTEM_SETTINGS }],
-        });
-    };
-
-    return { updateNotificationSettings, loading, error };
-};
 
 export const useSecuritySettings = () => {
     const { data, loading, error, refetch } = useSystemSettingsQuery();

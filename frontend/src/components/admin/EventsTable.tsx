@@ -1,5 +1,7 @@
 // frontend/src/components/admin/EventsTable.tsx
-import React from "react";
+import React, { Fragment } from "react";
+import { Menu, Transition } from "@headlessui/react";
+import { EllipsisVerticalIcon, CalendarIcon } from "@heroicons/react/24/outline";
 
 interface Event {
   id: string;
@@ -9,7 +11,7 @@ interface Event {
   endDate: string;
   status: string;
   category: string;
-  maxParticipants: number;
+  maxParticipants?: number;
   registrationCount: number;
   images?: string[];
   imageUrl?: string;
@@ -80,33 +82,7 @@ export const EventsTable: React.FC<EventsTableProps> = ({
     );
   };
 
-  const getCategoryBadge = (category: string) => {
-    const categoryColors = {
-      SOCIAL: "bg-pink-100 text-pink-800",
-      CULTURAL: "bg-purple-100 text-purple-800",
-      EDUCATIONAL: "bg-blue-100 text-blue-800",
-      SPORTS: "bg-green-100 text-green-800",
-      TRAVEL: "bg-yellow-100 text-yellow-800",
-      VOLUNTEER: "bg-orange-100 text-orange-800",
-      NETWORKING: "bg-indigo-100 text-indigo-800",
-      PARTY: "bg-red-100 text-red-800",
-      WORKSHOP: "bg-teal-100 text-teal-800",
-      CONFERENCE: "bg-gray-100 text-gray-800",
-      OTHER: "bg-gray-100 text-gray-800",
-    };
 
-    const colorClass =
-      categoryColors[category as keyof typeof categoryColors] ||
-      "bg-gray-100 text-gray-800";
-
-    return (
-      <span
-        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${colorClass}`}
-      >
-        {category}
-      </span>
-    );
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -189,47 +165,43 @@ export const EventsTable: React.FC<EventsTableProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col max-h-[calc(100vh-18rem)]">
-      <div className="overflow-auto flex-1">
-        <table className="min-w-full divide-y divide-gray-100 relative">
-          <thead className="bg-gray-50/50 sticky top-0 z-10 shadow-sm">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:max-h-[calc(100vh-18rem)]">
+      {/* Desktop Table View */}
+      <div className="hidden md:block flex-1 overflow-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-4 text-left">
+              <th scope="col" className="px-6 py-3 text-left">
                 <input
                   type="checkbox"
                   checked={
                     selectedEvents.length === events.length && events.length > 0
                   }
                   onChange={(e) => handleSelectAll(e.target.checked)}
-                  className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  aria-label="Select all events"
                 />
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Event
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Category
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Registrations
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Price
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Registrations
               </th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
+          <tbody className="bg-white divide-y divide-gray-200">
             {events.map((event) => (
-              <tr key={event.id} className="hover:bg-gray-50/50 transition-colors">
+              <tr key={event.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
@@ -237,50 +209,302 @@ export const EventsTable: React.FC<EventsTableProps> = ({
                     onChange={(e) =>
                       handleSelectEvent(event.id, e.target.checked)
                     }
-                    className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    aria-label={`Select event ${event.title}`}
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    <div className="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center text-xl mr-4 overflow-hidden">
-                      {(event.images && event.images.length > 0) || event.imageUrl ? (
+                    <div className="flex-shrink-0 h-10 w-10">
+                      {event.images && event.images.length > 0 ? (
                         <img
-                          className="h-full w-full object-cover"
-                          src={event.images && event.images.length > 0 ? event.images[0] : event.imageUrl}
+                          className="h-10 w-10 rounded object-cover"
+                          src={event.images[0]}
                           alt={event.title}
                         />
                       ) : (
-                        <span>📅</span>
+                        <div className="h-10 w-10 rounded bg-gray-200 flex items-center justify-center">
+                          <CalendarIcon className="h-6 w-6 text-gray-400" />
+                        </div>
                       )}
                     </div>
-                    <div>
-                      <div className="text-sm font-bold text-gray-900 max-w-xs truncate">
+                    <div className="ml-4">
+                      <div className="text-sm font-medium text-gray-900">
                         {event.title}
                       </div>
-                      <div className="text-xs text-gray-500">
-                        {event.location}
+                      <div className="text-sm text-gray-500">
+                        {event.location || "No location"}
                       </div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                  <div>
-                    <div>{formatDate(event.startDate)}</div>
-                    {event.startDate !== event.endDate && (
-                      <div className="text-xs text-gray-400">
-                        to {formatDate(event.endDate)}
-                      </div>
-                    )}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {getCategoryBadge(event.category)}
+                  <div className="text-sm text-gray-900">
+                    {formatDate(event.startDate)}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {new Date(event.startDate).toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <div className="flex items-center gap-2">
-                    <div className="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {getStatusBadge(event.status)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div>
+                    <span className="text-gray-500 block text-xs uppercase tracking-wide">Registrations</span>
+                    <div className="mt-1">
+                      <div className="flex items-center">
+                        <span className="font-medium text-gray-900">
+                          {event.registrationCount}
+                        </span>
+                        <span className="mx-1">/</span>
+                        <span>{event.maxParticipants || "∞"}</span>
+                      </div>
+                      {event.maxParticipants && (
+                        <div className="w-full h-1.5 bg-gray-200 rounded-full mt-1 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${event.registrationCount >= event.maxParticipants
+                              ? "bg-red-500"
+                              : "bg-green-500"
+                              }`}
+                            style={{
+                              width: `${Math.min(
+                                (event.registrationCount / event.maxParticipants) *
+                                100,
+                                100
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <Menu as="div" className="relative inline-block text-left">
+                    <div>
+                      <Menu.Button className="flex items-center text-gray-400 hover:text-gray-600 focus:outline-none" aria-label="Event actions">
+                        <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
+                      </Menu.Button>
+                    </div>
+                    <Transition
+                      as={Fragment}
+                      enter="transition ease-out duration-100"
+                      enterFrom="transform opacity-0 scale-95"
+                      enterTo="transform opacity-100 scale-100"
+                      leave="transition ease-in duration-75"
+                      leaveFrom="transform opacity-100 scale-100"
+                      leaveTo="transform opacity-0 scale-95"
+                    >
+                      <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                        <div className="px-1 py-1">
+                          <Menu.Item>
+                            {({ active }) => (
+                              <button
+                                onClick={() => onViewEvent?.(event.id)}
+                                className={`${active ? 'bg-cyan-500 text-white' : 'text-gray-900'
+                                  } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                              >
+                                View Details
+                              </button>
+                            )}
+                          </Menu.Item>
+                          <Menu.Item>
+                            {({ active }) => (
+                              <button
+                                onClick={() => onEditEvent?.(event.id)}
+                                className={`${active ? 'bg-cyan-500 text-white' : 'text-gray-900'
+                                  } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                              >
+                                Edit Event
+                              </button>
+                            )}
+                          </Menu.Item>
+                          <Menu.Item>
+                            {({ active }) => (
+                              <button
+                                onClick={() => onPublishEvent?.(event.id)}
+                                className={`${active ? 'bg-cyan-500 text-white' : 'text-gray-900'
+                                  } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                              >
+                                {event.status === 'PUBLISHED' ? 'Unpublish' : 'Publish'}
+                              </button>
+                            )}
+                          </Menu.Item>
+                        </div>
+                        <div className="px-1 py-1">
+                          <Menu.Item>
+                            {({ active }) => (
+                              <button
+                                onClick={() => {
+                                  if (window.confirm("Are you sure you want to delete this event?")) {
+                                    onDeleteEvent?.(event.id);
+                                  }
+                                }}
+                                className={`${active ? 'bg-red-500 text-white' : 'text-red-600'
+                                  } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                              >
+                                Delete Event
+                              </button>
+                            )}
+                          </Menu.Item>
+                        </div>
+                      </Menu.Items>
+                    </Transition>
+                  </Menu>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4 p-4">
+        {events.map((event) => (
+          <div key={event.id} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={selectedEvents.includes(event.id)}
+                  onChange={(e) => handleSelectEvent(event.id, e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
+                  aria-label={`Select event ${event.title}`}
+                />
+                <div className="flex items-center gap-3">
+                  <div className="flex-shrink-0 h-10 w-10">
+                    {event.images && event.images.length > 0 ? (
+                      <img
+                        className="h-10 w-10 rounded object-cover"
+                        src={event.images[0]}
+                        alt={event.title}
+                      />
+                    ) : (
+                      <div className="h-10 w-10 rounded bg-gray-200 flex items-center justify-center">
+                        <CalendarIcon className="h-6 w-6 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {event.title}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {event.location || "No location"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Menu as="div" className="relative inline-block text-left">
+                <div>
+                  <Menu.Button className="flex items-center text-gray-400 hover:text-gray-600 focus:outline-none p-1" aria-label="Event actions">
+                    <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
+                  </Menu.Button>
+                </div>
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                    <div className="px-1 py-1">
+                      <Menu.Item>
+                        {({ active }) => (
+                          <button
+                            onClick={() => onViewEvent?.(event.id)}
+                            className={`${active ? 'bg-cyan-500 text-white' : 'text-gray-900'
+                              } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                          >
+                            View Details
+                          </button>
+                        )}
+                      </Menu.Item>
+                      <Menu.Item>
+                        {({ active }) => (
+                          <button
+                            onClick={() => onEditEvent?.(event.id)}
+                            className={`${active ? 'bg-cyan-500 text-white' : 'text-gray-900'
+                              } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                          >
+                            Edit Event
+                          </button>
+                        )}
+                      </Menu.Item>
+                      <Menu.Item>
+                        {({ active }) => (
+                          <button
+                            onClick={() => onPublishEvent?.(event.id)}
+                            className={`${active ? 'bg-cyan-500 text-white' : 'text-gray-900'
+                              } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                          >
+                            {event.status === 'PUBLISHED' ? 'Unpublish' : 'Publish'}
+                          </button>
+                        )}
+                      </Menu.Item>
+                    </div>
+                    <div className="px-1 py-1">
+                      <Menu.Item>
+                        {({ active }) => (
+                          <button
+                            onClick={() => {
+                              if (window.confirm("Are you sure you want to delete this event?")) {
+                                onDeleteEvent?.(event.id);
+                              }
+                            }}
+                            className={`${active ? 'bg-red-500 text-white' : 'text-red-600'
+                              } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                          >
+                            Delete Event
+                          </button>
+                        )}
+                      </Menu.Item>
+                    </div>
+                  </Menu.Items>
+                </Transition>
+              </Menu>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+              <div className="col-span-2">
+                <span className="text-gray-500 block text-xs uppercase tracking-wide">Date</span>
+                <div className="mt-1 font-medium text-gray-900">{formatDate(event.startDate)}</div>
+                <div className="text-gray-500 text-xs">
+                  {new Date(event.startDate).toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
+              </div>
+              <div>
+                <span className="text-gray-500 block text-xs uppercase tracking-wide">Status</span>
+                <div className="mt-1">{getStatusBadge(event.status)}</div>
+              </div>
+              <div>
+                <span className="text-gray-500 block text-xs uppercase tracking-wide">Registrations</span>
+                <div className="mt-1">
+                  <div className="flex items-center">
+                    <span className="font-medium text-gray-900">
+                      {event.registrationCount}
+                    </span>
+                    <span className="mx-1">/</span>
+                    <span>{event.maxParticipants || "∞"}</span>
+                  </div>
+                  {event.maxParticipants && (
+                    <div className="w-full h-1.5 bg-gray-200 rounded-full mt-1 overflow-hidden">
                       <div
-                        className="bg-cyan-500 h-2 rounded-full"
+                        className={`h-full rounded-full ${event.registrationCount >= event.maxParticipants
+                          ? "bg-red-500"
+                          : "bg-green-500"
+                          }`}
                         style={{
                           width: `${Math.min(
                             (event.registrationCount / event.maxParticipants) *
@@ -290,78 +514,12 @@ export const EventsTable: React.FC<EventsTableProps> = ({
                         }}
                       />
                     </div>
-                    <span className="font-medium text-gray-700">
-                      {event.registrationCount}
-                    </span>
-                    <span className="text-gray-400 text-xs">
-                      /{event.maxParticipants}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {getStatusBadge(event.status)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {event.price ? (
-                    <div>
-                      <div className="font-medium">€{event.price}</div>
-                      {event.memberPrice && (
-                        <div className="text-xs text-cyan-600 font-medium">
-                          €{event.memberPrice} (ESN)
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-green-600 font-bold text-xs uppercase tracking-wide bg-green-50 px-2 py-1 rounded-full">Free</span>
                   )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={() => onViewEvent(event.id)}
-                      className="p-1 text-gray-400 hover:text-cyan-600 transition-colors rounded-lg hover:bg-cyan-50"
-                      title="View"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => onEditEvent(event.id)}
-                      className="p-1 text-gray-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50"
-                      title="Edit"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
-                    {event.status === "DRAFT" && (
-                      <button
-                        onClick={() => onPublishEvent(event.id)}
-                        className="p-1 text-gray-400 hover:text-green-600 transition-colors rounded-lg hover:bg-green-50"
-                        title="Publish"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </button>
-                    )}
-                    <button
-                      onClick={() => onDeleteEvent(event.id)}
-                      className="p-1 text-gray-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
-                      title="Delete"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

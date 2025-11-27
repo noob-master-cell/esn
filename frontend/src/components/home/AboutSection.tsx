@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "../ui/Button";
 
 export const AboutSection: React.FC = () => {
     const navigate = useNavigate();
@@ -80,15 +81,16 @@ export const AboutSection: React.FC = () => {
                             </div>
                         </div>
 
-                        <button
+                        <Button
                             onClick={() => navigate("/faq")}
-                            className="px-8 py-4 bg-white text-gray-900 border border-gray-200 rounded-2xl font-bold hover:bg-gray-50 transition-all shadow-sm hover:shadow-md inline-flex items-center gap-2"
+                            variant="outline"
+                            className="px-8 py-4 !bg-white !text-gray-900 border-gray-200 rounded-2xl font-bold hover:!bg-gray-50 shadow-sm hover:shadow-md inline-flex items-center gap-2"
                         >
                             Read our Survival Guide
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
-                        </button>
+                        </Button>
                     </div>
 
                 </div>

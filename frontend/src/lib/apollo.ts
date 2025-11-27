@@ -3,7 +3,11 @@ import {
   InMemoryCache,
   createHttpLink,
   from,
+  split,
 } from "@apollo/client";
+import { getMainDefinition } from "@apollo/client/utilities";
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
+import { createClient } from "graphql-ws";
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
 
@@ -14,6 +18,32 @@ const httpLink = createHttpLink({
     "apollo-require-preflight": "true",
   },
 });
+
+// WebSocket link for subscriptions
+const wsLink = new GraphQLWsLink(
+  createClient({
+    url: (import.meta.env.VITE_API_URL || "http://localhost:4000/graphql").replace(/^http/, 'ws'),
+    connectionParams: async () => {
+      const token = getAccessToken ? await getAccessToken() : null;
+      return {
+        Authorization: token ? `Bearer ${token}` : "",
+      };
+    },
+  })
+);
+
+// Split link to route subscriptions to WebSocket and queries/mutations to HTTP
+const splitLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query);
+    return (
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
+    );
+  },
+  wsLink,
+  httpLink,
+);
 
 // Token getter function - will be set by Auth0 provider
 let getAccessToken: (() => Promise<string | null>) | null = null;
@@ -84,7 +114,7 @@ const errorLink = onError(
 
 // Create Apollo Client with enhanced configuration
 export const apolloClient = new ApolloClient({
-  link: from([errorLink, authLink, httpLink]),
+  link: from([errorLink, authLink, splitLink]),
   cache: new InMemoryCache({
     typePolicies: {
       Event: {

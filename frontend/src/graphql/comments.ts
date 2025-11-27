@@ -31,3 +31,19 @@ export const CREATE_COMMENT = gql`
     }
   }
 `;
+
+export const COMMENT_ADDED_SUBSCRIPTION = gql`
+  subscription CommentAdded($eventId: String!) {
+    commentAdded(eventId: $eventId) {
+      id
+      content
+      createdAt
+      user {
+        id
+        firstName
+        lastName
+        avatar
+      }
+    }
+  }
+`;

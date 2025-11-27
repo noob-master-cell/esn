@@ -65,6 +65,7 @@ type Event {
   requirements: String
   additionalInfo: String
   isPublic: Boolean!
+  isUnlimited: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   organizer: User!
@@ -216,6 +217,7 @@ type Query {
   users(filter: UsersFilterInput): PaginatedUsers!
   user(id: String!): User
   myProfile: User!
+  exportMyData: String!
   events(filter: EventsFilterInput, includePrivate: Boolean = false): PaginatedEvents!
   adminEvents(filter: EventsFilterInput): PaginatedEvents!
   myEvents: [Event!]!
@@ -329,6 +331,7 @@ input CreateEventInput {
   requirements: String
   additionalInfo: String
   isPublic: Boolean! = true
+  isUnlimited: Boolean! = false
   status: EventStatus
 }
 
@@ -351,6 +354,7 @@ input UpdateEventInput {
   requirements: String
   additionalInfo: String
   isPublic: Boolean = true
+  isUnlimited: Boolean = false
   status: EventStatus
   id: ID!
 }
@@ -389,4 +393,9 @@ input UpdateRegistrationInput {
 input CreateCommentInput {
   content: String!
   eventId: String!
+}
+
+type Subscription {
+  feedbackAdded: Feedback!
+  commentAdded(eventId: String!): Comment!
 }

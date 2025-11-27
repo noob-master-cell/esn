@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client";
 import { GET_COMMENTS, CREATE_COMMENT } from "../../graphql/comments";
-import { PaperAirplaneIcon, UserCircleIcon } from "@heroicons/react/24/outline";
+import { useRealtimeComments } from "../../hooks/useRealtimeComments";
+import { format, formatDistanceToNow } from "date-fns";
+import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 
 interface CommentsSectionProps {
     eventId: string;
@@ -26,12 +28,13 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ eventId, isRegistered
 
     const { data, loading, error, fetchMore } = useQuery(GET_COMMENTS, {
         variables: { eventId, skip: 0, take: PAGE_SIZE },
-        pollInterval: 10000, // Poll less frequently (10s) to reduce load
         notifyOnNetworkStatusChange: true,
     });
 
+    // Real-time updates via Subscription
+    useRealtimeComments(eventId);
+
     const [createComment, { loading: creating }] = useMutation(CREATE_COMMENT, {
-        refetchQueries: [{ query: GET_COMMENTS, variables: { eventId, skip: 0, take: PAGE_SIZE } }],
         onCompleted: () => setContent(""),
     });
 
@@ -71,16 +74,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ eventId, isRegistered
         }
     };
 
-    const formatTime = (dateString: string) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-        if (diffInSeconds < 60) return "Just now";
-        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-        return date.toLocaleDateString();
-    };
 
     if (loading && !data) return <div className="animate-pulse h-20 bg-gray-50 rounded-xl"></div>;
     if (error) return <div className="text-red-500 text-sm">Failed to load comments</div>;
@@ -97,37 +91,40 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ eventId, isRegistered
             {/* Comment List */}
             <div className="space-y-6 mb-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                 {comments.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500 text-sm">
-                        No comments yet. Be the first to say something!
+                    <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                        <p className="text-gray-500 text-sm">No comments yet. Be the first to say something!</p>
                     </div>
                 ) : (
                     <>
                         {comments.map((comment) => (
-                            <div key={comment.id} className="flex gap-3 group">
-                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 overflow-hidden">
+                            <div key={comment.id} className="flex gap-4 group">
+                                <div className="flex-shrink-0">
                                     {comment.user.avatar ? (
                                         <img
                                             src={comment.user.avatar}
                                             alt={comment.user.firstName}
-                                            className="w-full h-full object-cover"
+                                            className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
                                         />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                            <UserCircleIcon className="w-5 h-5" />
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm border-2 border-white">
+                                            {comment.user.firstName?.[0] || '?'}
                                         </div>
                                     )}
                                 </div>
-                                <div className="flex-1">
-                                    <div className="bg-gray-50 rounded-2xl rounded-tl-none p-3 px-4">
+                                <div className="flex-1 max-w-[85%]">
+                                    <div className="bg-gray-50 rounded-2xl rounded-tl-none p-4 hover:bg-gray-100 transition-colors">
                                         <div className="flex items-center justify-between mb-1">
-                                            <span className="font-semibold text-sm text-gray-900">
+                                            <span className="font-bold text-sm text-gray-900">
                                                 {comment.user.firstName} {comment.user.lastName}
                                             </span>
-                                            <span className="text-xs text-gray-400">
-                                                {formatTime(comment.createdAt)}
+                                            <span
+                                                className="text-xs font-medium text-gray-400"
+                                                title={format(new Date(comment.createdAt), "PPpp")}
+                                            >
+                                                {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
                                             </span>
                                         </div>
-                                        <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
+                                        <p className="text-sm text-gray-700 whitespace-pre-wrap break-words leading-relaxed">
                                             {comment.content}
                                         </p>
                                     </div>
@@ -139,7 +136,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ eventId, isRegistered
                         {hasMore && (
                             <button
                                 onClick={handleLoadMore}
-                                className="w-full py-2 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded-lg transition-colors"
+                                className="w-full py-2.5 text-sm text-cyan-600 font-medium hover:bg-cyan-50 rounded-xl transition-colors border border-transparent hover:border-cyan-100"
                             >
                                 Load more comments
                             </button>
@@ -167,7 +164,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ eventId, isRegistered
                         <button
                             type="submit"
                             disabled={!content.trim() || creating}
-                            className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-black disabled:opacity-50 disabled:hover:bg-gray-900 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white text-sm font-medium rounded-lg hover:bg-cyan-700 disabled:opacity-50 disabled:hover:bg-cyan-600 transition-colors shadow-sm hover:shadow-cyan-500/20"
                         >
                             <PaperAirplaneIcon className="w-4 h-4" />
                             Post Comment

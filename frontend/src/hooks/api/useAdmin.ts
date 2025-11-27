@@ -25,7 +25,6 @@ export const useRegistrationStats = () => {
 
 export const useAdminStats = () => {
     const { data, loading, error, refetch } = useQuery(ADMIN_DASHBOARD_STATS, {
-        pollInterval: 30000, // Poll every 30 seconds for realtime updates
     });
     return { stats: data?.adminStats, loading, error, refetch };
 };
@@ -34,7 +33,7 @@ import { useState } from "react";
 
 export const useAdminUsers = (initialFilter?: any) => {
     const [page, setPage] = useState(1);
-    const [pageSize] = useState(20);
+    const [pageSize, setPageSize] = useState(20);
 
     // Extract the filter object if it's wrapped, otherwise use the whole object
     const filterParams = initialFilter?.filter || initialFilter || {};
@@ -55,6 +54,7 @@ export const useAdminUsers = (initialFilter?: any) => {
         page,
         setPage,
         pageSize,
+        setPageSize,
         loading,
         error,
         refetch,

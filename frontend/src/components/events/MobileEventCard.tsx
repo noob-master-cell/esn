@@ -14,6 +14,7 @@ interface MobileEventCardProps {
     location?: string;
     type?: string;
     status?: string;
+    isUnlimited?: boolean;
   };
   variant?: "compact" | "full";
 }
@@ -41,7 +42,15 @@ const MobileEventCard: React.FC<MobileEventCardProps> = ({
   // Calculate spots left and determine category
   const spotsLeft = event.maxParticipants - event.registrationCount;
 
-  const getSpotsInfo = (spotsLeft: number, maxParticipants: number) => {
+  const getSpotsInfo = (spotsLeft: number, maxParticipants: number, isUnlimited?: boolean) => {
+    if (isUnlimited) {
+      return {
+        text: "Unlimited Spots",
+        category: "many" as const,
+        shortText: "Open",
+      };
+    }
+
     if (spotsLeft <= 0) {
       return { text: "Full", category: "full" as const, shortText: "Full" };
     }
@@ -85,7 +94,7 @@ const MobileEventCard: React.FC<MobileEventCardProps> = ({
 
   // Get icon and colors
   const { icon, bgColor, textColor } = getEventIcon(event.category);
-  const spotsInfo = getSpotsInfo(spotsLeft, event.maxParticipants);
+  const spotsInfo = getSpotsInfo(spotsLeft, event.maxParticipants, event.isUnlimited);
 
   if (variant === "compact") {
     // Compact version for mobile list view

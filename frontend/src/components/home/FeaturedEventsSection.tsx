@@ -70,9 +70,7 @@ export const FeaturedEventsSection: React.FC = () => {
                                             </svg>
                                         </div>
                                     )}
-                                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide text-blue-600 shadow-sm">
-                                        {event.category}
-                                    </div>
+
                                 </div>
 
                                 {/* Content */}

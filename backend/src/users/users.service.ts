@@ -189,4 +189,85 @@ export class UsersService {
       return false;
     }
   }
+
+  async exportUserData(userId: string): Promise<any> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        preferences: true,
+        registrations: {
+          include: {
+            event: true,
+            payments: true,
+          },
+        },
+        comments: true,
+        feedbacks: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Transform data into a user-friendly format
+    const exportData = {
+      profile: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        university: user.university,
+        nationality: user.nationality,
+        chapter: user.chapter,
+        esnCardNumber: user.esnCardNumber,
+        esnCardVerified: user.esnCardVerified,
+        bio: user.bio,
+        socialMedia: {
+          telegram: user.telegram,
+          instagram: user.instagram,
+        },
+        emergencyContact: {
+          name: user.emergencyContactName,
+          phone: user.emergencyContactPhone,
+        },
+        joinedAt: user.createdAt,
+      },
+      preferences: user.preferences ? {
+        language: user.preferences.language,
+        timezone: user.preferences.timezone,
+      } : null,
+      registrations: user.registrations.map(reg => ({
+        event: {
+          title: reg.event.title,
+          startDate: reg.event.startDate,
+          endDate: reg.event.endDate,
+          location: reg.event.location,
+        },
+        status: reg.status,
+        registeredAt: reg.registeredAt,
+        paymentStatus: reg.paymentStatus,
+        amountDue: reg.amountDue,
+        payments: reg.payments.map(p => ({
+          amount: p.amount,
+          currency: p.currency,
+          status: p.status,
+          method: p.method,
+          date: p.createdAt,
+        })),
+      })),
+      comments: user.comments.map(c => ({
+        content: c.content,
+        date: c.createdAt,
+        eventId: c.eventId, // Keeping ID for reference as we didn't include Event in comments query
+      })),
+      feedback: user.feedbacks.map(f => ({
+        message: f.message,
+        type: f.type,
+        date: f.createdAt,
+      })),
+    };
+
+    return exportData;
+  }
 }

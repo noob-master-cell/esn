@@ -5,18 +5,19 @@ import { PublicRoute } from './components/auth/PublicRoute';
 
 
 // Public Pages
-import HomePage from './pages/home';
-import EventsPage from './pages/events';
-import EventDetailsPage from './pages/events/EventDetailsPage';
-import EventRegistrationPage from './pages/events/EventRegistrationPage';
-import ProfilePage from './pages/profile';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import FeedbackPage from './pages/feedback';
-import FAQPage from './pages/faq';
+const HomePage = lazy(() => import('./pages/home'));
+const EventsPage = lazy(() => import('./pages/events'));
+const EventDetailsPage = lazy(() => import('./pages/events/EventDetailsPage'));
+const EventRegistrationPage = lazy(() => import('./pages/events/EventRegistrationPage'));
+const ProfilePage = lazy(() => import('./pages/profile'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const FeedbackPage = lazy(() => import('./pages/feedback'));
+const FAQPage = lazy(() => import('./pages/faq'));
+const Imprint = lazy(() => import('./pages/Imprint'));
 
 // Auth Pages
-import SignInPage from './pages/auth/sign-in';
-import SignUpPage from './pages/auth/sign-up';
+const SignInPage = lazy(() => import('./pages/auth/sign-in'));
+const SignUpPage = lazy(() => import('./pages/auth/sign-up'));
 
 // Admin Pages
 const AdminDashboardPage = lazy(() => import('./pages/admin/dashboard/index'));
@@ -30,151 +31,158 @@ const AdminSettingsPage = lazy(() => import('./pages/admin/settings/index'));
 const AdminAttendancePage = lazy(() => import('./pages/admin/events/attendance').then(module => ({ default: module.AdminAttendancePage })));
 
 export const AppRoutes: React.FC = () => (
-    <Routes>
-        {/* Public Routes */}
+    <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+    }>
+        <Routes>
+            {/* Public Routes */}
 
-        <Route path="/" element={<HomePage />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/events/:id" element={<EventDetailsPage />} />
-        <Route path="/feedback" element={<FeedbackPage />} />
-        <Route path="/faq" element={<FAQPage />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/events" element={<EventsPage />} />
+            <Route path="/events/:id" element={<EventDetailsPage />} />
+            <Route path="/feedback" element={<FeedbackPage />} />
+            <Route path="/faq" element={<FAQPage />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/imprint" element={<Imprint />} />
 
-        {/* Auth Routes */}
-        <Route
-            path="/sign-in/*"
-            element={
-                <PublicRoute>
-                    <SignInPage />
-                </PublicRoute>
-            }
-        />
-        <Route
-            path="/sign-up/*"
-            element={
-                <PublicRoute>
-                    <SignUpPage />
-                </PublicRoute>
-            }
-        />
+            {/* Auth Routes */}
+            <Route
+                path="/sign-in/*"
+                element={
+                    <PublicRoute>
+                        <SignInPage />
+                    </PublicRoute>
+                }
+            />
+            <Route
+                path="/sign-up/*"
+                element={
+                    <PublicRoute>
+                        <SignUpPage />
+                    </PublicRoute>
+                }
+            />
 
-        {/* Protected User Routes */}
-        <Route
-            path="/events/:id/register"
-            element={
-                <ProtectedRoute>
-                    <EventRegistrationPage />
-                </ProtectedRoute>
-            }
-        />
-        <Route
-            path="/profile"
-            element={
-                <ProtectedRoute>
-                    <ProfilePage />
-                </ProtectedRoute>
-            }
-        />
+            {/* Protected User Routes */}
+            <Route
+                path="/events/:id/register"
+                element={
+                    <ProtectedRoute>
+                        <EventRegistrationPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/profile"
+                element={
+                    <ProtectedRoute>
+                        <ProfilePage />
+                    </ProtectedRoute>
+                }
+            />
 
-        {/* Admin Routes */}
-        <Route
-            path="/admin"
-            element={
-                <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN"]}>
-                    <Suspense fallback={<div>Loading...</div>}>
-                        <AdminDashboardPage />
-                    </Suspense>
-                </ProtectedRoute>
-            }
-        />
-        <Route
-            path="/admin/events"
-            element={
-                <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN", "ORGANIZER"]}>
-                    <AdminEventsPage />
-                </ProtectedRoute>
-            }
-        />
-        <Route
-            path="/admin/events/create"
-            element={
-                <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN", "ORGANIZER"]}>
-                    <Suspense fallback={<div>Loading...</div>}>
-                        <EventCreatePage />
-                    </Suspense>
-                </ProtectedRoute>
-            }
-        />
-        <Route
-            path="/admin/events/:id/edit"
-            element={
-                <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN", "ORGANIZER"]}>
-                    <EventEditPage />
-                </ProtectedRoute>
-            }
-        />
-        <Route
-            path="/admin/events/:eventId/attendance"
-            element={
-                <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN", "ORGANIZER"]}>
-                    <Suspense fallback={<div>Loading...</div>}>
-                        <AdminAttendancePage />
-                    </Suspense>
-                </ProtectedRoute>
-            }
-        />
-        <Route
-            path="/admin/users"
-            element={
-                <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN"]}>
-                    <Suspense fallback={<div>Loading...</div>}>
-                        <AdminUsersPage />
-                    </Suspense>
-                </ProtectedRoute>
-            }
-        />
-        <Route
-            path="/admin/registrations"
-            element={
-                <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN", "ORGANIZER"]}>
-                    <AdminRegistrationsPage />
-                </ProtectedRoute>
-            }
-        />
+            {/* Admin Routes */}
+            <Route
+                path="/admin"
+                element={
+                    <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN"]}>
+                        <Suspense fallback={<div>Loading...</div>}>
+                            <AdminDashboardPage />
+                        </Suspense>
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/events"
+                element={
+                    <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN", "ORGANIZER"]}>
+                        <AdminEventsPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/events/create"
+                element={
+                    <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN", "ORGANIZER"]}>
+                        <Suspense fallback={<div>Loading...</div>}>
+                            <EventCreatePage />
+                        </Suspense>
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/events/:id/edit"
+                element={
+                    <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN", "ORGANIZER"]}>
+                        <EventEditPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/events/:eventId/attendance"
+                element={
+                    <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN", "ORGANIZER"]}>
+                        <Suspense fallback={<div>Loading...</div>}>
+                            <AdminAttendancePage />
+                        </Suspense>
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/users"
+                element={
+                    <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN"]}>
+                        <Suspense fallback={<div>Loading...</div>}>
+                            <AdminUsersPage />
+                        </Suspense>
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/admin/registrations"
+                element={
+                    <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN", "ORGANIZER"]}>
+                        <AdminRegistrationsPage />
+                    </ProtectedRoute>
+                }
+            />
 
-        <Route
-            path="/admin/settings"
-            element={
-                <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN"]}>
-                    <Suspense fallback={<div>Loading...</div>}>
-                        <AdminSettingsPage />
-                    </Suspense>
-                </ProtectedRoute>
-            }
-        />
-        <Route path="/admin/settings/:section" element={<AdminSettingsPage />} />
+            <Route
+                path="/admin/settings"
+                element={
+                    <ProtectedRoute requiredRoles={["ADMIN", "SUPER_ADMIN"]}>
+                        <Suspense fallback={<div>Loading...</div>}>
+                            <AdminSettingsPage />
+                        </Suspense>
+                    </ProtectedRoute>
+                }
+            />
+            <Route path="/admin/settings/:section" element={<AdminSettingsPage />} />
 
-        {/* Debug Route */}
-        <Route path="/debug" element={<div>Debug Page Placeholder</div>} />
+            {/* Debug Route */}
+            <Route path="/debug" element={<div>Debug Page Placeholder</div>} />
 
-        {/* 404 Route */}
-        <Route
-            path="*"
-            element={
-                <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                    <div className="text-center">
-                        <div className="text-6xl mb-4">🔍</div>
-                        <h1 className="text-4xl font-bold text-gray-900 mb-2">Page Not Found</h1>
-                        <p className="text-gray-600 mb-6">The page you’re looking for doesn’t exist.</p>
-                        <button
-                            onClick={() => window.history.back()}
-                            className="px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                        >
-                            Go Back
-                        </button>
+            {/* 404 Route */}
+            <Route
+                path="*"
+                element={
+                    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                        <div className="text-center">
+                            <div className="text-6xl mb-4">🔍</div>
+                            <h1 className="text-4xl font-bold text-gray-900 mb-2">Page Not Found</h1>
+                            <p className="text-gray-600 mb-6">The page you’re looking for doesn’t exist.</p>
+                            <button
+                                onClick={() => window.history.back()}
+                                className="px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                            >
+                                Go Back
+                            </button>
+                        </div>
                     </div>
-                </div>
-            }
-        />
-    </Routes >
+                }
+            />
+        </Routes >
+    </Suspense>
 );

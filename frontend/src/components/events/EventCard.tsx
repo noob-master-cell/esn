@@ -65,6 +65,7 @@ interface EventCardProps {
     location?: string;
     type?: string;
     status?: string;
+    isUnlimited?: boolean;
   };
 }
 
@@ -134,8 +135,12 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
           {/* Spots */}
           <div className="flex items-center gap-1.5">
             <UsersIcon className="w-4 h-4 text-gray-400" />
-            <span className={`text-xs font-medium ${spotsLeft <= 5 ? 'text-red-500' : 'text-gray-600'}`}>
-              {spotsLeft <= 0 ? 'Full' : `${spotsLeft} spots left`}
+            <span className={`text-xs font-medium ${spotsLeft <= 5 && !event.isUnlimited ? 'text-red-500' : 'text-gray-600'}`}>
+              {event.isUnlimited
+                ? 'Unlimited spots'
+                : spotsLeft <= 0
+                  ? 'Full'
+                  : `${spotsLeft} spots left`}
             </span>
           </div>
 

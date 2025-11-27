@@ -310,7 +310,15 @@ export class RegistrationsService {
     }
 
     const orderBy: any = {};
-    orderBy[filter.orderBy || 'registeredAt'] = filter.orderDirection || 'desc';
+    const direction = filter.orderDirection || 'desc';
+
+    if (filter.orderBy === 'user') {
+      orderBy.user = { lastName: direction };
+    } else if (filter.orderBy === 'event') {
+      orderBy.event = { title: direction };
+    } else {
+      orderBy[filter.orderBy || 'registeredAt'] = direction;
+    }
 
     const registrations = await this.prisma.registration.findMany({
       where,

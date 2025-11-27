@@ -31,6 +31,7 @@ interface EventFormData {
   requirements: string;
   additionalInfo: string;
   isPublic: boolean;
+  isUnlimited: boolean;
   status: "DRAFT" | "PUBLISHED" | "CANCELLED";
 }
 
@@ -61,6 +62,7 @@ const defaultFormData: EventFormData = {
   requirements: "",
   additionalInfo: "",
   isPublic: true,
+  isUnlimited: false,
   status: "DRAFT",
 };
 
@@ -99,6 +101,20 @@ export const EventForm: React.FC<EventFormProps> = ({
   const [errors, setErrors] = useState<Partial<Record<keyof EventFormData, string>>>({});
   const [tagInput, setTagInput] = useState("");
   const { getToken } = useAuth();
+  const [isUnlimited, setIsUnlimited] = useState(
+    initialData?.isUnlimited ?? defaultFormData.isUnlimited
+  );
+
+  const handleUnlimitedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setIsUnlimited(checked);
+    setFormData((prev) => ({ ...prev, isUnlimited: checked }));
+    if (checked) {
+      setFormData((prev) => ({ ...prev, maxParticipants: 10000 }));
+    } else {
+      setFormData((prev) => ({ ...prev, maxParticipants: 50 }));
+    }
+  };
 
   const [createEvent, { loading: creating }] = useMutation(CREATE_EVENT, {
     onCompleted: () => {
@@ -225,6 +241,7 @@ export const EventForm: React.FC<EventFormProps> = ({
       memberPrice: formData.type === "FREE" ? null : formData.memberPrice,
       registrationDeadline: formData.registrationDeadline || null,
       images: formData.images || [],
+      isUnlimited: isUnlimited,
       ...(mode === "edit" && eventId ? { id: eventId } : {}),
     };
 
@@ -394,15 +411,31 @@ export const EventForm: React.FC<EventFormProps> = ({
           </h3>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Input
-              type="number"
-              label="Max Participants *"
-              name="maxParticipants"
-              value={formData.maxParticipants ?? ""}
-              onChange={handleInputChange}
-              min={1}
-              error={errors.maxParticipants}
-            />
+            <div className="flex flex-col gap-2">
+              <Input
+                type="number"
+                label="Max Participants *"
+                name="maxParticipants"
+                value={isUnlimited ? "" : (formData.maxParticipants ?? "")}
+                onChange={handleInputChange}
+                min={1}
+                error={errors.maxParticipants}
+                disabled={isUnlimited}
+                placeholder={isUnlimited ? "Unlimited" : "50"}
+              />
+              <div className="flex items-center">
+                <input
+                  id="isUnlimited"
+                  type="checkbox"
+                  checked={isUnlimited}
+                  onChange={handleUnlimitedChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="isUnlimited" className="ml-2 block text-sm text-gray-900">
+                  Unlimited Participants
+                </label>
+              </div>
+            </div>
 
             {formData.type === "PAID" && (
               <>

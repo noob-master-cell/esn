@@ -30,23 +30,7 @@ interface MobileEventsByDateProps {
 
 // Simple date formatting
 
-const formatDateShort = (date: Date): string => {
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
 
-  if (date.toDateString() === today.toDateString()) {
-    return "Today";
-  } else if (date.toDateString() === tomorrow.toDateString()) {
-    return "Tomorrow";
-  } else {
-    return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    });
-  }
-};
 
 const MobileEventsByDate: React.FC<MobileEventsByDateProps> = ({
   groupedEvents,
@@ -110,38 +94,27 @@ const MobileEventsByDate: React.FC<MobileEventsByDateProps> = ({
 
         return (
           <div key={groupKey} className="space-y-3">
-            {/* Date Header - Touch Friendly */}
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-3">
-                {/* Date Circle */}
-                <div
-                  className={`flex flex-col items-center justify-center w-14 h-14 rounded-full border-2 ${group.isToday
-                    ? "bg-blue-600 border-blue-600 text-white"
-                    : "bg-white border-gray-200 text-gray-900"
-                    }`}
-                >
-                  <span className="text-lg font-bold leading-none">
-                    {group.date.getDate()}
+            {/* Date Header - Minimalist */}
+            <div className="flex items-center justify-between py-4 px-1">
+              <div className="flex items-center gap-4">
+                {/* Day Number */}
+                <span className={`text-3xl font-bold ${group.isToday ? "text-cyan-600" : "text-gray-900"}`}>
+                  {group.date.getDate()}
+                </span>
+
+                {/* Month and Weekday */}
+                <div className="flex flex-col leading-none gap-1">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                    {group.date.toLocaleDateString("en-US", { month: "short" })}
                   </span>
-                  <span className="text-xs font-medium uppercase leading-none">
-                    {group.date
-                      .toLocaleDateString("en-US", { month: "short" })
-                      .substring(0, 3)}
+                  <span className={`text-sm font-bold uppercase ${group.isToday ? "text-cyan-600" : "text-gray-600"}`}>
+                    {group.isToday ? "Today" : group.date.toLocaleDateString("en-US", { weekday: "short" })}
                   </span>
                 </div>
 
-                {/* Date Info */}
-                <div>
-                  <h2
-                    className={`text-lg font-semibold ${group.isToday ? "text-blue-600" : "text-gray-900"
-                      }`}
-                  >
-                    {formatDateShort(group.date)}
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    {group.events.length} event
-                    {group.events.length !== 1 ? "s" : ""}
-                  </p>
+                {/* Event Count Pill */}
+                <div className="px-2 py-1 bg-gray-100 rounded-full text-[10px] font-medium text-gray-500 ml-2">
+                  {group.events.length} event{group.events.length !== 1 ? "s" : ""}
                 </div>
               </div>
 

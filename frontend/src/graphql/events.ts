@@ -14,6 +14,7 @@ export const GET_EVENTS = gql`
         endDate
         location
         maxParticipants
+        isUnlimited
         price
         memberPrice
         images
@@ -49,6 +50,7 @@ export const GET_EVENT = gql`
       location
       address
       maxParticipants
+      isUnlimited
       price
       memberPrice
       images
@@ -92,6 +94,7 @@ export const GET_ADMIN_EVENTS = gql`
         endDate
         location
         maxParticipants
+        isUnlimited
         registrationCount
         status
         category
@@ -120,6 +123,7 @@ export const CREATE_EVENT = gql`
       endDate
       location
       maxParticipants
+      isUnlimited
       registrationCount
 
       organizer {

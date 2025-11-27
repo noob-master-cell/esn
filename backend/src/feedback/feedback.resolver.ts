@@ -1,10 +1,12 @@
-import { Resolver, Query, Mutation, Args, ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { Resolver, Query, Mutation, Args, ObjectType, Field, ID, registerEnumType, Subscription } from '@nestjs/graphql';
+import { UseGuards, Inject } from '@nestjs/common';
 import { FeedbackService } from './feedback.service';
 import { Auth0Guard } from '../auth/guards/auth0.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { FeedbackType } from '@prisma/client';
+import { RedisPubSub } from 'graphql-redis-subscriptions';
+import { PUB_SUB } from '../common/pubsub.module';
 
 // Register Enum
 registerEnumType(FeedbackType, {
@@ -32,7 +34,10 @@ export class Feedback {
 
 @Resolver(() => Feedback)
 export class FeedbackResolver {
-    constructor(private readonly feedbackService: FeedbackService) { }
+    constructor(
+        private readonly feedbackService: FeedbackService,
+        @Inject(PUB_SUB) private readonly pubSub: RedisPubSub,
+    ) { }
 
     @Mutation(() => Feedback)
     @UseGuards(Auth0Guard)
@@ -41,7 +46,9 @@ export class FeedbackResolver {
         @Args('type', { type: () => FeedbackType }) type: FeedbackType,
         @CurrentUser() user: User,
     ) {
-        return this.feedbackService.create(user.id, message, type);
+        const feedback = await this.feedbackService.create(user.id, message, type);
+        this.pubSub.publish('feedbackAdded', { feedbackAdded: feedback });
+        return feedback;
     }
 
     @Mutation(() => Feedback)
@@ -67,5 +74,18 @@ export class FeedbackResolver {
     @Query(() => [Feedback], { name: 'feedbacks' })
     async findAll() {
         return this.feedbackService.findAll();
+    }
+
+    @Subscription(() => Feedback, {
+        resolve: (payload) => {
+            const feedback = payload.feedbackAdded;
+            return {
+                ...feedback,
+                createdAt: new Date(feedback.createdAt),
+            };
+        },
+    })
+    feedbackAdded() {
+        return this.pubSub.asyncIterator('feedbackAdded');
     }
 }

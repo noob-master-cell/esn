@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useFeedback, FeedbackType, type Feedback } from "../../hooks/api/useFeedback";
+import { useRealtimeFeedback } from "../../hooks/useRealtimeFeedback";
 import { useAuth } from "../../hooks/useAuth";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import {
     ChatBubbleLeftRightIcon,
     BugAntIcon,
@@ -24,9 +25,15 @@ const FeedbackPage: React.FC = () => {
     } = useFeedback();
     const { user, isAdmin } = useAuth();
 
+    // Enable real-time updates
+    useRealtimeFeedback();
+
     const [message, setMessage] = useState("");
     const [type, setType] = useState<FeedbackType>(FeedbackType.FEEDBACK);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [filter, setFilter] = useState<FeedbackType | 'ALL'>('ALL');
+
+    const filteredFeedbacks = feedbacks.filter(f => filter === 'ALL' || f.type === filter);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -205,33 +212,75 @@ const FeedbackPage: React.FC = () => {
                 </div>
 
                 {/* Feedback List */}
-                <div className="space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-900 px-1">Recent Feedback</h2>
+                <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <h2 className="text-lg font-bold text-gray-900">Recent Feedback</h2>
+
+                        {/* Filter Tabs */}
+                        <div className="flex p-1 bg-white border border-gray-200 rounded-xl shadow-sm overflow-x-auto no-scrollbar">
+                            <button
+                                onClick={() => setFilter('ALL')}
+                                className={`px-4 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-all ${filter === 'ALL'
+                                    ? 'bg-gray-900 text-white shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                                    }`}
+                            >
+                                All
+                            </button>
+                            {Object.values(FeedbackType).map((t) => (
+                                <button
+                                    key={t}
+                                    onClick={() => setFilter(t)}
+                                    className={`px-4 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-all flex items-center gap-2 ${filter === t
+                                        ? 'bg-gray-900 text-white shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    {t === FeedbackType.BUG && <BugAntIcon className="w-3.5 h-3.5" />}
+                                    {t === FeedbackType.IMPROVEMENT && <LightBulbIcon className="w-3.5 h-3.5" />}
+                                    {t === FeedbackType.FEEDBACK && <ChatBubbleLeftRightIcon className="w-3.5 h-3.5" />}
+                                    {getTypeLabel(t)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
 
                     {loading ? (
                         <div className="text-center py-12">
                             <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-cyan-500 border-t-transparent"></div>
                         </div>
-                    ) : feedbacks.length === 0 ? (
-                        <div className="text-center py-12 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                            <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-300" />
-                            <h3 className="mt-2 text-sm font-medium text-gray-900">No feedback yet</h3>
-                            <p className="mt-1 text-sm text-gray-500">Be the first to share your thoughts!</p>
+                    ) : filteredFeedbacks.length === 0 ? (
+                        <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                {filter === FeedbackType.BUG ? (
+                                    <BugAntIcon className="w-8 h-8 text-gray-300" />
+                                ) : filter === FeedbackType.IMPROVEMENT ? (
+                                    <LightBulbIcon className="w-8 h-8 text-gray-300" />
+                                ) : (
+                                    <ChatBubbleLeftRightIcon className="w-8 h-8 text-gray-300" />
+                                )}
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900">No feedback found</h3>
+                            <p className="mt-1 text-gray-500">
+                                {filter === 'ALL'
+                                    ? "Be the first to share your thoughts!"
+                                    : `No ${getTypeLabel(filter as FeedbackType).toLowerCase()}s found.`}
+                            </p>
                         </div>
                     ) : (
                         <div className="grid gap-4">
-                            {feedbacks.map((feedback) => (
-                                <div key={feedback.id} className="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
+                            {filteredFeedbacks.map((feedback) => (
+                                <div key={feedback.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group">
                                     <div className="flex items-start gap-4">
                                         <div className="flex-shrink-0">
                                             {feedback.user.avatar ? (
                                                 <img
                                                     src={feedback.user.avatar}
                                                     alt={feedback.user.firstName}
-                                                    className="h-10 w-10 rounded-full object-cover border border-gray-100"
+                                                    className="h-11 w-11 rounded-full object-cover border-2 border-white shadow-sm"
                                                 />
                                             ) : (
-                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                                                <div className="h-11 w-11 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center text-white font-bold text-sm shadow-sm border-2 border-white">
                                                     {feedback.user.firstName?.[0] || '?'}
                                                 </div>
                                             )}
@@ -239,23 +288,23 @@ const FeedbackPage: React.FC = () => {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex flex-wrap items-center justify-between gap-y-2 mb-2">
                                                 <div className="flex items-center gap-2">
-                                                    <h3 className="text-sm font-semibold text-gray-900">
+                                                    <h3 className="text-sm font-bold text-gray-900">
                                                         {feedback.user.firstName} {feedback.user.lastName}
                                                     </h3>
-                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${getBadgeColor(feedback.type)}`}>
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getBadgeColor(feedback.type)}`}>
                                                         {getTypeLabel(feedback.type)}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-xs text-gray-400">
-                                                        {format(new Date(feedback.createdAt), "MMM d, yyyy")}
+                                                    <span className="text-xs font-medium text-gray-400" title={format(new Date(feedback.createdAt), "PPpp")}>
+                                                        {formatDistanceToNow(new Date(feedback.createdAt), { addSuffix: true })}
                                                     </span>
                                                     {canModify(feedback) && (
-                                                        <div className="flex items-center gap-1">
+                                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                             {(user?.sub === feedback.user.auth0Id || isAdmin) && (
                                                                 <button
                                                                     onClick={() => handleEdit(feedback)}
-                                                                    className="p-1 text-gray-400 hover:text-cyan-600 transition-colors"
+                                                                    className="p-1.5 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-all"
                                                                     title="Edit"
                                                                 >
                                                                     <PencilIcon className="w-4 h-4" />
@@ -264,7 +313,7 @@ const FeedbackPage: React.FC = () => {
                                                             <button
                                                                 onClick={() => handleDelete(feedback.id)}
                                                                 disabled={deleting}
-                                                                className="p-1 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                                                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
                                                                 title="Delete"
                                                             >
                                                                 <TrashIcon className="w-4 h-4" />
@@ -273,7 +322,7 @@ const FeedbackPage: React.FC = () => {
                                                     )}
                                                 </div>
                                             </div>
-                                            <p className="text-gray-600 text-sm whitespace-pre-wrap">{feedback.message}</p>
+                                            <p className="text-gray-600 text-sm whitespace-pre-wrap leading-relaxed">{feedback.message}</p>
                                         </div>
                                     </div>
                                 </div>

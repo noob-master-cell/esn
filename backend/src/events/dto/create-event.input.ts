@@ -103,6 +103,11 @@ export class CreateEventInput {
   @IsBoolean()
   isPublic: boolean = true;
 
+  @Field({ defaultValue: false })
+  @IsBoolean()
+  @IsOptional()
+  isUnlimited: boolean = false;
+
   @Field(() => EventStatus, { nullable: true })
   @IsOptional()
   @IsEnum(EventStatus)

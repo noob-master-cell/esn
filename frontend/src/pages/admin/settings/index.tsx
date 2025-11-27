@@ -9,7 +9,7 @@ import { AdminLayout } from "../../../components/admin/AdminLayout";
 import { GeneralSettings } from "../../../components/admin/settings/GeneralSettings";
 import { EmailSettings } from "../../../components/admin/settings/EmailSettings";
 // import { IntegrationSettings } from "../../../components/admin/settings/IntegrationSettings";
-import { NotificationSettings } from "../../../components/admin/settings/NotificationSettings";
+
 import { SecuritySettings } from "../../../components/admin/settings/SecuritySettings";
 import { SystemSettings } from "../../../components/admin/settings/SystemSettings";
 
@@ -17,7 +17,7 @@ type SettingsTab =
   | "general"
   | "email"
 
-  | "notifications"
+
   | "security"
   | "system";
 
@@ -115,25 +115,7 @@ export const AdminSettingsPage: React.FC = () => {
       ),
     },
 
-    {
-      id: "notifications",
-      name: "Notifications",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 17h5l-5 5v-5zM12 8a7.2 7.2 0 0 0-5 2c0 0 0 7 0 7h5v-9z"
-          />
-        </svg>
-      ),
-    },
+
     {
       id: "security",
       name: "Security",
@@ -295,16 +277,7 @@ export const AdminSettingsPage: React.FC = () => {
 
 
 
-            {activeTab === "notifications" && (
-              <NotificationSettings
-                settings={settings.notifications || {}}
-                onSave={(settings: Record<string, unknown>) =>
-                  handleSaveSettings("notifications", settings)
-                }
-                onChange={handleSettingChange}
-                loading={updating}
-              />
-            )}
+
 
             {activeTab === "security" && (
               <SecuritySettings

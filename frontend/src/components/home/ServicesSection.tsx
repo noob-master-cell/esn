@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "../ui/Button";
 
 export const ServicesSection: React.FC = () => {
   const navigate = useNavigate();
@@ -94,15 +95,15 @@ export const ServicesSection: React.FC = () => {
 
         {/* CTA */}
         <div className="text-center">
-          <button
+          <Button
             onClick={() => navigate("/events")}
-            className="group px-8 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl inline-flex items-center gap-3 hover:scale-105 active:scale-95"
+            className="group px-8 py-4 !bg-gray-900 !text-white rounded-2xl font-bold hover:!bg-gray-800 shadow-lg hover:shadow-xl inline-flex items-center gap-3 hover:scale-105 active:scale-95"
           >
             View All Events
             <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
-          </button>
+          </Button>
         </div>
       </div>
     </section>

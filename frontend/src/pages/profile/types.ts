@@ -12,16 +12,7 @@ export interface ProfileFormData {
     emergencyContactPhone: string;
 }
 
-export interface NotificationSettings {
-    emailEvents: boolean;
-    emailReminders: boolean;
-    emailNewsletter: boolean;
-    emailPromotions: boolean;
-    pushEvents: boolean;
-    pushReminders: boolean;
-    pushUpdates: boolean;
-    smsReminders: boolean;
-}
+
 
 export interface PrivacySettings {
     profileVisible: boolean;

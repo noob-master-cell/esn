@@ -61,3 +61,20 @@ export const DELETE_FEEDBACK = gql`
     }
   }
 `;
+export const FEEDBACK_ADDED_SUBSCRIPTION = gql`
+  subscription FeedbackAdded {
+    feedbackAdded {
+      id
+      message
+      type
+      createdAt
+      user {
+        id
+        auth0Id
+        firstName
+        lastName
+        avatar
+      }
+    }
+  }
+`;

@@ -215,12 +215,12 @@ export class EventsService implements OnModuleInit {
     // Since we can't do a second 'registrations' include with different args easily in one query without raw query,
     // we will fetch the top 5 attendees for these events in a separate optimized query or just accept we don't show all attendees in list view.
     // For now, let's fetch top 5 attendees for the list view to keep it fast.
-    
+
     // Actually, we can't have two 'registrations' keys in include.
     // So we have to choose. The 'isRegistered' check is more important for logic.
     // But we also want to show "Who is going".
     // We can use a trick: include registrations where (userId = current OR status != CANCELLED) take 5? No, that messes up isRegistered check.
-    
+
     // Strategy:
     // 1. Get events with _count and isRegistered check (via registrations filtered by userId).
     // 2. If we really need attendees for the list, we can fetch them separately or just not show them in the main list (often better for perf).
@@ -229,11 +229,11 @@ export class EventsService implements OnModuleInit {
     // Or, we can just omit attendees from the list view (PaginatedEvents usually doesn't need full attendee list).
     // Let's check PaginatedEvents output... it returns Event[].
     // If the UI needs attendees in the card, we should provide a few.
-    
+
     // Let's do a second query to fetch top 3 attendees for the events we found, to populate the "attendees" field with a preview.
     const eventIds = items.map(e => e.id);
     let attendeesMap: Record<string, any[]> = {};
-    
+
     if (eventIds.length > 0) {
       const attendees = await this.prisma.registration.findMany({
         where: {
@@ -257,7 +257,7 @@ export class EventsService implements OnModuleInit {
         },
         orderBy: { registeredAt: 'desc' }
       });
-      
+
       // Group by eventId, take top 5
       attendees.forEach(att => {
         if (!attendeesMap[att.eventId]) attendeesMap[att.eventId] = [];
@@ -351,7 +351,7 @@ export class EventsService implements OnModuleInit {
     if (userId) {
       // Check in the fetched list first
       isRegistered = registrations.some(r => r.userId === userId);
-      
+
       // If not found and we hit the limit, check DB specifically
       if (!isRegistered && registrations.length >= 100) {
         const userReg = await this.prisma.registration.findUnique({
@@ -369,11 +369,11 @@ export class EventsService implements OnModuleInit {
     // Manually construct the object expected by transformEvent
     // We pass the attendees list explicitly
     const attendees = registrations.map(r => r.user);
-    
+
     // We need to pass the registrations in a way transformEvent understands, 
     // OR update transformEvent to accept explicit data.
     // Let's update transformEvent to be more flexible.
-    
+
     return this.transformEvent(event, userId, attendees, isRegistered);
   }
 
@@ -384,7 +384,7 @@ export class EventsService implements OnModuleInit {
     userRole: UserRole,
   ) {
     const event = await this.prisma.event.findUnique({ where: { id } });
-    
+
     if (!event) throw new NotFoundException(`Event with ID ${id} not found`);
 
     // Check permissions
@@ -507,7 +507,7 @@ export class EventsService implements OnModuleInit {
 
   async publish(id: string, userId: string, userRole: UserRole) {
     const event = await this.prisma.event.findUnique({ where: { id } });
-    
+
     if (!event) throw new NotFoundException(`Event with ID ${id} not found`);
 
     // Check permissions
@@ -556,29 +556,29 @@ export class EventsService implements OnModuleInit {
     if (event._count && typeof event._count.registrations === 'number') {
       registrationCount = event._count.registrations;
     } else if (Array.isArray(event.registrations)) {
-       // Fallback if _count not present
-       registrationCount = event.registrations.filter((r: any) => r.status !== RegistrationStatus.CANCELLED).length;
+      // Fallback if _count not present
+      registrationCount = event.registrations.filter((r: any) => r.status !== RegistrationStatus.CANCELLED).length;
     }
 
     // 2. Get Attendees
     // Use explicitAttendees if provided (from separate query), otherwise map from registrations if available
     let attendees = explicitAttendees || [];
     if (!explicitAttendees && Array.isArray(event.registrations)) {
-       // Note: In findAll, 'registrations' might be the filtered list for isRegistered check (length 0 or 1)
-       // So we should be careful. If registrations has 'user' property, it's a full registration object.
-       // If it was the 'isRegistered' check, it might not have 'user'.
-       const validRegs = event.registrations.filter((r: any) => r.user && r.status !== RegistrationStatus.CANCELLED);
-       attendees = validRegs.map((r: any) => r.user);
+      // Note: In findAll, 'registrations' might be the filtered list for isRegistered check (length 0 or 1)
+      // So we should be careful. If registrations has 'user' property, it's a full registration object.
+      // If it was the 'isRegistered' check, it might not have 'user'.
+      const validRegs = event.registrations.filter((r: any) => r.user && r.status !== RegistrationStatus.CANCELLED);
+      attendees = validRegs.map((r: any) => r.user);
     }
 
     // 3. Check isRegistered
     let isRegistered = explicitIsRegistered;
     if (isRegistered === undefined) {
       if (userId && Array.isArray(event.registrations)) {
-         // In findAll, we include registrations: { where: { userId } }
-         // So if that array is not empty, user is registered.
-         // BUT, if we fell back to full registrations array (legacy), we check that too.
-         isRegistered = event.registrations.some((r: any) => r.userId === userId && r.status !== RegistrationStatus.CANCELLED);
+        // In findAll, we include registrations: { where: { userId } }
+        // So if that array is not empty, user is registered.
+        // BUT, if we fell back to full registrations array (legacy), we check that too.
+        isRegistered = event.registrations.some((r: any) => r.userId === userId && r.status !== RegistrationStatus.CANCELLED);
       } else {
         isRegistered = false;
       }
@@ -596,7 +596,7 @@ export class EventsService implements OnModuleInit {
         status = EventStatus.COMPLETED;
       } else if (now > startDate) {
         status = EventStatus.ONGOING; // Event started, registration closed
-      } else if (registrationCount >= event.maxParticipants || now > registrationDeadline) {
+      } else if ((!event.isUnlimited && registrationCount >= event.maxParticipants) || now > registrationDeadline) {
         status = EventStatus.REGISTRATION_CLOSED;
       } else {
         status = EventStatus.REGISTRATION_OPEN;
@@ -617,7 +617,7 @@ export class EventsService implements OnModuleInit {
       // The frontend might use these. If critical, we need to group by status in _count which Prisma supports partially.
       // For now, let's assume confirmedCount ~= registrationCount for simplicity in optimization
       // unless we do a groupBy query.
-      confirmedCount: registrationCount, 
+      confirmedCount: registrationCount,
       pendingCount: 0, // Optimization trade-off: skip detailed status counts for list view
       cancelledCount: 0,
 
@@ -642,7 +642,7 @@ export class EventsService implements OnModuleInit {
       return EventStatus.COMPLETED;
     } else if (now > startDate) {
       return EventStatus.ONGOING;
-    } else if (registrationCount >= event.maxParticipants || now > registrationDeadline) {
+    } else if ((!event.isUnlimited && registrationCount >= event.maxParticipants) || now > registrationDeadline) {
       return EventStatus.REGISTRATION_CLOSED;
     } else {
       return EventStatus.REGISTRATION_OPEN;

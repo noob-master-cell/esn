@@ -89,6 +89,9 @@ export class Event {
   @Field()
   isPublic: boolean;
 
+  @Field()
+  isUnlimited: boolean;
+
 
 
   @Field()

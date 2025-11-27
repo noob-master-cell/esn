@@ -1,6 +1,6 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerException } from '@nestjs/throttler';
 
 @Injectable()
 export class GqlThrottlerGuard extends ThrottlerGuard {
@@ -76,9 +76,14 @@ export class GqlThrottlerGuard extends ThrottlerGuard {
         try {
             return await super.canActivate(context);
         } catch (error) {
-            // If ThrottlerGuard fails (e.g. missing req properties), allow the request
+            // If it's a ThrottlerException, rethrow it to enforce the limit
+            if (error instanceof ThrottlerException) {
+                throw error;
+            }
+
+            // If ThrottlerGuard fails for other reasons (e.g. missing req properties), allow the request
             // This is better than crashing the subscription
-            console.warn('GqlThrottlerGuard: Throttling check failed, allowing request', error.message);
+            // console.warn('GqlThrottlerGuard: Throttling check failed, allowing request', error.message);
             return true;
         }
     }
