@@ -64,6 +64,7 @@ model User {
   @@map("users")
   @@index([createdAt])
   @@index([role])
+  @@index([isActive]) // Optimization for active user count
 }
 
 model UserPreferences {
@@ -198,6 +199,7 @@ model Registration {
   // Compound indexes for optimized query patterns
   @@index([userId, status, registeredAt])  // User's registration history
   @@index([eventId, paymentStatus])        // Event payment tracking
+  @@index([status, registeredAt])          // Optimization for registration stats over time
   @@map("registrations")
 }
 
@@ -237,6 +239,7 @@ model Payment {
   @@index([status])
   @@index([userId])
   @@index([eventId])
+  @@index([status, createdAt]) // Optimization for revenue stats over time
 }
 
 // ================================

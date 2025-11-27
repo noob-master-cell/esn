@@ -210,15 +210,6 @@ export class EventsService implements OnModuleInit {
               },
             },
           },
-          // Check if current user is registered
-          registrations: userId ? {
-            where: {
-              userId: userId,
-              status: { not: RegistrationStatus.CANCELLED }
-            },
-            take: 1,
-            select: { status: true, userId: true }
-          } : false,
         },
         orderBy,
         skip: filter.skip || 0,
@@ -227,12 +218,29 @@ export class EventsService implements OnModuleInit {
       this.prisma.event.count({ where }),
     ]);
 
-    // OPTIMIZATION: Don't fetch attendees for list view
-    // This eliminates the N+1 query problem (500+ extra rows)
-    // Attendees are only shown in detail view where they make sense
+    // OPTIMIZATION: Batch fetch user registration status
+    // Instead of subquery per row, we fetch all relevant registrations in one go
+    let registeredEventIds = new Set<string>();
+    if (userId && items.length > 0) {
+      const eventIds = items.map(e => e.id);
+      const userRegistrations = await this.prisma.registration.findMany({
+        where: {
+          userId,
+          eventId: { in: eventIds },
+          status: { not: RegistrationStatus.CANCELLED }
+        },
+        select: { eventId: true }
+      });
+      registeredEventIds = new Set(userRegistrations.map(r => r.eventId));
+    }
 
     const result = {
-      items: items.map((event) => this.transformEvent(event, userId, [], undefined)), // Empty attendees array for list
+      items: items.map((event) => this.transformEvent(
+        event,
+        userId,
+        [],
+        userId ? registeredEventIds.has(event.id) : false
+      )),
       total,
     };
 
@@ -645,7 +653,7 @@ export class EventsService implements OnModuleInit {
     try {
       // Access the underlying store to get keys (Redis specific)
       const store = (this.cacheManager as any).store;
-      if (store.keys) {
+      if (store && store.keys) {
         // Clear both list and detail caches
         const keys = await store.keys('events:*');
         const eventKeys = await store.keys('event:*');

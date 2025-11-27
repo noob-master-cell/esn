@@ -1,12 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import { AdminStats } from './dto/admin-stats.output';
 
 @Injectable()
 export class AdminService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
+    ) { }
 
     async getStats(): Promise<AdminStats> {
+        const cacheKey = 'admin:stats';
+        const cached = await this.cacheManager.get<AdminStats>(cacheKey);
+        if (cached) {
+            return cached;
+        }
+
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -88,7 +99,7 @@ export class AdminService {
         // A better approach for active users would be users created this month vs last month
 
 
-        return {
+        const result = {
             totalEvents,
             activeUsers,
             totalRegistrations,
@@ -101,6 +112,11 @@ export class AdminService {
             revenueChange: calculateChange(revenueThisMonth, revenueLastMonth),
             activeUsersChange: calculateChange(usersThisMonth, usersLastMonth),
         };
+
+        // Cache for 5 minutes
+        await this.cacheManager.set(cacheKey, result, 300000);
+
+        return result;
     }
 
     async getRegistrationStats() {

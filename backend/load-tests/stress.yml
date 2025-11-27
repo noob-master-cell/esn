@@ -5,11 +5,11 @@ config:
       arrivalRate: 2  # 120 req/min (Slightly above Medium limit) - Should start seeing some 429s
       name: Warm up & Rate Limit Check
     - duration: 120
-      arrivalRate: 5
-      rampTo: 50      # Ramp to 50 req/sec (Well above Burst limit) - Stress test
+      arrivalRate: 10
+      rampTo: 100      # Ramp to 100 req/sec (6000 req/min) - Heavy stress
       name: Ramp up load
     - duration: 120
-      arrivalRate: 50 # Sustained high load - Verify system stability under 429s
+      arrivalRate: 100 # Sustained high load (100 RPS)
       name: Sustained high load
   plugins:
     ensure: {}
@@ -19,8 +19,8 @@ config:
     threshold: 100
   ensure:
     thresholds:
-      - http.response_time.p99: 500 # Adjusted to 500ms (Actual was ~273ms)
-      - http.response_time.p95: 200 # Adjusted to 200ms (Actual was ~170ms)
+      - http.response_time.p99: 200 # Tightened to 200ms
+      - http.response_time.p95: 100 # Tightened to 100ms
 scenarios:
   - name: "Browse Public Content"
     flow:
