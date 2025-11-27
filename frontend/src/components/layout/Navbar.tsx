@@ -124,15 +124,13 @@ export const Navbar: React.FC = () => {
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                     className="flex items-center gap-3 pl-1 pr-2 py-1 rounded-full border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all bg-white"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 p-0.5">
-                      <Avatar
-                        src={profileData?.avatar}
-                        alt="Profile"
-                        fallback={profileData?.firstName?.[0] || user?.name?.[0] || "U"}
-                        size="sm"
-                        className="ring-1 ring-white"
-                      />
-                    </div>
+                    <Avatar
+                      src={profileData?.avatar}
+                      alt="Profile"
+                      fallback={profileData?.firstName?.[0] || user?.name?.[0] || "U"}
+                      size="sm"
+                      className="ring-1 ring-gray-200"
+                    />
                     <span className="text-sm font-medium text-gray-700 max-w-[100px] truncate">
                       {profileData?.firstName || "Account"}
                     </span>
