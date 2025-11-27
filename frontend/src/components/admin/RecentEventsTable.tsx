@@ -136,7 +136,7 @@ export const RecentEventsTable: React.FC = () => {
                     <div className="flex items-center">
                       {event.imageUrl && (
                         <img
-                          className="h-10 w-10 rounded-lg object-cover mr-3"
+                          className="h-10 w-10 rounded-full object-cover mr-3"
                           src={event.imageUrl}
                           alt={event.title}
                         />

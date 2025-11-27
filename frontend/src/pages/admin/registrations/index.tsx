@@ -216,7 +216,7 @@ export const AdminRegistrationsPage: React.FC = () => {
                     <div className="w-full px-6 py-4 bg-gray-50/50 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-100/50 transition-colors">
                       <Disclosure.Button className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left focus:outline-none group">
                         <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center text-xl font-bold overflow-hidden shrink-0">
+                          <div className="h-12 w-12 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center text-xl font-bold overflow-hidden shrink-0">
                             {event?.images && event.images.length > 0 ? (
                               <img src={event.images[0]} alt={event.title} className="h-full w-full object-cover" />
                             ) : (

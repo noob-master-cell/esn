@@ -218,12 +218,12 @@ export const EventsTable: React.FC<EventsTableProps> = ({
                     <div className="flex-shrink-0 h-10 w-10">
                       {event.images && event.images.length > 0 ? (
                         <img
-                          className="h-10 w-10 rounded object-cover"
+                          className="h-10 w-10 rounded-full object-cover"
                           src={event.images[0]}
                           alt={event.title}
                         />
                       ) : (
-                        <div className="h-10 w-10 rounded bg-gray-200 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                           <CalendarIcon className="h-6 w-6 text-gray-400" />
                         </div>
                       )}
@@ -379,12 +379,12 @@ export const EventsTable: React.FC<EventsTableProps> = ({
                   <div className="flex-shrink-0 h-10 w-10">
                     {event.images && event.images.length > 0 ? (
                       <img
-                        className="h-10 w-10 rounded object-cover"
+                        className="h-10 w-10 rounded-full object-cover"
                         src={event.images[0]}
                         alt={event.title}
                       />
                     ) : (
-                      <div className="h-10 w-10 rounded bg-gray-200 flex items-center justify-center">
+                      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                         <CalendarIcon className="h-6 w-6 text-gray-400" />
                       </div>
                     )}

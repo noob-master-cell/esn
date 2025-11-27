@@ -166,13 +166,12 @@ const ProfilePage: React.FC = () => {
           />
 
           {/* Photo Upload Modal */}
-          {isChangingPhoto && (
-            <PhotoUploadModal
-              dbUser={dbUser}
-              onClose={() => setIsChangingPhoto(false)}
-              onUploadComplete={handlePhotoUpload}
-            />
-          )}
+          <PhotoUploadModal
+            dbUser={dbUser}
+            isOpen={isChangingPhoto}
+            onClose={() => setIsChangingPhoto(false)}
+            onUploadComplete={handlePhotoUpload}
+          />
 
           {/* Navigation Tabs */}
           <div className="px-6 md:px-10">

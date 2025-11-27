@@ -80,7 +80,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ eventId, isRegistered
     if (error) return <div className="text-red-500 text-sm">Failed to load comments</div>;
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mt-6">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 mt-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                 Comments
                 <span className="text-sm font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
@@ -89,30 +89,30 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ eventId, isRegistered
             </h3>
 
             {/* Comment List */}
-            <div className="space-y-6 mb-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-4 mb-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                 {comments.length === 0 ? (
-                    <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                    <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                         <p className="text-gray-500 text-sm">No comments yet. Be the first to say something!</p>
                     </div>
                 ) : (
                     <>
                         {comments.map((comment) => (
-                            <div key={comment.id} className="flex gap-4 group">
+                            <div key={comment.id} className="flex gap-3 group">
                                 <div className="flex-shrink-0">
                                     {comment.user.avatar ? (
                                         <img
                                             src={comment.user.avatar}
                                             alt={comment.user.firstName}
-                                            className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                                            className="w-10 h-10 rounded-full object-cover shadow-sm"
                                         />
                                     ) : (
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm border-2 border-white">
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                                             {comment.user.firstName?.[0] || '?'}
                                         </div>
                                     )}
                                 </div>
-                                <div className="flex-1 max-w-[85%]">
-                                    <div className="bg-gray-50 rounded-2xl rounded-tl-none p-4 hover:bg-gray-100 transition-colors">
+                                <div className="flex-1 max-w-[90%]">
+                                    <div className="bg-gray-50 rounded-2xl rounded-tl-none p-3 hover:bg-gray-100 transition-colors">
                                         <div className="flex items-center justify-between mb-1">
                                             <span className="font-bold text-sm text-gray-900">
                                                 {comment.user.firstName} {comment.user.lastName}
