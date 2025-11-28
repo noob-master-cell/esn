@@ -1,55 +1,52 @@
 // frontend/src/components/events/EventsListSkeleton.tsx
 import React from "react";
-import { Card, CardBody } from "@heroui/react";
 
 const EventCardSkeleton: React.FC = () => {
   return (
-    <Card className="max-w-sm">
-      <CardBody className="p-3">
-        <div className="flex gap-3">
-          {/* Left: Image Skeleton */}
-          <div className="flex-shrink-0">
-            <div className="w-[60px] h-[60px] bg-gray-200 rounded-lg animate-pulse"></div>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-3 max-w-sm">
+      <div className="flex gap-3">
+        {/* Left: Image Skeleton */}
+        <div className="flex-shrink-0">
+          <div className="w-[60px] h-[60px] bg-gray-200 rounded-lg animate-pulse"></div>
+        </div>
+
+        {/* Right: Content Skeleton */}
+        <div className="flex-1 min-w-0">
+          {/* Header: Icon + Title */}
+          <div className="flex items-start gap-2 mb-2">
+            <div className="w-5 h-5 bg-gray-200 rounded animate-pulse flex-shrink-0"></div>
+            <div className="flex-1">
+              <div className="h-4 bg-gray-200 rounded animate-pulse mb-1"></div>
+              <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
+            </div>
           </div>
 
-          {/* Right: Content Skeleton */}
-          <div className="flex-1 min-w-0">
-            {/* Header: Icon + Title */}
-            <div className="flex items-start gap-2 mb-2">
-              <div className="w-5 h-5 bg-gray-200 rounded animate-pulse flex-shrink-0"></div>
-              <div className="flex-1">
-                <div className="h-4 bg-gray-200 rounded animate-pulse mb-1"></div>
-                <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
-              </div>
-            </div>
+          {/* Date & Time Skeleton */}
+          <div className="flex items-center gap-1 mb-1">
+            <div className="w-3 h-3 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-3 bg-gray-200 rounded animate-pulse w-24"></div>
+          </div>
 
-            {/* Date & Time Skeleton */}
-            <div className="flex items-center gap-1 mb-1">
-              <div className="w-3 h-3 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-3 bg-gray-200 rounded animate-pulse w-24"></div>
-            </div>
+          {/* Location Skeleton */}
+          <div className="flex items-center gap-1 mb-2">
+            <div className="w-3 h-3 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-3 bg-gray-200 rounded animate-pulse w-20"></div>
+          </div>
 
-            {/* Location Skeleton */}
-            <div className="flex items-center gap-1 mb-2">
-              <div className="w-3 h-3 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-3 bg-gray-200 rounded animate-pulse w-20"></div>
-            </div>
+          {/* Bottom Row: Price + Spots */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="h-5 bg-gray-200 rounded-full animate-pulse w-12"></div>
+            <div className="h-3 bg-gray-200 rounded animate-pulse w-16"></div>
+          </div>
 
-            {/* Bottom Row: Price + Spots */}
-            <div className="flex items-center justify-between mb-2">
-              <div className="h-5 bg-gray-200 rounded-full animate-pulse w-12"></div>
-              <div className="h-3 bg-gray-200 rounded animate-pulse w-16"></div>
-            </div>
-
-            {/* Registration Status Skeleton */}
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-gray-200 rounded-full animate-pulse"></div>
-              <div className="h-3 bg-gray-200 rounded animate-pulse w-20"></div>
-            </div>
+          {/* Registration Status Skeleton */}
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 bg-gray-200 rounded-full animate-pulse"></div>
+            <div className="h-3 bg-gray-200 rounded animate-pulse w-20"></div>
           </div>
         </div>
-      </CardBody>
-    </Card>
+      </div>
+    </div>
   );
 };
 

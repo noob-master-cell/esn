@@ -9,9 +9,46 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       devOptions: {
-        enabled: true
+        enabled: false // Disabled to improve dev performance
       },
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'pwa-icon.svg'],
+      workbox: {
+        // Only precache JavaScript, CSS, and HTML - no images!
+        globPatterns: ['**/*.{js,css,html,woff2}'],
+        globIgnores: [
+          '**/node_modules/**/*',
+          '**/uploads/**/*',
+          '**/*.{png,jpg,jpeg,gif,webp,svg,ico}' // Don't precache images
+        ],
+        // Set max size to prevent caching huge files
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3MB max
+        // Runtime caching for API calls
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/localhost:4000\/graphql/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'graphql-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 300 // 5 minutes
+              }
+            }
+          },
+          // Runtime cache for images
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images-cache',
+              expiration: {
+                maxEntries: 60,
+                maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
+              }
+            }
+          }
+        ]
+      },
+      includeAssets: ['favicon.ico', 'pwa-icon.svg'],
       manifest: {
         name: 'ESN Kaiserslautern',
         short_name: 'ESN KL',
@@ -60,9 +97,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          apollo: ['@apollo/client', 'graphql'],
-          ui: ['@headlessui/react', '@heroicons/react', 'framer-motion'],
+          // Only split large vendor libraries
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'apollo': ['@apollo/client', 'graphql']
         },
       },
     },
