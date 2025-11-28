@@ -12,6 +12,12 @@ import {
 
 import { useState } from "react";
 
+/**
+ * Hook for fetching a paginated list of events.
+ * 
+ * @param initialFilter - Initial filter parameters.
+ * @returns Object containing events list, pagination state, and loading/error status.
+ */
 export const useEvents = (initialFilter?: any) => {
     const [page, setPage] = useState(1);
     const [pageSize] = useState(20);
@@ -44,6 +50,12 @@ export const useEvents = (initialFilter?: any) => {
     };
 };
 
+/**
+ * Hook for fetching events for the admin dashboard.
+ * 
+ * @param initialFilter - Initial filter parameters.
+ * @returns Object containing admin events list, pagination state, and loading/error status.
+ */
 export const useAdminEvents = (initialFilter?: any) => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(20);
@@ -76,6 +88,12 @@ export const useAdminEvents = (initialFilter?: any) => {
     };
 };
 
+/**
+ * Hook for fetching a single event by ID.
+ * 
+ * @param id - Event ID.
+ * @returns Object containing event data and loading/error status.
+ */
 export const useEvent = (id: string) => {
     const { data, loading, error, refetch } = useQuery(GET_EVENT, {
         variables: { id },
@@ -90,6 +108,12 @@ export const useEvent = (id: string) => {
     };
 };
 
+/**
+ * Hook for fetching an event for editing purposes.
+ * 
+ * @param id - Event ID.
+ * @returns Object containing event data and loading/error status.
+ */
 export const useEventForEdit = (id: string) => {
     const { data, loading, error } = useQuery(GET_EVENT_FOR_EDIT, {
         variables: { id },
@@ -103,6 +127,11 @@ export const useEventForEdit = (id: string) => {
     };
 };
 
+/**
+ * Hook for creating a new event.
+ * 
+ * @returns Object containing createEvent mutation and status.
+ */
 export const useCreateEvent = () => {
     const [createEvent, { loading, error, data }] = useMutation(CREATE_EVENT);
 
@@ -114,6 +143,11 @@ export const useCreateEvent = () => {
     };
 };
 
+/**
+ * Hook for updating an existing event.
+ * 
+ * @returns Object containing updateEvent mutation and status.
+ */
 export const useUpdateEvent = () => {
     const [updateEvent, { loading, error, data }] = useMutation(UPDATE_EVENT);
 
@@ -125,6 +159,12 @@ export const useUpdateEvent = () => {
     };
 };
 
+/**
+ * Hook for deleting an event.
+ * Handles cache updates to remove the deleted event from lists.
+ * 
+ * @returns Object containing deleteEvent mutation and status.
+ */
 export const useDeleteEvent = () => {
     const [deleteEventMutation, { loading, error }] = useMutation(DELETE_EVENT);
 
@@ -176,6 +216,11 @@ export const useDeleteEvent = () => {
     };
 };
 
+/**
+ * Hook for publishing a draft event.
+ * 
+ * @returns Object containing publishEvent mutation and status.
+ */
 export const usePublishEvent = () => {
     const [publishEvent, { loading, error }] = useMutation(PUBLISH_EVENT);
 

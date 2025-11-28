@@ -24,6 +24,9 @@ interface GroupedEvents {
   isCurrentMonth: boolean;
 }
 
+/**
+ * Props for the CalendarView component.
+ */
 interface CalendarViewProps {
   events: Event[];
   loading?: boolean;
@@ -77,6 +80,11 @@ const endOfWeek = (date: Date): Date => {
   );
 };
 
+/**
+ * Component for displaying events in a calendar format.
+ * Supports Monthly, Weekly, and Daily views.
+ * Handles navigation and filtering of events based on the selected view.
+ */
 const CalendarView: React.FC<CalendarViewProps> = ({
   events = [],
   loading = false,

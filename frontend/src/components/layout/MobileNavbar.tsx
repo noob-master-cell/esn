@@ -2,7 +2,9 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useMyProfile } from "../../hooks/api/useUsers";
+import { useInstallPrompt } from "../../hooks/useInstallPrompt";
 import { Avatar } from "../ui/Avatar";
+import logo from "../../assets/logos/star-color.svg";
 import {
     HomeIcon,
     CalendarIcon,
@@ -20,6 +22,7 @@ import {
 export const MobileNavbar: React.FC = () => {
     const { user, isAuthenticated } = useAuth0();
     const location = useLocation();
+    const { isInstallable, promptInstall } = useInstallPrompt();
     const { user: profileData } = useMyProfile({
         skip: !user,
     });
@@ -90,6 +93,17 @@ export const MobileNavbar: React.FC = () => {
                         </Link>
                     );
                 })}
+
+                {/* Install App Button */}
+                {isInstallable && (
+                    <button
+                        onClick={promptInstall}
+                        className="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-500 hover:text-gray-900"
+                    >
+                        <img src={logo} alt="Install" className="w-6 h-6 object-contain" />
+                        <span className="text-[10px] font-medium">Install</span>
+                    </button>
+                )}
 
                 {/* Profile / Login Item */}
                 <Link

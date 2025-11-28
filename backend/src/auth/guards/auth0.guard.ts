@@ -11,6 +11,13 @@ import * as jwt from 'jsonwebtoken';
 import { JwksClient } from 'jwks-rsa';
 import axios from 'axios';
 
+/**
+ * Guard that validates Auth0 JWT tokens.
+ * 
+ * It verifies the token signature using JWKS, checks the audience and issuer,
+ * and ensures the user exists in the local database.
+ * If the user exists in Auth0 but not locally, it attempts to sync/create the user.
+ */
 @Injectable()
 export class Auth0Guard implements CanActivate {
     private jwksClient: JwksClient;

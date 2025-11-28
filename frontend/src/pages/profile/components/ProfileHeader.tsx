@@ -1,5 +1,7 @@
 import React from "react";
 import { Avatar } from "../../../components/ui/Avatar";
+import { useInstallPrompt } from "../../../hooks/useInstallPrompt";
+import logo from "../../../assets/logos/star-color.svg";
 
 interface ProfileHeaderProps {
     dbUser: any;
@@ -12,6 +14,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     memberSince,
     onChangePhoto,
 }) => {
+    const { isInstallable, promptInstall } = useInstallPrompt();
+
     return (
         <div className="bg-white border-b border-gray-200">
             <div className="px-6 md:px-10 py-8">
@@ -52,6 +56,16 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                                 <p className="text-gray-500 text-sm mb-3">{dbUser?.email}</p>
                             </div>
 
+                            {/* Actions */}
+                            {isInstallable && (
+                                <button
+                                    onClick={promptInstall}
+                                    className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors shadow-sm"
+                                >
+                                    <img src={logo} alt="Install" className="w-5 h-5 object-contain" />
+                                    Install App
+                                </button>
+                            )}
                         </div>
 
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm text-gray-600 mt-2">

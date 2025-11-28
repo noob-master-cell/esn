@@ -20,6 +20,8 @@ export const AboutSection: React.FC = () => {
                                 src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop"
                                 alt="Students having fun"
                                 className="w-full h-full object-cover"
+                                width="2070"
+                                height="1380"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-8">
                                 <div className="text-white">

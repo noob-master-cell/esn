@@ -8,6 +8,10 @@ import { PaginatedUsers } from './dto/paginated-users.output';
 import { Prisma } from '@prisma/client';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
+/**
+ * Service responsible for managing users.
+ * Handles user retrieval, profile updates, and administrative actions.
+ */
 @Injectable()
 export class UsersService {
   constructor(
@@ -16,8 +20,13 @@ export class UsersService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
 
+  /**
+   * Retrieves a paginated list of users based on filters.
+   * 
+   * @param filter - Filtering criteria (search, role, status, etc.).
+   * @returns Paginated list of users.
+   */
   async findAll(filter: UsersFilterInput = {}): Promise<PaginatedUsers> {
-    // Generate a unique cache key based on the filter
     const cacheKey = `users:list:${JSON.stringify(filter)}`;
     const cached = await this.cacheManager.get<PaginatedUsers>(cacheKey);
 
@@ -66,12 +75,17 @@ export class UsersService {
       total,
     };
 
-    // Cache for 30 seconds - short TTL for admin lists to balance freshness and load
     await this.cacheManager.set(cacheKey, result, 30000);
 
     return result;
   }
 
+  /**
+   * Retrieves a single user by ID.
+   * 
+   * @param id - User ID.
+   * @returns The user object or null if not found.
+   */
   async findOne(id: string): Promise<User | null> {
     const prismaUser = await this.prisma.user.findUnique({
       where: { id, isActive: true },
@@ -84,6 +98,12 @@ export class UsersService {
     return this.transformPrismaUser(prismaUser);
   }
 
+  /**
+   * Retrieves a user by email address.
+   * 
+   * @param email - User email.
+   * @returns The user object or null if not found.
+   */
   async findByEmail(email: string): Promise<User | null> {
     const prismaUser = await this.prisma.user.findUnique({
       where: { email, isActive: true },
@@ -96,6 +116,13 @@ export class UsersService {
     return this.transformPrismaUser(prismaUser);
   }
 
+  /**
+   * Updates a user's profile information.
+   * 
+   * @param userId - ID of the user to update.
+   * @param updateData - Data to update.
+   * @returns The updated user.
+   */
   async updateProfile(userId: string, updateData: any): Promise<User> {
     const prismaUser = await this.prisma.user.update({
       where: { id: userId },
@@ -116,14 +143,12 @@ export class UsersService {
       },
     });
 
-    // Cloudinary Cleanup: Delete old avatar if changed
     if (updateData.avatar !== undefined) {
       const oldAvatar = await this.prisma.user.findUnique({
         where: { id: userId },
         select: { avatar: true },
       }).then(u => u?.avatar);
 
-      // If there was an old avatar and it's different from the new one (or new one is null)
       if (oldAvatar && oldAvatar !== updateData.avatar) {
         const publicId = this.cloudinaryService.extractPublicIdFromUrl(oldAvatar);
         if (publicId) {
@@ -137,7 +162,12 @@ export class UsersService {
     return this.transformPrismaUser(prismaUser);
   }
 
-  // Helper method to transform Prisma user to GraphQL user
+  /**
+   * Transforms a Prisma user object into the GraphQL User type.
+   * 
+   * @param prismaUser - Raw Prisma user object.
+   * @returns Transformed user object.
+   */
   transformPrismaUser(prismaUser: any): User {
     return {
       id: prismaUser.id,
@@ -164,6 +194,14 @@ export class UsersService {
       updatedAt: prismaUser.updatedAt,
     };
   }
+
+  /**
+   * Verifies or un-verifies a user's ESN card.
+   * 
+   * @param userId - User ID.
+   * @param verified - Verification status.
+   * @returns The updated user.
+   */
   async verifyEsnCard(userId: string, verified: boolean): Promise<User> {
     const prismaUser = await this.prisma.user.update({
       where: { id: userId },
@@ -173,6 +211,12 @@ export class UsersService {
     return this.transformPrismaUser(prismaUser);
   }
 
+  /**
+   * Deletes a user account.
+   * 
+   * @param userId - User ID.
+   * @returns True if deletion was successful.
+   */
   async deleteUser(userId: string): Promise<boolean> {
     try {
       await this.prisma.user.delete({
@@ -185,7 +229,13 @@ export class UsersService {
     }
   }
 
-
+  /**
+   * Updates a user's role.
+   * 
+   * @param userId - User ID.
+   * @param role - New role.
+   * @returns The updated user.
+   */
   async updateUserRole(userId: string, role: any): Promise<User> {
     const prismaUser = await this.prisma.user.update({
       where: { id: userId },
@@ -194,6 +244,12 @@ export class UsersService {
     return this.transformPrismaUser(prismaUser);
   }
 
+  /**
+   * Administratively deletes a user.
+   * 
+   * @param userId - User ID.
+   * @returns True if deletion was successful.
+   */
   async adminDeleteUser(userId: string): Promise<boolean> {
     try {
       await this.prisma.user.delete({
@@ -206,6 +262,13 @@ export class UsersService {
     }
   }
 
+  /**
+   * Exports all data associated with a user (GDPR compliance).
+   * 
+   * @param userId - User ID.
+   * @returns Object containing all user data.
+   * @throws Error if user is not found.
+   */
   async exportUserData(userId: string): Promise<any> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -226,7 +289,6 @@ export class UsersService {
       throw new Error('User not found');
     }
 
-    // Transform data into a user-friendly format
     const exportData = {
       profile: {
         firstName: user.firstName,
@@ -275,7 +337,7 @@ export class UsersService {
       comments: user.comments.map(c => ({
         content: c.content,
         date: c.createdAt,
-        eventId: c.eventId, // Keeping ID for reference as we didn't include Event in comments query
+        eventId: c.eventId,
       })),
       feedback: user.feedbacks.map(f => ({
         message: f.message,

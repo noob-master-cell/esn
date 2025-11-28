@@ -3,6 +3,11 @@ import { useEvents } from "../../hooks/api/useEvents";
 import EventCard from "./EventCard";
 import { EventsListSkeleton } from "./EventsListSkeleton";
 
+/**
+ * Component for displaying a list of events.
+ * Supports Grid and List views.
+ * Fetches events using `useEvents` hook and handles loading/error states.
+ */
 export const EventsList: React.FC = () => {
   const [viewType, setViewType] = useState<"grid" | "list">("grid");
 

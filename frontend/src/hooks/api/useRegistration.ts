@@ -13,12 +13,18 @@ import {
   GET_EVENT,
 } from "../../graphql/events";
 
+/**
+ * Options for the useRegistration hook.
+ */
 interface UseRegistrationOptions {
   eventId: string;
   onSuccess?: (data: any) => void;
   onError?: (error: any) => void;
 }
 
+/**
+ * State returned by the useRegistration hook.
+ */
 interface RegistrationState {
   isRegistered: boolean;
   isLoading: boolean;
@@ -33,6 +39,13 @@ interface RegistrationState {
 
 }
 
+/**
+ * Hook for managing event registration.
+ * Handles checking registration status, registering for events, and updating the cache.
+ * 
+ * @param options - Configuration options (eventId, callbacks).
+ * @returns Registration state and handlers.
+ */
 export const useRegistration = ({
   eventId,
   onSuccess,
@@ -222,6 +235,13 @@ interface RegistrationStatus {
   | "CANCELLED"
   | "WAITLISTED";
 }
+
+/**
+ * Hook for checking registration status for a specific event.
+ * 
+ * @param eventId - Event ID.
+ * @returns Registration status object.
+ */
 export const useRegistrationStatus = (eventId: string): RegistrationStatus => {
   const { data, loading, error } = useQuery(GET_MY_REGISTRATIONS, {
     fetchPolicy: "cache-and-network",
@@ -284,6 +304,11 @@ export const getRegistrationStatusInfo = (status: string) => {
   return statusConfig[status as keyof typeof statusConfig] || statusConfig.NONE;
 };
 
+/**
+ * Hook for cancelling a registration.
+ * 
+ * @returns Object containing cancelRegistration mutation and status.
+ */
 export const useCancelRegistration = () => {
   const [cancelRegistrationMutation, { loading, error }] = useMutation(
     CANCEL_REGISTRATION
@@ -320,6 +345,12 @@ export const useCancelRegistration = () => {
   return { cancelRegistration, loading, error };
 };
 
+/**
+ * Hook for fetching the current user's registrations.
+ * 
+ * @param options - Apollo Query options.
+ * @returns Object containing registrations list and status.
+ */
 export const useMyRegistrations = (options?: QueryHookOptions) => {
   const { data, loading, error, refetch } = useQuery(GET_MY_REGISTRATIONS, {
     fetchPolicy: "cache-and-network",
@@ -335,6 +366,11 @@ export const useMyRegistrations = (options?: QueryHookOptions) => {
   };
 };
 
+/**
+ * Hook for creating a registration (admin/manual).
+ * 
+ * @returns Object containing createRegistration mutation and status.
+ */
 export const useCreateRegistration = () => {
   const [createRegistrationMutation, { loading, error }] = useMutation(
     REGISTER_FOR_EVENT,

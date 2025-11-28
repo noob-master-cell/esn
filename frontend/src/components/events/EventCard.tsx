@@ -54,6 +54,9 @@ const getCategoryColors = (category: string) => {
   return colorMap[category] || colorMap.OTHER;
 };
 
+/**
+ * Props for the EventCard component.
+ */
 interface EventCardProps {
   event: {
     id: string;
@@ -69,6 +72,11 @@ interface EventCardProps {
   };
 }
 
+/**
+ * Card component for displaying event summary.
+ * Shows title, category, time, location, and availability.
+ * Navigates to event details on click.
+ */
 const EventCard: React.FC<EventCardProps> = ({ event }) => {
   const navigate = useNavigate();
 

@@ -1,5 +1,12 @@
 import { useAuth0 } from "@auth0/auth0-react";
 
+/**
+ * Custom hook for handling authentication using Auth0.
+ * Wraps the `useAuth0` hook and provides simplified access to auth state,
+ * tokens, and user roles.
+ * 
+ * @returns Object containing auth state, token getter, and user info.
+ */
 export const useAuth = () => {
     const { isLoading, isAuthenticated, user, getAccessTokenSilently, loginWithRedirect, logout } = useAuth0();
 

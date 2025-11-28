@@ -2,6 +2,13 @@ import { ExecutionContext, Injectable } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { ThrottlerGuard, ThrottlerException } from '@nestjs/throttler';
 
+/**
+ * Throttler guard for GraphQL requests.
+ * Extends the default ThrottlerGuard to handle GraphQL context and subscriptions.
+ * 
+ * It extracts the request and response objects from the GraphQL context,
+ * handling both standard queries/mutations and subscriptions.
+ */
 @Injectable()
 export class GqlThrottlerGuard extends ThrottlerGuard {
     getRequestResponse(context: ExecutionContext) {

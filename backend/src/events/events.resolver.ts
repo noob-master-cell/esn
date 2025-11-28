@@ -10,10 +10,15 @@ import { OrganizerGuard } from './guards/organizer.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { PaginatedEvents } from './dto/paginated-events.output';
-import { EventStatus, RegistrationStatus } from '@prisma/client';
-
+import { EventStatus } from '@prisma/client';
 import { EventCountsLoader } from '../dataloader/event-counts.loader';
+import { EventConnection } from './dto/event-connection.output';
+import { PaginationArgs } from '../common/dto/pagination.args';
 
+/**
+ * Resolver for handling Event-related GraphQL operations.
+ * Exposes queries and mutations for managing events.
+ */
 @Resolver(() => Event)
 export class EventsResolver {
   constructor(
@@ -21,6 +26,14 @@ export class EventsResolver {
     private readonly eventCountsLoader: EventCountsLoader,
   ) { }
 
+  /**
+   * Creates a new event.
+   * Requires authentication and organizer privileges.
+   * 
+   * @param createEventInput - Data for creating the event.
+   * @param user - The currently authenticated user.
+   * @returns The created event.
+   */
   @Mutation(() => Event)
   @UseGuards(Auth0Guard, OrganizerGuard)
   async createEvent(
@@ -30,19 +43,49 @@ export class EventsResolver {
     return this.eventsService.create(createEventInput, user.id);
   }
 
+  /**
+   * Retrieves a paginated list of public events.
+   * Can be filtered by various criteria.
+   * 
+   * @param filter - Filtering criteria (category, date, search, etc.).
+   * @param includePrivate - Whether to include private events (not used currently).
+   * @returns Paginated list of events.
+   */
   @Query(() => PaginatedEvents, { name: 'events' })
   async findAll(
     @Args('filter', { nullable: true }) filter: EventsFilterInput = {},
     @Args('includePrivate', { nullable: true, defaultValue: false })
     includePrivate: boolean = false,
   ) {
-    // For public access, don't pass userId
     const userId = includePrivate ? undefined : undefined;
-    // Public query always treats user as guest/regular for filtering purposes (unless we want to support admin seeing drafts on homepage?)
-    // For now, let's keep homepage strictly public/published only.
     return this.eventsService.findAll(filter, userId, undefined);
   }
 
+  /**
+   * Retrieves events using cursor-based pagination.
+   * 
+   * @param paginationArgs - Cursor pagination arguments (first, after).
+   * @param filter - Filtering criteria.
+   * @param user - The currently authenticated user (optional).
+   * @returns EventConnection object.
+   */
+  @Query(() => EventConnection, { name: 'eventsConnection' })
+  async eventsConnection(
+    @Args() paginationArgs: PaginationArgs,
+    @Args('filter', { nullable: true }) filter: EventsFilterInput = {},
+    @CurrentUser() user?: User,
+  ) {
+    return this.eventsService.findConnection(paginationArgs, filter, user?.id, user?.role);
+  }
+
+  /**
+   * Retrieves events for the admin dashboard.
+   * Requires authentication.
+   * 
+   * @param filter - Filtering criteria.
+   * @param user - The currently authenticated user.
+   * @returns Paginated list of events for admin.
+   */
   @Query(() => PaginatedEvents, { name: 'adminEvents' })
   @UseGuards(Auth0Guard)
   async adminEvents(
@@ -52,12 +95,26 @@ export class EventsResolver {
     return this.eventsService.findAll(filter, user.id, user.role);
   }
 
+  /**
+   * Retrieves events organized by the current user.
+   * Requires authentication.
+   * 
+   * @param user - The currently authenticated user.
+   * @returns List of events organized by the user.
+   */
   @Query(() => [Event], { name: 'myEvents' })
   @UseGuards(Auth0Guard)
   async findMyEvents(@CurrentUser() user: User) {
     return this.eventsService.getMyEvents(user.id);
   }
 
+  /**
+   * Retrieves a single event by its ID.
+   * 
+   * @param id - Event ID.
+   * @param user - The currently authenticated user (optional).
+   * @returns The requested event.
+   */
   @Query(() => Event, { name: 'event' })
   async findOne(
     @Args('id', { type: () => ID }) id: string,
@@ -66,6 +123,14 @@ export class EventsResolver {
     return this.eventsService.findOne(id, user?.id, user?.role);
   }
 
+  /**
+   * Updates an existing event.
+   * Requires authentication.
+   * 
+   * @param updateEventInput - Data to update.
+   * @param user - The currently authenticated user.
+   * @returns The updated event.
+   */
   @Mutation(() => Event)
   @UseGuards(Auth0Guard)
   async updateEvent(
@@ -80,6 +145,14 @@ export class EventsResolver {
     );
   }
 
+  /**
+   * Deletes an event.
+   * Requires authentication.
+   * 
+   * @param id - Event ID.
+   * @param user - The currently authenticated user.
+   * @returns True if deletion was successful.
+   */
   @Mutation(() => Boolean)
   @UseGuards(Auth0Guard)
   async removeEvent(
@@ -89,6 +162,14 @@ export class EventsResolver {
     return this.eventsService.remove(id, user.id, user.role);
   }
 
+  /**
+   * Publishes a draft event.
+   * Requires authentication.
+   * 
+   * @param id - Event ID.
+   * @param user - The currently authenticated user.
+   * @returns The published event.
+   */
   @Mutation(() => Event)
   @UseGuards(Auth0Guard)
   async publishEvent(
@@ -98,6 +179,12 @@ export class EventsResolver {
     return this.eventsService.publish(id, user.id, user.role);
   }
 
+  /**
+   * Retrieves the total count of events matching the filter.
+   * 
+   * @param filter - Filtering criteria.
+   * @returns Total count of events.
+   */
   @Query(() => Int, { name: 'eventsCount' })
   async getEventsCount(
     @Args('filter', { nullable: true }) filter: EventsFilterInput = {},
@@ -106,6 +193,13 @@ export class EventsResolver {
     return events.total;
   }
 
+  /**
+   * Field resolver for confirmed registrations count.
+   * Uses Dataloader to batch queries and prevent N+1 issues.
+   * 
+   * @param event - The parent event object.
+   * @returns Number of confirmed registrations.
+   */
   @ResolveField(() => Int)
   async confirmedCount(@Parent() event: Event) {
     if (event.confirmedCount !== undefined) return event.confirmedCount;
@@ -113,6 +207,13 @@ export class EventsResolver {
     return counts.confirmed;
   }
 
+  /**
+   * Field resolver for pending registrations count.
+   * Uses Dataloader to batch queries.
+   * 
+   * @param event - The parent event object.
+   * @returns Number of pending registrations.
+   */
   @ResolveField(() => Int)
   async pendingCount(@Parent() event: Event) {
     if (event.pendingCount !== undefined) return event.pendingCount;
@@ -120,6 +221,13 @@ export class EventsResolver {
     return counts.pending;
   }
 
+  /**
+   * Field resolver for cancelled registrations count.
+   * Uses Dataloader to batch queries.
+   * 
+   * @param event - The parent event object.
+   * @returns Number of cancelled registrations.
+   */
   @ResolveField(() => Int)
   async cancelledCount(@Parent() event: Event) {
     if (event.cancelledCount !== undefined) return event.cancelledCount;
@@ -127,10 +235,14 @@ export class EventsResolver {
     return counts.cancelled;
   }
 
+  /**
+   * Field resolver for computing event status.
+   * 
+   * @param event - The parent event object.
+   * @returns The computed EventStatus.
+   */
   @ResolveField(() => EventStatus)
   async status(@Parent() event: Event) {
-    // If registrationCount is missing (e.g. raw Prisma object), default to 0
-    // Ideally, the service should always provide it, but this is a fallback
     const count = event.registrationCount || 0;
     return this.eventsService.computeEventStatus(event, count);
   }

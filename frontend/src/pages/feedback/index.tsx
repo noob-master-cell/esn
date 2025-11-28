@@ -294,7 +294,7 @@ const FeedbackPage: React.FC = () => {
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-xs font-medium text-gray-400" title={format(new Date(feedback.createdAt), "PPpp")}>
+                                                    <span className="text-xs font-medium text-gray-500" title={format(new Date(feedback.createdAt), "PPpp")}>
                                                         {formatDistanceToNow(new Date(feedback.createdAt), { addSuffix: true })}
                                                     </span>
                                                     {canModify(feedback) && (
@@ -311,7 +311,7 @@ const FeedbackPage: React.FC = () => {
                                                             <button
                                                                 onClick={() => handleDelete(feedback.id)}
                                                                 disabled={deleting}
-                                                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
+                                                                className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
                                                                 title="Delete"
                                                             >
                                                                 <TrashIcon className="w-4 h-4" />
@@ -320,7 +320,7 @@ const FeedbackPage: React.FC = () => {
                                                     )}
                                                 </div>
                                             </div>
-                                            <p className="text-gray-600 text-sm whitespace-pre-wrap leading-relaxed">{feedback.message}</p>
+                                            <p className="text-gray-700 text-sm whitespace-pre-wrap leading-relaxed">{feedback.message}</p>
                                         </div>
                                     </div>
                                 </div>

@@ -8,6 +8,10 @@ import { User } from '../users/entities/user.entity';
 // Cache TTL for comments (1 minute - frequently updated)
 const COMMENTS_CACHE_TTL = 60000; // 1 minute
 
+/**
+ * Service responsible for managing comments.
+ * Handles creation, retrieval, and caching of comments.
+ */
 @Injectable()
 export class CommentsService {
     constructor(
@@ -15,6 +19,17 @@ export class CommentsService {
         @Inject(CACHE_MANAGER) private cacheManager: Cache,
     ) { }
 
+    /**
+     * Creates a new comment.
+     * Validates that the user is allowed to comment (registered, organizer, or admin).
+     * Invalidates the cache for the event's comments.
+     * 
+     * @param createCommentInput - Data for creating the comment.
+     * @param user - The user creating the comment.
+     * @returns The created comment.
+     * @throws NotFoundException if event not found.
+     * @throws ForbiddenException if user is not allowed to comment.
+     */
     async create(createCommentInput: CreateCommentInput, user: User) {
         const { eventId, content } = createCommentInput;
 
@@ -82,6 +97,15 @@ export class CommentsService {
         return comment;
     }
 
+    /**
+     * Retrieves a paginated list of comments for an event.
+     * Uses caching to improve performance.
+     * 
+     * @param eventId - ID of the event.
+     * @param skip - Number of comments to skip.
+     * @param take - Number of comments to retrieve.
+     * @returns List of comments.
+     */
     async findAll(eventId: string, skip: number = 0, take: number = 10) {
         // Generate cache key
         const cacheKey = `comments:${eventId}:${skip}:${take}`;
@@ -118,7 +142,11 @@ export class CommentsService {
         return comments;
     }
 
-    // Helper method to clear cache for an event's comments
+    /**
+     * Clears the cache for all comments of a specific event.
+     * 
+     * @param eventId - ID of the event.
+     */
     private async clearEventCommentsCache(eventId: string) {
         try {
             const store = (this.cacheManager as any).store;

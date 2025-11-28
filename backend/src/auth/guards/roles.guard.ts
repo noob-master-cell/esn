@@ -3,6 +3,12 @@ import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { UserRole } from '@prisma/client';
 
+/**
+ * Guard that checks if the authenticated user has the required roles.
+ * 
+ * It retrieves the required roles from the route metadata (set by @Roles decorator)
+ * and compares them with the user's role.
+ */
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) { }

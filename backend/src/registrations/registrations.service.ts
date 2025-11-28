@@ -17,17 +17,30 @@ import {
 } from './entities/registration.entity';
 import { UserRole, EventStatus } from '@prisma/client';
 
+/**
+ * Service responsible for managing event registrations.
+ * Handles creation, updates, cancellations, and retrieval of registrations.
+ * Enforces business rules regarding capacity, deadlines, and user permissions.
+ */
 @Injectable()
 export class RegistrationsService {
   constructor(private prisma: PrismaService) { }
 
+  /**
+   * Creates a new registration for an event.
+   * Uses a database transaction to ensure atomicity and prevent race conditions (e.g., overbooking).
+   * 
+   * @param createRegistrationInput - Data for creating the registration.
+   * @param userId - ID of the user registering.
+   * @returns The created registration.
+   * @throws NotFoundException if event is not found.
+   * @throws BadRequestException if event is not open for registration or deadline passed.
+   * @throws ConflictException if user is already registered or event is full (and no waitlist).
+   */
   async create(
     createRegistrationInput: CreateRegistrationInput,
     userId: string,
   ) {
-
-
-    // Use a transaction to ensure atomic capacity check and registration
     return this.prisma.$transaction(async (tx) => {
       // Re-fetch event within transaction to lock/ensure latest state
       const event = await tx.event.findUnique({
@@ -186,6 +199,14 @@ export class RegistrationsService {
     });
   }
 
+  /**
+   * Retrieves a paginated list of registrations based on filters.
+   * 
+   * @param filter - Filtering criteria.
+   * @param requestingUserId - ID of the requesting user.
+   * @param userRole - Role of the requesting user.
+   * @returns List of registrations.
+   */
   async findAll(
     filter: RegistrationFilterInput,
     requestingUserId?: string,
@@ -272,6 +293,16 @@ export class RegistrationsService {
     );
   }
 
+  /**
+   * Retrieves a single registration by ID.
+   * 
+   * @param id - Registration ID.
+   * @param requestingUserId - ID of the requesting user.
+   * @param userRole - Role of the requesting user.
+   * @returns The requested registration.
+   * @throws NotFoundException if registration is not found.
+   * @throws ForbiddenException if user lacks permission.
+   */
   async findOne(id: string, requestingUserId?: string, userRole?: UserRole) {
     const registration = await this.prisma.registration.findUnique({
       where: { id },
@@ -308,6 +339,16 @@ export class RegistrationsService {
     return this.transformRegistration(registration);
   }
 
+  /**
+   * Updates an existing registration.
+   * 
+   * @param id - Registration ID.
+   * @param updateRegistrationInput - Data to update.
+   * @param requestingUserId - ID of the user performing the update.
+   * @param userRole - Role of the user performing the update.
+   * @returns The updated registration.
+   * @throws ForbiddenException if user lacks permission.
+   */
   async update(
     id: string,
     updateRegistrationInput: UpdateRegistrationInput,
@@ -386,6 +427,15 @@ export class RegistrationsService {
     return this.transformRegistration(updatedRegistration);
   }
 
+  /**
+   * Cancels a registration.
+   * 
+   * @param id - Registration ID.
+   * @param requestingUserId - ID of the user cancelling.
+   * @param userRole - Role of the user cancelling.
+   * @returns The cancelled registration.
+   * @throws BadRequestException if registration is already cancelled or event has ended.
+   */
   async cancel(id: string, requestingUserId: string, userRole: UserRole) {
     const registration = await this.findOne(id, requestingUserId, userRole);
 
@@ -455,6 +505,12 @@ export class RegistrationsService {
     return this.transformRegistration(cancelledRegistration);
   }
 
+  /**
+   * Retrieves all registrations for a specific user.
+   * 
+   * @param userId - ID of the user.
+   * @returns List of registrations.
+   */
   async getMyRegistrations(userId: string) {
     const registrations = await this.prisma.registration.findMany({
       where: {
@@ -509,8 +565,12 @@ export class RegistrationsService {
   }
 
 
-
-  // Update the transformRegistration method
+  /**
+   * Transforms a Prisma registration object into the GraphQL Registration type.
+   * 
+   * @param registration - Raw Prisma registration object.
+   * @returns Transformed registration object.
+   */
   private transformRegistration(registration: any) {
     return {
       ...registration,
@@ -519,7 +579,12 @@ export class RegistrationsService {
     };
   }
 
-  // Enhanced event transformation for registration context
+  /**
+   * Transforms an event object specifically for the registration context.
+   * 
+   * @param event - Raw Prisma event object.
+   * @returns Transformed event object.
+   */
   private transformEventForRegistration(event: any) {
     if (!event) return null;
 
@@ -556,6 +621,17 @@ export class RegistrationsService {
     };
   }
 
+  /**
+   * Marks a registration as attended or no-show.
+   * 
+   * @param registrationId - Registration ID.
+   * @param attended - True if attended, false if no-show.
+   * @param userId - ID of the user marking attendance.
+   * @param userRole - Role of the user marking attendance.
+   * @returns The updated registration.
+   * @throws NotFoundException if registration is not found.
+   * @throws ForbiddenException if outside allowed time window.
+   */
   async markAttendance(
     registrationId: string,
     attended: boolean,

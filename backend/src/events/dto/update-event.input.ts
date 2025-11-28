@@ -4,7 +4,7 @@ import { IsString } from 'class-validator';
 
 @InputType()
 export class UpdateEventInput extends PartialType(CreateEventInput) {
-  @Field(() => ID)
+  @Field(() => ID, { description: 'Unique identifier of the event to update' })
   @IsString()
   id: string;
 }

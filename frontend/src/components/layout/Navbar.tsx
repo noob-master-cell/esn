@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useMyProfile } from "../../hooks/api/useUsers";
+import { useInstallPrompt } from "../../hooks/useInstallPrompt";
 import { Avatar } from "../ui/Avatar";
 import logo from "../../assets/logos/star-color.svg";
 import {
@@ -18,6 +19,7 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const { isInstallable, promptInstall } = useInstallPrompt();
 
   const { user: profileData } = useMyProfile({
     skip: !user,
@@ -113,6 +115,20 @@ export const Navbar: React.FC = () => {
                   <ShieldCheckIcon className="w-4 h-4" />
                   Admin
                 </Link>
+              )}
+
+              {/* Install App Button */}
+              {isInstallable && (
+                <button
+                  onClick={promptInstall}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 ${isTransparent
+                    ? "text-white hover:text-cyan-400 hover:bg-white/10"
+                    : "text-gray-600 hover:text-cyan-600 hover:bg-cyan-50"
+                    }`}
+                >
+                  <img src={logo} alt="Install" className="w-5 h-5 object-contain" />
+                  Install App
+                </button>
               )}
             </div>
 

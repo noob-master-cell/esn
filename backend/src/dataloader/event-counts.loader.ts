@@ -9,10 +9,28 @@ export interface EventCounts {
     cancelled: number;
 }
 
+/**
+ * DataLoader for batching and caching event registration counts.
+ * Prevents N+1 query issues when fetching counts for multiple events.
+ * 
+ * This loader groups registrations by event ID and status to efficiently
+ * calculate confirmed, pending, and cancelled counts in a single database query.
+ * 
+ * @see https://github.com/graphql/dataloader
+ */
 @Injectable({ scope: Scope.REQUEST })
 export class EventCountsLoader {
     constructor(private readonly prisma: PrismaService) { }
 
+    /**
+     * DataLoader instance for batching event counts.
+     * 
+     * Keys: Event IDs (string)
+     * Values: EventCounts object containing:
+     * - confirmed: Number of confirmed/attended/no-show registrations
+     * - pending: Number of pending registrations
+     * - cancelled: Number of cancelled registrations
+     */
     public readonly batchCounts = new DataLoader<string, EventCounts>(
         async (eventIds: readonly string[]) => {
             // Fetch all counts in a single query using grouping

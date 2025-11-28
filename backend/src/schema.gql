@@ -117,6 +117,24 @@ type PaginatedEvents {
   total: Int!
 }
 
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type EventEdge {
+  cursor: String!
+  node: Event!
+}
+
+type EventConnection {
+  edges: [EventEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
 type Registration {
   id: ID!
   createdAt: DateTime!
@@ -219,6 +237,7 @@ type Query {
   myProfile: User!
   exportMyData: String!
   events(filter: EventsFilterInput, includePrivate: Boolean = false): PaginatedEvents!
+  eventsConnection(first: Int, after: String, last: Int, before: String, filter: EventsFilterInput): EventConnection!
   adminEvents(filter: EventsFilterInput): PaginatedEvents!
   myEvents: [Event!]!
   event(id: ID!): Event!
@@ -246,18 +265,43 @@ input UsersFilterInput {
 }
 
 input EventsFilterInput {
+  """Search term for title, description, or location"""
   search: String
+
+  """Filter by event category"""
   category: EventCategory
+
+  """Filter by event type"""
   type: EventType
+
+  """Filter by event status"""
   status: EventStatus
+
+  """Filter events starting after this date"""
   startDate: DateTime
+
+  """Filter events starting before this date"""
   endDate: DateTime
+
+  """Filter by location name"""
   location: String
+
+  """Filter by tags"""
   tags: [String!]
+
+  """If true, only shows events with available spots"""
   availableOnly: Boolean = false
+
+  """Number of items to skip"""
   skip: Int = 0
+
+  """Number of items to return"""
   take: Int = 20
+
+  """Field to sort by"""
   orderBy: String = "startDate"
+
+  """Sort direction (asc/desc)"""
   orderDirection: String = "asc"
 }
 
@@ -313,49 +357,129 @@ input UpdateUserInput {
 }
 
 input CreateEventInput {
+  """The title of the event"""
   title: String!
+
+  """Full description of the event"""
   description: String!
+
+  """Short summary for list views"""
   shortDescription: String
+
+  """Category of the event"""
   category: EventCategory!
+
+  """Type of the event (e.g., WORKSHOP, SOCIAL)"""
   type: EventType!
+
+  """Date and time when the event starts"""
   startDate: DateTime!
+
+  """Date and time when the event ends"""
   endDate: DateTime!
+
+  """Deadline for registration"""
   registrationDeadline: DateTime
+
+  """Name of the location"""
   location: String!
+
+  """Physical address of the location"""
   address: String
+
+  """Maximum number of participants allowed"""
   maxParticipants: Int!
+
+  """Price for non-members"""
   price: Float
+
+  """Price for ESN members"""
   memberPrice: Float
+
+  """List of image URLs"""
   images: [String!]! = []
+
+  """Tags for categorization"""
   tags: [String!]
+
+  """Special requirements for participants"""
   requirements: String
+
+  """Additional information"""
   additionalInfo: String
+
+  """Whether the event is visible to everyone"""
   isPublic: Boolean! = true
+
+  """If true, ignores maxParticipants limit"""
   isUnlimited: Boolean! = false
+
+  """Initial status of the event"""
   status: EventStatus
 }
 
 input UpdateEventInput {
+  """The title of the event"""
   title: String
+
+  """Full description of the event"""
   description: String
+
+  """Short summary for list views"""
   shortDescription: String
+
+  """Category of the event"""
   category: EventCategory
+
+  """Type of the event (e.g., WORKSHOP, SOCIAL)"""
   type: EventType
+
+  """Date and time when the event starts"""
   startDate: DateTime
+
+  """Date and time when the event ends"""
   endDate: DateTime
+
+  """Deadline for registration"""
   registrationDeadline: DateTime
+
+  """Name of the location"""
   location: String
+
+  """Physical address of the location"""
   address: String
+
+  """Maximum number of participants allowed"""
   maxParticipants: Int
+
+  """Price for non-members"""
   price: Float
+
+  """Price for ESN members"""
   memberPrice: Float
+
+  """List of image URLs"""
   images: [String!] = []
+
+  """Tags for categorization"""
   tags: [String!]
+
+  """Special requirements for participants"""
   requirements: String
+
+  """Additional information"""
   additionalInfo: String
+
+  """Whether the event is visible to everyone"""
   isPublic: Boolean = true
+
+  """If true, ignores maxParticipants limit"""
   isUnlimited: Boolean = false
+
+  """Initial status of the event"""
   status: EventStatus
+
+  """Unique identifier of the event to update"""
   id: ID!
 }
 
