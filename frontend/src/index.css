@@ -57,6 +57,17 @@ body {
   line-height: 1.6;
 }
 
+/* Mobile font size optimization */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px; /* Slightly smaller base font on mobile */
+  }
+  
+  html {
+    font-size: 14px; /* Affects rem units */
+  }
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
