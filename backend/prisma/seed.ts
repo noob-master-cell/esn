@@ -363,12 +363,56 @@ async function main() {
   await Promise.all(feedbackPromises);
   console.log('✅ Generated feedback');
 
+  // 7. Generate Comments on Events
+  console.log('💬 Generating comments on events...');
+  const commentPromises = [];
+
+  // Select random events to add comments to (about 60% of events)
+  const eventsWithComments = faker.helpers.shuffle(createdEvents).slice(0, Math.floor(createdEvents.length * 0.6));
+
+  for (const event of eventsWithComments) {
+    // Generate 3-15 comments per event
+    const numComments = faker.number.int({ min: 3, max: 15 });
+    const commentUsers = faker.helpers.shuffle(allUserIds).slice(0, numComments);
+
+    for (const userId of commentUsers) {
+      commentPromises.push(
+        prisma.comment.create({
+          data: {
+            userId,
+            eventId: event.id,
+            content: faker.lorem.paragraph(),
+            createdAt: faker.date.between({
+              from: new Date(event.createdAt),
+              to: new Date()
+            }),
+          },
+        })
+      );
+
+      if (commentPromises.length >= BATCH_SIZE) {
+        await Promise.all(commentPromises);
+        commentPromises.length = 0;
+        process.stdout.write('.');
+      }
+    }
+  }
+
+  if (commentPromises.length > 0) {
+    await Promise.all(commentPromises);
+  }
+  console.log('\n✅ Generated event comments');
+
   // Summary
+  const totalRegistrations = await prisma.registration.count();
+  const totalComments = await prisma.comment.count();
+
   console.log('\n🎉 Database seeded successfully!');
   console.log(`   👤 ${allUserIds.length} Total Users (1 Admin, ${organizerUsers.length} Organizers, ${TOTAL_USERS} Regular)`);
   console.log(`   🎪 ${createdEvents.length} Events`);
-  console.log(`   🎫 ${registrationPromises.length + (await prisma.registration.count())} Registrations`);
+  console.log(`   🎫 ${totalRegistrations} Registrations`);
   console.log(`   💬 ${feedbackPromises.length} Feedback entries`);
+  console.log(`   💭 ${totalComments} Comments`);
   console.log('\n✨ Ready to test the application!');
 }
 
