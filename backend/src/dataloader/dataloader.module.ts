@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { EventCountsLoader } from './event-counts.loader';
+import { UsersLoader } from './users.loader';
 import { PrismaModule } from '../prisma/prisma.module';
 
 /**
@@ -13,7 +14,7 @@ import { PrismaModule } from '../prisma/prisma.module';
  */
 @Module({
     imports: [PrismaModule],
-    providers: [EventCountsLoader],
-    exports: [EventCountsLoader],
+    providers: [EventCountsLoader, UsersLoader],
+    exports: [EventCountsLoader, UsersLoader],
 })
 export class DataloaderModule { }

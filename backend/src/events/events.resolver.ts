@@ -14,6 +14,7 @@ import { EventStatus } from '@prisma/client';
 import { EventCountsLoader } from '../dataloader/event-counts.loader';
 import { EventConnection } from './dto/event-connection.output';
 import { PaginationArgs } from '../common/dto/pagination.args';
+import { UsersLoader } from '../dataloader/users.loader';
 
 /**
  * Resolver for handling Event-related GraphQL operations.
@@ -24,7 +25,18 @@ export class EventsResolver {
   constructor(
     private readonly eventsService: EventsService,
     private readonly eventCountsLoader: EventCountsLoader,
+    private readonly usersLoader: UsersLoader,
   ) { }
+
+  /**
+   * Field resolver for event organizer.
+   * Uses Dataloader to batch queries.
+   */
+  @ResolveField(() => User)
+  async organizer(@Parent() event: Event) {
+    if (event.organizer) return event.organizer;
+    return this.usersLoader.batchUsers.load(event.organizerId);
+  }
 
   /**
    * Creates a new event.

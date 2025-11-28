@@ -169,15 +169,6 @@ export class EventsService implements OnModuleInit {
       this.prisma.event.findMany({
         where,
         include: {
-          organizer: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
-              avatar: true,
-            },
-          },
           _count: {
             select: {
               registrations: {
@@ -266,15 +257,6 @@ export class EventsService implements OnModuleInit {
       this.prisma.event.findMany({
         where,
         include: {
-          organizer: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
-              avatar: true,
-            },
-          },
           _count: {
             select: {
               registrations: {
@@ -417,15 +399,6 @@ export class EventsService implements OnModuleInit {
     const event = await this.prisma.event.findUnique({
       where: { id },
       include: {
-        organizer: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            avatar: true,
-          },
-        },
         _count: {
           select: {
             registrations: {
@@ -809,6 +782,7 @@ export class EventsService implements OnModuleInit {
       },
     });
   }
+
 
   /**
    * Clears all event-related cache keys.
