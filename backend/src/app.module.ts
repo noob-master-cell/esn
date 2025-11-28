@@ -21,6 +21,7 @@ import { UploadController } from './common/upload.controller';
 import { HealthController } from './common/health.controller';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { PubSubModule } from './common/pubsub.module';
+import { DataloaderModule } from './dataloader/dataloader.module';
 
 import { FeedbackModule } from './feedback/feedback.module';
 import { GqlThrottlerGuard } from './common/guards/gql-throttler.guard';
@@ -142,6 +143,7 @@ import { AppService } from './app.service';
     FeedbackModule,
     CommentsModule,
     PubSubModule,
+    DataloaderModule,
   ],
   providers: [
     AppService,

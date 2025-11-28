@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersFilterInput } from './dto/users-filter.input';
@@ -11,9 +13,18 @@ export class UsersService {
   constructor(
     private prisma: PrismaService,
     private cloudinaryService: CloudinaryService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
 
   async findAll(filter: UsersFilterInput = {}): Promise<PaginatedUsers> {
+    // Generate a unique cache key based on the filter
+    const cacheKey = `users:list:${JSON.stringify(filter)}`;
+    const cached = await this.cacheManager.get<PaginatedUsers>(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
     const where: Prisma.UserWhereInput = {};
 
     if (filter.search) {
@@ -50,10 +61,15 @@ export class UsersService {
       this.prisma.user.count({ where }),
     ]);
 
-    return {
+    const result = {
       items: items.map((user) => this.transformPrismaUser(user)),
       total,
     };
+
+    // Cache for 30 seconds - short TTL for admin lists to balance freshness and load
+    await this.cacheManager.set(cacheKey, result, 30000);
+
+    return result;
   }
 
   async findOne(id: string): Promise<User | null> {

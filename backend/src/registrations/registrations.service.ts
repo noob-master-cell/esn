@@ -27,246 +27,163 @@ export class RegistrationsService {
   ) {
 
 
-    const existingRegistration = await this.prisma.registration.findFirst({
-      where: {
-        userId,
-        eventId: createRegistrationInput.eventId,
-        status: {
-          in: [
-            RegistrationStatus.CONFIRMED,
-            RegistrationStatus.PENDING,
-            RegistrationStatus.CANCELLED, // Include CANCELLED to handle re-registration
-            RegistrationStatus.WAITLIST,
-          ],
-        },
-      },
-      include: {
-        event: {
-          select: { title: true },
-        },
-      },
-    });
+    // Use a transaction to ensure atomic capacity check and registration
+    return this.prisma.$transaction(async (tx) => {
+      // Re-fetch event within transaction to lock/ensure latest state
+      const event = await tx.event.findUnique({
+        where: { id: createRegistrationInput.eventId },
+      });
 
-    if (existingRegistration) {
-      // If cancelled, we can potentially re-register
-      if (existingRegistration.status === RegistrationStatus.CANCELLED) {
-        // Fall through to validation checks, then update instead of create
-      } else {
-        console.warn(
-          `⚠️ User ${userId} already has registration ${existingRegistration.id} for event ${createRegistrationInput.eventId} with status ${existingRegistration.status}`,
+      if (!event) {
+        throw new NotFoundException('Event not found');
+      }
+
+      if (event.status !== EventStatus.PUBLISHED) {
+        throw new BadRequestException(
+          `Event is not open for registration (Status: ${event.status})`,
         );
+      }
 
-        // Return more specific error messages based on status
-        switch (existingRegistration.status) {
-          case RegistrationStatus.CONFIRMED:
-            throw new ConflictException(
-              `You are already confirmed for "${existingRegistration.event.title}". Check your registrations for details.`,
-            );
-          case RegistrationStatus.PENDING:
-            throw new ConflictException(
-              `You have a pending registration for "${existingRegistration.event.title}". Please complete your registration or contact support.`,
-            );
-          case RegistrationStatus.WAITLIST:
-            throw new ConflictException(
-              `You are already on the waitlist for "${existingRegistration.event.title}".`,
-            );
-          default:
-            throw new ConflictException(
-              `You already have an active registration for "${existingRegistration.event.title}".`,
-            );
+      if (event.registrationDeadline && new Date() > event.registrationDeadline) {
+        throw new BadRequestException('Registration deadline has passed');
+      }
+
+      if (new Date() > event.startDate) {
+        throw new BadRequestException('Event has already started');
+      }
+
+      // Check for existing registration within transaction
+      const existingRegistration = await tx.registration.findFirst({
+        where: {
+          userId,
+          eventId: createRegistrationInput.eventId,
+          status: {
+            in: [
+              RegistrationStatus.CONFIRMED,
+              RegistrationStatus.PENDING,
+              RegistrationStatus.CANCELLED,
+              RegistrationStatus.WAITLIST,
+            ],
+          },
+        },
+        include: {
+          event: { select: { title: true } },
+        },
+      });
+
+      if (existingRegistration) {
+        if (existingRegistration.status === RegistrationStatus.CANCELLED) {
+          // Allow re-registration logic to proceed
+        } else {
+          // Conflict logic
+          switch (existingRegistration.status) {
+            case RegistrationStatus.CONFIRMED:
+              throw new ConflictException(`You are already confirmed for "${existingRegistration.event.title}".`);
+            case RegistrationStatus.PENDING:
+              throw new ConflictException(`You have a pending registration for "${existingRegistration.event.title}".`);
+            case RegistrationStatus.WAITLIST:
+              throw new ConflictException(`You are already on the waitlist for "${existingRegistration.event.title}".`);
+            default:
+              throw new ConflictException(`You already have an active registration for "${existingRegistration.event.title}".`);
+          }
         }
       }
-    }
 
-    // Get event details to check capacity and pricing
-    const event = await this.prisma.event.findUnique({
-      where: { id: createRegistrationInput.eventId },
-      include: {
-
-      },
-    });
-
-    if (!event) {
-      throw new NotFoundException('Event not found');
-    }
-
-    // Check if event is published
-    // Note: We don't check for REGISTRATION_OPEN because that is now a computed status
-    // We rely on the date and capacity checks below
-    if (event.status !== EventStatus.PUBLISHED) {
-      throw new BadRequestException(
-        `Event is not open for registration (Status: ${event.status})`,
-      );
-    }
-
-    // Check registration deadline
-    if (event.registrationDeadline && new Date() > event.registrationDeadline) {
-      throw new BadRequestException('Registration deadline has passed');
-    }
-
-    // Check if event has started
-    if (new Date() > event.startDate) {
-      throw new BadRequestException('Event has already started');
-    }
-
-    // Count current confirmed registrations (excluding waitlist)
-    const confirmedRegistrations = await this.prisma.registration.count({
-      where: {
-        eventId: createRegistrationInput.eventId,
-        status: {
-          in: [RegistrationStatus.CONFIRMED, RegistrationStatus.PENDING],
+      // Count confirmed registrations
+      const confirmedRegistrations = await tx.registration.count({
+        where: {
+          eventId: createRegistrationInput.eventId,
+          status: { in: [RegistrationStatus.CONFIRMED, RegistrationStatus.PENDING] },
         },
-      },
-    });
-    const isEventFull = confirmedRegistrations >= event.maxParticipants;
+      });
 
-    // Determine registration type and status
-    let registrationType =
-      createRegistrationInput.registrationType || RegistrationType.REGULAR;
-    let status = RegistrationStatus.CONFIRMED; // Default to CONFIRMED if spots available
+      const isEventFull = confirmedRegistrations >= event.maxParticipants;
+      let status = RegistrationStatus.CONFIRMED;
 
-    if (isEventFull) {
-      if (createRegistrationInput.joinWaitlist) {
-        status = RegistrationStatus.WAITLIST;
-      } else {
-        throw new ConflictException(
-          'Event is full. Would you like to join the waitlist?',
-        );
+      if (isEventFull) {
+        if (createRegistrationInput.joinWaitlist) {
+          status = RegistrationStatus.WAITLIST;
+        } else {
+          throw new ConflictException('Event is full. Would you like to join the waitlist?');
+        }
       }
-    }
 
-    // Calculate pricing
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
+      // Calculate pricing
+      const user = await tx.user.findUnique({ where: { id: userId } });
+      let amountDue = 0;
+      let paymentRequired = false;
 
-    let amountDue = 0;
-    let paymentRequired = false;
+      if (event.type !== 'FREE') {
+        amountDue = user?.esnCardVerified && event.memberPrice ? event.memberPrice : event.price || 0;
+        paymentRequired = amountDue > 0;
+      }
 
-    if (event.type !== 'FREE') {
-      // Use member price if user has valid ESN card, otherwise regular price
-      amountDue =
-        user?.esnCardVerified && event.memberPrice
-          ? event.memberPrice
-          : event.price || 0;
-      paymentRequired = amountDue > 0;
-    }
-
-    // Calculate position for waitlist
-    let position: number | null = null;
-
-    try {
-      // Check if we are re-registering (updating a cancelled registration)
+      // Handle Re-registration
       if (existingRegistration && existingRegistration.status === RegistrationStatus.CANCELLED) {
-        const updatedRegistration = await this.prisma.registration.update({
+        const updatedRegistration = await tx.registration.update({
           where: { id: existingRegistration.id },
           data: {
             status,
-            registrationType,
-            position,
+            registrationType: createRegistrationInput.registrationType || RegistrationType.REGULAR,
             paymentRequired,
-            paymentStatus: paymentRequired
-              ? PaymentStatus.PENDING
-              : PaymentStatus.COMPLETED,
+            paymentStatus: paymentRequired ? PaymentStatus.PENDING : PaymentStatus.COMPLETED,
             amountDue,
             currency: 'EUR',
             specialRequests: createRegistrationInput.specialRequests,
             emergencyContact: createRegistrationInput.emergencyContact,
             dietary: createRegistrationInput.dietary,
-            registeredAt: new Date(), // Reset registration date
-            cancelledAt: null, // Clear cancellation date
+            registeredAt: new Date(),
+            cancelledAt: null,
             confirmedAt: status === RegistrationStatus.CONFIRMED ? new Date() : null,
           },
           include: {
             event: {
               include: {
                 organizer: true,
-                registrations: {
-                  where: {
-                    status: {
-                      not: RegistrationStatus.CANCELLED,
-                    },
-                  },
-                },
+                registrations: { where: { status: { not: RegistrationStatus.CANCELLED } } },
               },
             },
             user: true,
           },
         });
-
         return this.transformRegistration(updatedRegistration);
       }
 
-      // Create the registration with enhanced error handling
-      const registration = await this.prisma.registration.create({
-        data: {
-          userId,
-          eventId: createRegistrationInput.eventId,
-          status,
-          registrationType,
-          position,
-          paymentRequired,
-          paymentStatus: paymentRequired
-            ? PaymentStatus.PENDING
-            : PaymentStatus.COMPLETED,
-          amountDue,
-          currency: 'EUR',
-          specialRequests: createRegistrationInput.specialRequests,
-          emergencyContact: createRegistrationInput.emergencyContact,
-          dietary: createRegistrationInput.dietary,
-          registeredAt: new Date(),
-        },
-        include: {
-          event: {
-            include: {
-              organizer: true,
-              registrations: {
-                where: {
-                  status: {
-                    not: RegistrationStatus.CANCELLED,
-                  },
-                },
+      // Create new registration
+      try {
+        const registration = await tx.registration.create({
+          data: {
+            userId,
+            eventId: createRegistrationInput.eventId,
+            status,
+            registrationType: createRegistrationInput.registrationType || RegistrationType.REGULAR,
+            paymentRequired,
+            paymentStatus: paymentRequired ? PaymentStatus.PENDING : PaymentStatus.COMPLETED,
+            amountDue,
+            currency: 'EUR',
+            specialRequests: createRegistrationInput.specialRequests,
+            emergencyContact: createRegistrationInput.emergencyContact,
+            dietary: createRegistrationInput.dietary,
+            registeredAt: new Date(),
+          },
+          include: {
+            event: {
+              include: {
+                organizer: true,
+                registrations: { where: { status: { not: RegistrationStatus.CANCELLED } } },
               },
             },
+            user: true,
           },
-          user: true,
-        },
-      });
-
-      // Check if event is now full and close registration if needed
-      const newConfirmedCount = await this.prisma.registration.count({
-        where: {
-          eventId: createRegistrationInput.eventId,
-          status: {
-            in: [RegistrationStatus.CONFIRMED, RegistrationStatus.PENDING],
-          },
-        },
-      });
-
-      if (newConfirmedCount >= event.maxParticipants) {
-        console.log(`🔒 Event ${createRegistrationInput.eventId} reached capacity.`);
+        });
+        return this.transformRegistration(registration);
+      } catch (error) {
+        if (error.code === 'P2002') {
+          throw new ConflictException('You are already registered for this event.');
+        }
+        throw error;
       }
-
-      return this.transformRegistration(registration);
-    } catch (error) {
-      // Handle Prisma unique constraint errors more gracefully
-      if (
-        error.code === 'P2002' &&
-        error.meta?.target?.includes('userId') &&
-        error.meta?.target?.includes('eventId')
-      ) {
-        console.error(
-          '🔥 Unique constraint violation caught at creation time:',
-          error,
-        );
-        throw new ConflictException(
-          'You are already registered for this event. If you believe this is an error, please refresh the page and try again.',
-        );
-      }
-
-      console.error('❌ Registration creation failed:', error);
-      throw error;
-    }
+    });
   }
 
   async findAll(

@@ -145,6 +145,8 @@ export class EventsService implements OnModuleInit {
 
     // Search functionality
     if (filter.search) {
+      // Optimization: Use insensitive mode which maps to ILIKE in Postgres
+      // For larger datasets, we should enable Full Text Search (tsvector)
       where.OR = [
         { title: { contains: filter.search, mode: 'insensitive' } },
         { description: { contains: filter.search, mode: 'insensitive' } },

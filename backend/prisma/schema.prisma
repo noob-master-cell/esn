@@ -65,6 +65,9 @@ model User {
   @@index([createdAt])
   @@index([role])
   @@index([isActive]) // Optimization for active user count
+  @@index([esnCardVerified]) // Optimization for verified user filtering
+  @@index([university]) // Optimization for university filtering
+  @@index([role, isActive]) // Optimization for admin user lists
 }
 
 model UserPreferences {

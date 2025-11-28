@@ -12,9 +12,14 @@ import { User } from '../users/entities/user.entity';
 import { PaginatedEvents } from './dto/paginated-events.output';
 import { EventStatus, RegistrationStatus } from '@prisma/client';
 
+import { EventCountsLoader } from '../dataloader/event-counts.loader';
+
 @Resolver(() => Event)
 export class EventsResolver {
-  constructor(private readonly eventsService: EventsService) { }
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly eventCountsLoader: EventCountsLoader,
+  ) { }
 
   @Mutation(() => Event)
   @UseGuards(Auth0Guard, OrganizerGuard)
@@ -104,23 +109,22 @@ export class EventsResolver {
   @ResolveField(() => Int)
   async confirmedCount(@Parent() event: Event) {
     if (event.confirmedCount !== undefined) return event.confirmedCount;
-    return this.eventsService.countRegistrations(event.id, [
-      RegistrationStatus.CONFIRMED,
-      RegistrationStatus.ATTENDED,
-      RegistrationStatus.NO_SHOW,
-    ]);
+    const counts = await this.eventCountsLoader.batchCounts.load(event.id);
+    return counts.confirmed;
   }
 
   @ResolveField(() => Int)
   async pendingCount(@Parent() event: Event) {
     if (event.pendingCount !== undefined) return event.pendingCount;
-    return this.eventsService.countRegistrations(event.id, 'PENDING');
+    const counts = await this.eventCountsLoader.batchCounts.load(event.id);
+    return counts.pending;
   }
 
   @ResolveField(() => Int)
   async cancelledCount(@Parent() event: Event) {
     if (event.cancelledCount !== undefined) return event.cancelledCount;
-    return this.eventsService.countRegistrations(event.id, 'CANCELLED');
+    const counts = await this.eventCountsLoader.batchCounts.load(event.id);
+    return counts.cancelled;
   }
 
   @ResolveField(() => EventStatus)
