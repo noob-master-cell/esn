@@ -4,7 +4,7 @@ WORKDIR /app
 # Cache bust - increment this to force dependency layer rebuild
 ARG CACHE_BUST=1
 COPY package.json pnpm-lock.yaml ./
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
+RUN npm install -g pnpm@9 && pnpm install --frozen-lockfile
 
 # Stage 2: Build
 FROM node:20-alpine AS build
@@ -34,7 +34,7 @@ COPY package.json pnpm-lock.yaml ./
 # 2. Install Prisma v6.10.1 globally.
 #    This ensures 'npx prisma' finds this specific version at runtime (start.sh)
 #    instead of downloading the broken v7.0.0.
-RUN npm install -g pnpm prisma@6.10.1
+RUN npm install -g pnpm@9 prisma@6.10.1
 
 # Install ONLY production dependencies
 RUN pnpm install --frozen-lockfile --prod
